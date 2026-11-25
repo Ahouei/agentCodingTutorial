@@ -74,7 +74,7 @@ export function GlossaryProvider({ chapterSlug, children }: { chapterSlug: strin
             <p className="term-def">
               <Rich text={t(entry.def)} />
             </p>
-            <a className="chip" href={href.chapter(entry.slug, entry.section)} onClick={() => setOpen(false)}>
+            <a className="chip" href={href.chapter(entry.slug, entry.section)}>
               {tx('آموزش کامل در فصل:', 'Taught in:')} {t(entry.chapterTitle)}
             </a>
             {order.length > 1 && (

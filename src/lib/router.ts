@@ -68,7 +68,11 @@ export function navigate(to: string, opts: { replace?: boolean } = {}) {
   if (same && !opts.replace) return;
   rememberScroll();
   const st: HistState = { key: Math.random().toString(36).slice(2) };
-  if (opts.replace) history.replaceState(st, '', target);
+  // A link tapped inside an open sheet: the sheet's own history entry becomes the new page
+  // (replace, don't push). The sheet closes because the route changed, and Back from the new
+  // page returns to the page behind the sheet. Never close the sheet with history.back() first:
+  // that back() runs after this push and undoes the navigation (the "link does nothing" bug).
+  if (opts.replace || state().overlay) history.replaceState(st, '', target);
   else history.pushState(st, '', target);
   navKind = 'push';
   restoreY = null;
