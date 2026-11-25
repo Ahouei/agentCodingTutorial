@@ -34,6 +34,7 @@ export type WidgetId =
   | 'design-flaws' // find 5 flaws in a mock page (RD-07B)
   | 'secret-hunt' // find the leaked secret in a diff, rotate it (RD-07C)
   | 'platform-compare' // radar + scenario comparison of 5 platforms (CMP)
+  | 'skill-homes' // one SKILL.md in Claude, Codex and Lovable + always-on vs on-demand sort
   | 'other-businesses'; // apply the course to one of six other demo businesses (RD-01 extra)
 
 export type Tone = 'why' | 'tip' | 'warn' | 'fix';

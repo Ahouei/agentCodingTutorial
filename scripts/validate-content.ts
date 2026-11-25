@@ -24,7 +24,7 @@ const WIDGETS = [
   'team-to-agent', 'request-journey', 'stack-layers', 'dns-lookup', 'git-playground', 'storage-picker',
   'chat-vs-agent', 'agent-loop', 'setup-checklist', 'token-builder', 'brief-builder', 'prompt-lab',
   'vibe-loop', 'bug-report', 'pipeline', 'nameserver-switch', 'hero-finale',
-  'agent-picker', 'design-flaws', 'secret-hunt', 'platform-compare', 'other-businesses',
+  'agent-picker', 'design-flaws', 'secret-hunt', 'platform-compare', 'other-businesses', 'skill-homes',
 ];
 
 /** The 14 topics from the course brief, each with the chapter(s) that must teach it and terms that must appear there. */
@@ -46,6 +46,7 @@ const SYLLABUS: { topic: string; chapters: string[]; mustMention: string[] }[] =
   { topic: 'Five-platform comparison (owner request)', chapters: ['compare-platforms'], mustMention: ['Codex', 'Lovable', 'Claude Code', 'Grok', 'DeepSeek'] },
   { topic: 'Being findable (QA-26)', chapters: ['be-found'], mustMention: ['sitemap', 'Open Graph', 'Search Console'] },
   { topic: 'Plan B for Iran (QA-27)', chapters: ['cloudflare', 'custom-domain'], mustMention: ['Liara'] },
+  { topic: 'Skills in Claude, Codex and Lovable (owner request)', chapters: ['prompts-and-skills'], mustMention: ['SKILL.md', 'CLAUDE.md', 'AGENTS.md', 'Instructions', '$skill-creator', 'Import from GitHub'] },
 ];
 
 const errors: string[] = [];

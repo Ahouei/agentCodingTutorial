@@ -25,4 +25,5 @@ export const WIDGETS: Record<WidgetId, LazyExoticComponent<ComponentType>> = {
   'secret-hunt': lazy(() => import('./SecretHunt')),
   'platform-compare': lazy(() => import('./PlatformCompare')),
   'other-businesses': lazy(() => import('./OtherBusinesses')),
+  'skill-homes': lazy(() => import('./SkillHomes')),
 };

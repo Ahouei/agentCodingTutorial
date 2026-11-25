@@ -1,4 +1,4 @@
-import { motion, useScroll, useSpring } from 'motion/react';
+import { motion, useMotionValueEvent, useScroll, useSpring, useTransform } from 'motion/react';
 import { CHAPTERS } from '../content';
 import { href, navigate, num, useApp, useRoute, useTx } from '../lib/app';
 import { EASE_OUT } from '../lib/motion';
@@ -7,7 +7,7 @@ import { BottomSheet } from './BottomSheet';
 import { AccountSheet } from './AccountSheet';
 import { useAccount } from '../lib/account';
 import { AnimatePresence } from 'motion/react';
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Mascot } from './Mascot';
 import './shell.css';
 
@@ -31,6 +31,18 @@ export function Header() {
   }, [acc]);
   const { scrollYProgress } = useScroll();
   const progress = useSpring(scrollYProgress, { stiffness: 220, damping: 40, mass: 0.4 });
+  // Bit rides the reading-progress line on chapter pages, bobbing while you scroll.
+  const riderX = useTransform(progress, (v) => `translateX(${(lang === 'fa' ? -1 : 1) * (1.5 + v * 97)}%)`);
+  const [riding, setRiding] = useState(false);
+  const [moving, setMoving] = useState(false);
+  const stop = useRef(0);
+  const { scrollY } = useScroll();
+  useMotionValueEvent(scrollY, 'change', (y) => {
+    setRiding(y > 120);
+    setMoving(true);
+    window.clearTimeout(stop.current);
+    stop.current = window.setTimeout(() => setMoving(false), 220);
+  });
   const total = CHAPTERS.length;
   const count = CHAPTERS.filter((c) => done[c.slug]).length;
 
@@ -122,6 +134,15 @@ export function Header() {
         </div>
       </div>
       <motion.div className="hd-bar" style={{ scaleX: progress }} aria-hidden />
+      {route.name === 'chapter' && (
+        <div className="hd-rider-clip" aria-hidden>
+          <motion.div className={`hd-rider-track ${riding ? 'is-on' : ''}`} style={{ transform: riderX }}>
+            <span className={`hd-rider ${moving ? 'is-moving' : ''}`}>
+              <Mascot size={24} mood={moving ? 'happy' : 'calm'} follow={false} />
+            </span>
+          </motion.div>
+        </div>
+      )}
       <AccountSheet open={accOpen} onClose={() => setAccOpen(false)} />
       <AnimatePresence>
         {acc.justSignedIn && (

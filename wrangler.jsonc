@@ -29,7 +29,8 @@
     "TURNSTILE_SITE_KEY": "0x4AAAAAAGSOtdWVZ-nv4-Z5",
     "MAIL_FROM": "از صفر تا قهرمان <noreply@mail.ahouei.site>"
   }
-  // Secrets (never in this file): RESEND_API_KEY, TURNSTILE_SECRET_KEY
+  // Secrets (never in this file): RESEND_API_KEY, TURNSTILE_SECRET_KEY, OWNER_EMAIL (owner of the admin panel)
   //   npx wrangler secret put RESEND_API_KEY
   //   npx wrangler secret put TURNSTILE_SECRET_KEY
+  //   npx wrangler secret put OWNER_EMAIL
 }

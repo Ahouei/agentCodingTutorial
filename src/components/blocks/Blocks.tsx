@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'motion/react';
-import { Suspense, useId, type ReactNode } from 'react';
+import { Suspense, useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import type { Block, L, QuizItem, Tone } from '../../content/types';
 import { num, useApp, useTx } from '../../lib/app';
 import { DUR, EASE_OUT } from '../../lib/motion';
@@ -333,11 +333,21 @@ export function QuizCard({ item, quizKey, eyebrow, compact }: { item: QuizItem; 
   const picked = rec ? rec.picked : null;
   const correct = picked === item.answer;
   const letters = lang === 'fa' ? ['الف', 'ب', 'ج', 'د', 'ه'] : ['A', 'B', 'C', 'D', 'E'];
+  // Bit reacts out loud for a moment after each answer (not for answers restored from storage).
+  const [talk, setTalk] = useState(false);
+  const firstPick = useRef(picked);
+  useEffect(() => {
+    if (picked === null || picked === firstPick.current) return;
+    firstPick.current = null;
+    setTalk(true);
+    const tm = window.setTimeout(() => setTalk(false), 1400);
+    return () => window.clearTimeout(tm);
+  }, [picked]);
 
   return (
     <div className={`b-quiz sticker ${compact ? 'is-compact' : ''}`}>
       <div className="b-quiz-head">
-        <Mascot size={compact ? 44 : 54} mood={picked === null ? 'think' : correct ? 'happy' : 'wow'} follow={false} />
+        <Mascot size={compact ? 44 : 54} mood={picked === null ? 'think' : correct ? 'happy' : 'wow'} follow={false} talking={talk} />
         <div>
           <span className="eyebrow">{eyebrow ?? tx('یک سؤال کوچک', 'Quick check')}</span>
           <p className="b-quiz-q" id={qid}>

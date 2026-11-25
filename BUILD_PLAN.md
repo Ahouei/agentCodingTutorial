@@ -93,6 +93,15 @@ Update this file in the same commit as the work. A fresh session resumes from he
 |---|---|---|
 | RD-11 | Remotion trailer (Bit builds the café) + 1200×630 share card per chapter | done: 21 share cards in public/og; trailer public/media/trailer.mp4 (20s, 1080×1080, 831 KB; source in video/) |
 
+## Phase 6 · Owner requests (25 Nov)
+
+| ID | Item | Status |
+|---|---|---|
+| ADM | Admin panel (owner's Leitneria pattern): overview + chapter funnel, learners table + detail sheet, question/lab insights, announcements draft → preview → publish, live settings, audit log; role re-checked in D1 on every request | done (verified locally: permission matrix, validation, audit rows, all screens at 1366/390/dark) |
+| SKL | Skills in Claude, Codex and Lovable: "one idea, three homes" section, comparison table, Skill vs MCP vs prompt, Lovable install/call steps, new lab `skill-homes` | done |
+| FTR | Footer on every learner page with Ehsan's credit | done |
+| BIT | Bit alive everywhere: blink, antenna, hop on mood change, talks (typewriter + mouth) in chapter heroes, quizzes and lab hints, waves in the footer, rides the reading-progress line | done |
+
 ## Skipped by the owner
 
 - RD-03 Journey map "you are here" redesign.

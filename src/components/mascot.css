@@ -1,0 +1,82 @@
+/* Bit's life: cheap CSS loops on small SVG groups (transform only). All off under reduced motion. */
+.bit .bit-antenna {
+  transform-box: view-box;
+  transform-origin: 60px 22px;
+}
+.bit--alive .bit-antenna {
+  animation: bit-antenna 4.8s var(--ease-in-out) infinite;
+}
+@keyframes bit-antenna {
+  0%,
+  62%,
+  100% {
+    transform: rotate(0deg);
+  }
+  70% {
+    transform: rotate(9deg);
+  }
+  80% {
+    transform: rotate(-7deg);
+  }
+  90% {
+    transform: rotate(3deg);
+  }
+}
+
+/* Talking: the mouth opens and closes. */
+.bit .bit-mouth {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.bit--talking .bit-mouth {
+  animation: bit-talk 0.26s ease-in-out infinite alternate;
+}
+@keyframes bit-talk {
+  from {
+    transform: scaleY(0.35);
+  }
+  to {
+    transform: scaleY(1.15);
+  }
+}
+
+/* Waving: the raised arm swings from the shoulder. */
+.bit .bit-arm-up {
+  display: none;
+}
+.bit--wave .bit-arm-down {
+  display: none;
+}
+.bit--wave .bit-arm-up {
+  display: inline;
+}
+.bit .bit-arm {
+  transform-box: view-box;
+  transform-origin: 94px 98px;
+}
+.bit--wave .bit-arm {
+  animation: bit-wave 1.4s var(--ease-in-out) infinite;
+}
+@keyframes bit-wave {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-16deg);
+  }
+  50% {
+    transform: rotate(6deg);
+  }
+  75% {
+    transform: rotate(-12deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bit .bit-antenna,
+  .bit .bit-mouth,
+  .bit .bit-arm {
+    animation: none !important;
+  }
+}

@@ -868,3 +868,86 @@
     border-color: var(--ink);
   }
 }
+
+/* Bit riding the reading-progress line (chapter pages). The track slides past the edge, so clip it. */
+.hd-rider-clip {
+  position: absolute;
+  inset-inline: 0;
+  top: 100%;
+  height: 34px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.hd-rider-track {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s var(--ease-out);
+}
+.hd-rider-track.is-on {
+  opacity: 1;
+}
+.hd-rider {
+  position: absolute;
+  top: -1px; /* hangs just under the progress line, clear of the header controls */
+  inset-inline-start: -14px;
+  display: block;
+  width: 28px;
+}
+.hd-rider > svg {
+  display: block;
+  margin-inline: auto;
+}
+.hd-rider.is-moving > svg {
+  animation: hd-ride 0.32s var(--ease-in-out) infinite alternate;
+}
+@keyframes hd-ride {
+  from {
+    transform: translateY(0) rotate(-4deg);
+  }
+  to {
+    transform: translateY(-3px) rotate(4deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hd-rider-track {
+    display: none;
+  }
+}
+
+/* Site footer: Bit introduces Ehsan. */
+.ft {
+  align-items: flex-end;
+  border-top: 1.5px dashed var(--line);
+  margin-top: 24px;
+}
+.ft-bit {
+  flex: 1 1 320px;
+  max-width: 460px;
+}
+.ft-bit .bitsays-bubble {
+  font-size: 15px;
+  color: var(--ink);
+}
+.ft-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 280px;
+  padding-block-end: 18px;
+}
+.ft-credit {
+  font-size: 16px;
+  color: var(--ink);
+}
+.ft-credit b {
+  font-weight: 900;
+}
+@media (max-width: 900px) {
+  .ft {
+    padding-block-end: 112px; /* clear the chapter's bottom bar on phones */
+  }
+}

@@ -7,6 +7,7 @@ import { flushSync } from 'react-dom';
  *   /c/<slug>               chapter
  *   /c/<slug>/<section>     chapter, scrolled to a section
  *   /glossary               all terms
+ *   /admin[/<section>]      admin panel (staff only; the API enforces it)
  *   anything else           not found (the Worker also answers 404)
  *
  * Back/forward restore the scroll position of the page you return to (QA-13).
@@ -18,6 +19,7 @@ export type Route =
   | { name: 'home' }
   | { name: 'chapter'; slug: string; section?: string }
   | { name: 'glossary' }
+  | { name: 'admin'; section: string }
   | { name: 'notfound' };
 
 type HistState = { scrollY?: number; overlay?: string; key?: string };
@@ -26,6 +28,8 @@ export function parse(pathname: string): Route {
   const p = pathname.replace(/\/+$/, '') || '/';
   if (p === '/') return { name: 'home' };
   if (p === '/glossary') return { name: 'glossary' };
+  const a = p.match(/^\/admin(?:\/([a-z]+))?$/);
+  if (a) return { name: 'admin', section: a[1] ?? 'overview' };
   const m = p.match(/^\/c\/([a-z0-9-]+)(?:\/([a-z0-9-]+))?$/);
   if (m) return { name: 'chapter', slug: m[1], section: m[2] };
   return { name: 'notfound' };
@@ -35,6 +39,7 @@ export const href = {
   home: '/',
   map: '/#map',
   glossary: '/glossary',
+  admin: (section?: string) => `/admin${section && section !== 'overview' ? `/${section}` : ''}`,
   chapter: (slug: string, section?: string) => `/c/${slug}${section ? `/${section}` : ''}`,
 };
 

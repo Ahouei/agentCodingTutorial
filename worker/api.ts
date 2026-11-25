@@ -12,6 +12,8 @@
  * - Ownership is always derived from the session, never from the request.
  */
 import { merge, sanitize, same, type Progress } from '../src/lib/progressMerge';
+import { handleAdmin } from './admin';
+import { readSettings, UTC_DAY } from './settings';
 
 export interface Env {
   DB?: D1Database;
@@ -19,6 +21,16 @@ export interface Env {
   TURNSTILE_SECRET_KEY?: string;
   TURNSTILE_SITE_KEY?: string;
   MAIL_FROM?: string;
+  /** The owner's email (a Worker secret). Signing in with it gives the owner role. */
+  OWNER_EMAIL?: string;
+}
+
+export type Role = 'learner' | 'admin' | 'owner';
+/** Effective role: the owner comes from the OWNER_EMAIL secret, admins from the database. */
+export function roleOf(env: Env, email: string, dbRole: string | null | undefined): Role {
+  const owner = (env.OWNER_EMAIL ?? '').trim().toLowerCase();
+  if (owner && email.toLowerCase() === owner) return 'owner';
+  return dbRole === 'admin' ? 'admin' : 'learner';
 }
 
 const ORIGIN = 'https://start.ahouei.site';
@@ -27,12 +39,12 @@ const SESSION_TTL = 30 * 24 * 3600 * 1000;
 const RENEW_AFTER = SESSION_TTL / 2;
 const LINK_TTL = 15 * 60 * 1000;
 
-const json = (data: unknown, status = 200, headers: Record<string, string> = {}) =>
+export const json = (data: unknown, status = 200, headers: Record<string, string> = {}) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', ...headers } });
 
-const enabled = (env: Env) => !!(env.DB && env.RESEND_API_KEY && env.TURNSTILE_SECRET_KEY && env.TURNSTILE_SITE_KEY);
+export const enabled = (env: Env) => !!(env.DB && env.RESEND_API_KEY && env.TURNSTILE_SECRET_KEY && env.TURNSTILE_SITE_KEY);
 
-async function sha256(s: string) {
+export async function sha256(s: string) {
   const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
   return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
@@ -42,7 +54,7 @@ function randomToken() {
 }
 const ipOf = (r: Request) => r.headers.get('CF-Connecting-IP') ?? '0.0.0.0';
 
-function cookie(token: string, maxAgeMs: number) {
+export function cookie(token: string, maxAgeMs: number) {
   return `${COOKIE}=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${Math.floor(maxAgeMs / 1000)}`;
 }
 function readCookie(r: Request) {
@@ -51,7 +63,7 @@ function readCookie(r: Request) {
 }
 
 /** Fixed-window counter in D1. Returns true when over the limit. */
-async function limited(db: D1Database, key: string, max: number, windowMs: number) {
+export async function limited(db: D1Database, key: string, max: number, windowMs: number) {
   const now = Date.now();
   const bucket = `${key}:${Math.floor(now / windowMs)}`;
   const row = await db
@@ -62,28 +74,28 @@ async function limited(db: D1Database, key: string, max: number, windowMs: numbe
   return (row?.n ?? 0) > max;
 }
 
-function sameOrigin(r: Request) {
+export function sameOrigin(r: Request) {
   const o = r.headers.get('Origin');
   return o === ORIGIN || o === 'http://127.0.0.1:8787' || o === 'http://localhost:8787';
 }
 
-async function sessionUser(r: Request, env: Env, renew: boolean) {
+export async function sessionUser(r: Request, env: Env, renew: boolean) {
   const raw = readCookie(r);
   if (!raw || !env.DB) return null;
   const hash = await sha256(raw);
   const now = Date.now();
   const row = await env.DB.prepare(
-    'SELECT s.user_id, s.expires_at, u.email FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.id_hash = ?1',
+    'SELECT s.user_id, s.expires_at, u.email, u.role, u.status FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.id_hash = ?1',
   )
     .bind(hash)
-    .first<{ user_id: string; expires_at: number; email: string }>();
-  if (!row || row.expires_at < now) return null;
+    .first<{ user_id: string; expires_at: number; email: string; role: string; status: string }>();
+  if (!row || row.expires_at < now || row.status === 'blocked') return null;
   let setCookie: string | undefined;
   if (renew && row.expires_at - now < SESSION_TTL - RENEW_AFTER) {
     await env.DB.prepare('UPDATE sessions SET expires_at = ?1, last_seen = ?2 WHERE id_hash = ?3').bind(now + SESSION_TTL, now, hash).run();
     setCookie = cookie(raw, SESSION_TTL); // row and cookie move together
   }
-  return { userId: row.user_id, email: row.email, hash, setCookie };
+  return { userId: row.user_id, email: row.email, role: roleOf(env, row.email, row.role), hash, setCookie };
 }
 
 const EMAIL_RE = /^[^\s@<>()[\],;:"]{1,64}@[A-Za-z0-9.-]{1,190}\.[A-Za-z]{2,24}$/;
@@ -120,8 +132,21 @@ export async function handleApi(r: Request, env: Env, url: URL): Promise<Respons
   if (path === '/api/config' && r.method === 'GET')
     return json({ accounts: enabled(env), turnstileSiteKey: enabled(env) ? env.TURNSTILE_SITE_KEY : null });
 
+  // The one published announcement (admin panel → Announcements). Works without accounts.
+  if (path === '/api/announcement' && r.method === 'GET') {
+    if (!env.DB) return json({ announcement: null });
+    const a = await env.DB.prepare(
+      "SELECT id, tone, title_fa, title_en, body_fa, body_en, link FROM announcements WHERE status = 'published' ORDER BY published_at DESC LIMIT 1",
+    )
+      .first()
+      .catch(() => null);
+    return json({ announcement: a ?? null }, 200, { 'Cache-Control': 'public, max-age=30' });
+  }
+
   if (!enabled(env) || !env.DB) return json({ error: 'accounts_unavailable' }, 503);
   const db = env.DB;
+
+  if (path.startsWith('/api/admin/')) return handleAdmin(r, env, db, url);
 
   // ── Start sign-in: Turnstile + rate limits + email the link ──
   if (path === '/api/auth/start' && r.method === 'POST') {
@@ -136,7 +161,8 @@ export async function handleApi(r: Request, env: Env, url: URL): Promise<Respons
     const fa = body.lang !== 'en';
     if (!EMAIL_RE.test(email) || typeof body.turnstile !== 'string') return json({ error: 'bad_request' }, 400);
     const ip = ipOf(r);
-    if (await limited(db, `start-ip:${ip}`, 5, 60_000)) return json({ error: 'rate_limited' }, 429);
+    const cfg = await readSettings(db);
+    if (await limited(db, `start-ip:${ip}`, cfg.start_ip_per_min, 60_000)) return json({ error: 'rate_limited' }, 429);
 
     const form = new FormData();
     form.append('secret', env.TURNSTILE_SECRET_KEY!);
@@ -146,8 +172,16 @@ export async function handleApi(r: Request, env: Env, url: URL): Promise<Respons
     const tsr = (await ts.json().catch(() => ({}))) as { success?: boolean; hostname?: string };
     if (!tsr.success) return json({ error: 'turnstile_failed' }, 400);
 
-    // Same answer whether or not the email exists or is over its limit (no enumeration).
-    if (!(await limited(db, `start-email:${email}`, 3, 10 * 60_000))) {
+    const existing = await db.prepare('SELECT role, status FROM users WHERE email = ?1').bind(email).first<{ role: string; status: string }>();
+    const isStaff = roleOf(env, email, existing?.role) !== 'learner';
+    // Paused by an admin: learners are told so; staff still get their link.
+    const paused = !cfg.signin_enabled;
+    if (paused && !isStaff) return json({ error: 'signin_paused' }, 503);
+    // Same answer whether or not the email exists, is blocked or is over its limit (no enumeration).
+    const blocked = existing?.status === 'blocked';
+    if (!blocked && !(await limited(db, `start-email:${email}`, cfg.start_email_per_10min, 10 * 60_000))) {
+      // Cost cap across everyone, per UTC day.
+      if (await limited(db, 'email-day', cfg.emails_per_day, UTC_DAY)) return json({ error: 'busy' }, 503);
       const token = randomToken();
       const now = Date.now();
       await db
@@ -192,11 +226,16 @@ export async function handleApi(r: Request, env: Env, url: URL): Promise<Respons
         .first<{ email: string }>();
       if (!row)
         return continuePage('', fa, fa ? 'این پیوند منقضی یا قبلاً استفاده شده است. دوباره درخواست ورود بدهید.' : 'This link expired or was already used. Ask for a new one.');
-      let user = await db.prepare('SELECT id FROM users WHERE email = ?1').bind(row.email).first<{ id: string }>();
+      let user = await db.prepare('SELECT id, role, status FROM users WHERE email = ?1').bind(row.email).first<{ id: string; role: string; status: string }>();
+      if (user?.status === 'blocked')
+        return continuePage('', fa, fa ? 'این حساب نمی‌تواند وارد شود.' : 'This account cannot sign in.');
       if (!user) {
+        const cfg = await readSettings(db);
+        if (!cfg.new_accounts_enabled && roleOf(env, row.email, null) === 'learner')
+          return continuePage('', fa, fa ? 'ساخت حساب تازه فعلاً متوقف است. بدون ورود هم همه دوره در دسترس است.' : 'New accounts are paused for now. The whole course still works without signing in.');
         const id = crypto.randomUUID();
         await db.prepare('INSERT INTO users (id, email, created_at) VALUES (?1, ?2, ?3)').bind(id, row.email, now).run();
-        user = { id };
+        user = { id, role: 'learner', status: 'active' };
       }
       const raw = randomToken();
       await db
@@ -216,7 +255,7 @@ export async function handleApi(r: Request, env: Env, url: URL): Promise<Respons
 
   if (path === '/api/me' && r.method === 'GET') {
     if (!s) return json({ user: null }, 200);
-    return withCookie(json({ user: { email: s.email } }));
+    return withCookie(json({ user: { email: s.email, role: s.role } }));
   }
 
   if (!s) return json({ error: 'signed_out' }, 401);

@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'motion/react';
-import { createContext, useCallback, useContext, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useApp, useTx } from '../../lib/app';
 import { EASE_OUT } from '../../lib/motion';
 import { Mascot, type Mood } from '../Mascot';
@@ -64,6 +64,28 @@ export function Frame({
 }) {
   const tx = useTx();
   const lab = useLab();
+  // Bit "says" the hint the first time the lab comes into view.
+  const hintRef = useRef<HTMLDivElement>(null);
+  const [talk, setTalk] = useState(false);
+  useEffect(() => {
+    const el = hintRef.current;
+    if (!el) return;
+    let tm = 0;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        io.disconnect();
+        setTalk(true);
+        tm = window.setTimeout(() => setTalk(false), 1800);
+      },
+      { threshold: 0.6 },
+    );
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      window.clearTimeout(tm);
+    };
+  }, []);
   return (
     <section className="w-frame sticker" style={{ ['--w-tint' as string]: tint }} aria-label={title}>
       <header className="w-head">
@@ -97,8 +119,8 @@ export function Frame({
         </AnimatePresence>
       </header>
       {hint && (
-        <div className="w-hint">
-          <Mascot size={40} mood={mood} follow={false} />
+        <div className="w-hint" ref={hintRef}>
+          <Mascot size={40} mood={mood} follow={false} talking={talk} wave={talk} />
           <div className="w-hint-bubble">{hint}</div>
         </div>
       )}

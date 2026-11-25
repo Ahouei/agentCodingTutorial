@@ -49,13 +49,17 @@ function secure(h: Headers) {
   return h;
 }
 
-type Page = { status: number; title: string; desc: string; path: string; og: string };
+type Page = { status: number; title: string; desc: string; path: string; og: string; noindex?: boolean };
+const ADMIN_SECTIONS = ['overview', 'learners', 'content', 'announcements', 'settings', 'audit'];
 
 function pageFor(pathname: string): Page {
   const p = pathname.replace(/\/+$/, '') || '/';
   if (p === '/') return { status: 200, title: HOME_TITLE, desc: HOME_DESC, path: '/', og: '/og/home.png' };
   if (p === '/glossary')
     return { status: 200, title: `واژه‌نامه · ${SITE_FA}`, desc: 'همه اصطلاح‌های دوره، هر کدام با پیوند به فصلی که آن را آموزش می‌دهد.', path: '/glossary', og: '/og/home.png' };
+  const a = p.match(/^\/admin(?:\/([a-z]+))?$/);
+  if (a && (!a[1] || ADMIN_SECTIONS.includes(a[1])))
+    return { status: 200, title: `پنل مدیریت · ${SITE_FA}`, desc: 'Admin', path: '/admin', og: '/og/home.png', noindex: true };
   const m = p.match(/^\/c\/([a-z0-9-]+)(?:\/([a-z0-9-]+))?$/);
   if (m) {
     const c = M.chapters[m[1]];
@@ -92,7 +96,7 @@ async function html(request: Request, env: Env, url: URL) {
     `<meta name="twitter:title" content="${esc(page.title)}">`,
     `<meta name="twitter:description" content="${esc(page.desc)}">`,
     `<meta name="twitter:image" content="${SITE}${page.og}">`,
-    page.status === 404 ? `<meta name="robots" content="noindex">` : '',
+    page.status === 404 || page.noindex ? `<meta name="robots" content="noindex">` : '',
   ].join('');
   const out = new HTMLRewriter()
     .on('title', { element: (e) => void e.setInnerContent(page.title) })
@@ -103,6 +107,7 @@ async function html(request: Request, env: Env, url: URL) {
   headers.delete('ETag'); // the shell's ETag does not describe this rewritten page
   headers.set('Content-Type', 'text/html; charset=utf-8');
   headers.set('Cache-Control', 'no-cache');
+  if (page.noindex) headers.set('X-Robots-Tag', 'noindex, nofollow');
   return new Response(out.body, { status: page.status, headers });
 }
 
@@ -113,7 +118,7 @@ export default {
     if (url.pathname.startsWith('/api/')) {
       const res = await handleApi(request, env, url);
       const h = secure(new Headers(res.headers));
-      h.set('Cache-Control', 'no-store');
+      if (!h.has('Cache-Control')) h.set('Cache-Control', 'no-store');
       return new Response(res.body, { status: res.status, headers: h });
     }
 

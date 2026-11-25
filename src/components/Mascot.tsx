@@ -1,4 +1,5 @@
 import { motion, useReducedMotion, useSpring } from 'motion/react';
+import './mascot.css';
 import { useEffect, useId, useRef, useState } from 'react';
 
 export type Mood = 'happy' | 'think' | 'wow' | 'wink' | 'calm';
@@ -11,10 +12,15 @@ type Props = {
   /** Gentle idle float. Use for hero-sized Bit only. */
   float?: boolean;
   /**
-   * Antenna wiggle + blinking. Off by default: small Bits seen many times per
-   * session stay still and only change mood (RD-08). Turn on for the hero/finale Bit.
+   * Alive: blinking, antenna wiggle, a small hop whenever the mood changes, and a slow idle
+   * sway. On by default (owner request: Bit should feel alive everywhere). Pass `ambient={false}`
+   * for a fully still Bit (e.g. tiny icons). Everything stops under prefers-reduced-motion.
    */
   ambient?: boolean;
+  /** Mouth moves as if speaking (used by <BitSays> while a line is being typed). */
+  talking?: boolean;
+  /** Waves the right arm (greetings, the footer). */
+  wave?: boolean;
   className?: string;
   label?: string;
 };
@@ -23,13 +29,20 @@ type Props = {
  * Bit, the course mascot: a small round robot with a screen face.
  * Decorative motion only; everything is still with prefers-reduced-motion.
  */
-export function Mascot({ size = 120, mood = 'happy', follow = true, float = false, ambient = false, className, label }: Props) {
+export function Mascot({ size = 120, mood = 'happy', follow = true, float = false, ambient = true, talking = false, wave = false, className, label }: Props) {
   const reduce = useReducedMotion();
   const ref = useRef<SVGSVGElement>(null);
   const uid = useId().replace(/:/g, '');
   const lookX = useSpring(0, { stiffness: 140, damping: 16, mass: 0.6 });
   const lookY = useSpring(0, { stiffness: 140, damping: 16, mass: 0.6 });
   const [blink, setBlink] = useState(false);
+  // A little hop each time the mood changes: Bit reacts to answers, labs and progress.
+  const [hop, setHop] = useState(0);
+  const firstMood = useRef(mood);
+  useEffect(() => {
+    if (mood !== firstMood.current) setHop((h) => h + 1);
+    firstMood.current = mood;
+  }, [mood]);
 
   useEffect(() => {
     if (!follow || reduce) return;
@@ -116,7 +129,7 @@ export function Mascot({ size = 120, mood = 'happy', follow = true, float = fals
       viewBox="0 0 120 132"
       width={size}
       height={size * 1.1}
-      className={className}
+      className={['bit', ambient && !reduce ? 'bit--alive' : '', talking && !reduce ? 'bit--talking' : '', wave && !reduce ? 'bit--wave' : '', className].filter(Boolean).join(' ')}
       role={label ? 'img' : undefined}
       aria-label={label}
       aria-hidden={label ? undefined : true}
@@ -124,6 +137,13 @@ export function Mascot({ size = 120, mood = 'happy', follow = true, float = fals
       animate={float && !reduce ? { y: [0, -6, 0] } : undefined}
       transition={float && !reduce ? { duration: 4.2, repeat: Infinity, ease: 'easeInOut' } : undefined}
     >
+      <motion.g
+        key={hop}
+        style={{ originX: '60px', originY: '126px' }}
+        initial={hop && !reduce ? { y: 0, scaleY: 1 } : false}
+        animate={hop && !reduce ? { y: [0, -9, 0, -2, 0], scaleY: [1, 1.04, 0.94, 1.01, 1] } : undefined}
+        transition={{ duration: 0.55, ease: [0.23, 1, 0.32, 1] }}
+      >
       <defs>
         <linearGradient id={`body-${uid}`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#fff4dc" />
@@ -135,15 +155,11 @@ export function Mascot({ size = 120, mood = 'happy', follow = true, float = fals
       <ellipse cx="60" cy="127" rx="30" ry="4" fill="#2a211b" opacity="0.12" />
 
       {/* antenna */}
-      <motion.g
-        style={{ originX: '60px', originY: '22px' }}
-        animate={reduce || !ambient ? undefined : { rotate: [0, 8, -6, 0] }}
-        transition={reduce || !ambient ? undefined : { duration: 3.6, repeat: Infinity, ease: 'easeInOut', repeatDelay: 1.2 }}
-      >
+      <g className="bit-antenna">
         <line x1="60" y1="22" x2="60" y2="9" stroke="#2a211b" strokeWidth="3" strokeLinecap="round" />
         <circle cx="60" cy="8" r="6" fill="#ef6a4c" stroke="#2a211b" strokeWidth="2.5" />
         <circle cx="58" cy="6" r="1.8" fill="#fff" opacity="0.8" />
-      </motion.g>
+      </g>
 
       {/* ears */}
       <rect x="11" y="48" width="10" height="22" rx="5" fill="#8fd5b5" stroke="#2a211b" strokeWidth="2.5" />
@@ -151,7 +167,11 @@ export function Mascot({ size = 120, mood = 'happy', follow = true, float = fals
 
       {/* arms */}
       <path d="M26 98 q-10 6 -8 16" fill="none" stroke="#2a211b" strokeWidth="3" strokeLinecap="round" />
-      <path d="M94 98 q10 6 8 16" fill="none" stroke="#2a211b" strokeWidth="3" strokeLinecap="round" />
+      <g className="bit-arm">
+        <path d="M94 98 q10 6 8 16" fill="none" stroke="#2a211b" strokeWidth="3" strokeLinecap="round" className="bit-arm-down" />
+        <path d="M94 98 q12 -4 14 -18" fill="none" stroke="#2a211b" strokeWidth="3" strokeLinecap="round" className="bit-arm-up" />
+        <circle cx="108" cy="79" r="4" fill="#ffd98a" stroke="#2a211b" strokeWidth="2.2" className="bit-arm-up" />
+      </g>
 
       {/* body */}
       <rect x="28" y="88" width="64" height="34" rx="14" fill={`url(#body-${uid})`} stroke="#2a211b" strokeWidth="2.5" />
@@ -174,6 +194,8 @@ export function Mascot({ size = 120, mood = 'happy', follow = true, float = fals
           </g>
         ) : mood === 'wow' ? (
           <ellipse cx="60" cy="71" rx="4" ry="3.5" fill={eyeColor} />
+        ) : talking && !reduce ? (
+          <ellipse className="bit-mouth" cx="60" cy="70" rx="5" ry="3.2" fill={eyeColor} />
         ) : (
           <path d="M53 68 q7 6 14 0" fill="none" stroke={eyeColor} strokeWidth="3.5" strokeLinecap="round" />
         )}
@@ -182,6 +204,7 @@ export function Mascot({ size = 120, mood = 'happy', follow = true, float = fals
       {/* cheeks */}
       <ellipse cx="27" cy="72" rx="5.5" ry="3.5" fill="#f6a3b6" opacity="0.9" />
       <ellipse cx="93" cy="72" rx="5.5" ry="3.5" fill="#f6a3b6" opacity="0.9" />
+      </motion.g>
     </motion.svg>
   );
 }

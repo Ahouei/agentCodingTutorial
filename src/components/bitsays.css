@@ -1,0 +1,54 @@
+.bitsays {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+.bitsays > svg {
+  flex: none;
+}
+.bitsays-bubble {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding: 10px 14px;
+  border: var(--stroke) solid var(--outline);
+  border-radius: var(--r-md);
+  border-end-start-radius: 4px;
+  background: var(--card);
+  box-shadow: var(--sticker-sm);
+  line-height: 1.75;
+  font-weight: 700;
+  margin-block-end: 18px;
+}
+.bitsays-text {
+  display: block;
+}
+.bitsays-ghost {
+  visibility: hidden;
+}
+.bitsays-next {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  min-height: 28px;
+  min-width: 44px;
+  margin-block-start: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.bitsays-next span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--line);
+}
+.bitsays-next span.on {
+  background: var(--coral);
+}
+.bitsays-next:focus-visible {
+  outline: 3px solid var(--coral);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
