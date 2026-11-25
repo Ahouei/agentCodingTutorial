@@ -91,7 +91,7 @@ Update this file in the same commit as the work. A fresh session resumes from he
 
 | ID | Item | Status |
 |---|---|---|
-| RD-11 | Remotion trailer (Bit builds the café) + 1200×630 share card per chapter | share cards done (21); trailer todo |
+| RD-11 | Remotion trailer (Bit builds the café) + 1200×630 share card per chapter | done: 21 share cards in public/og; trailer public/media/trailer.mp4 (20s, 1080×1080, 831 KB; source in video/) |
 
 ## Skipped by the owner
 
