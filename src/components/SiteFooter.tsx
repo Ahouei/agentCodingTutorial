@@ -35,8 +35,12 @@ export function SiteFooter() {
           {tx('ساخته‌شده با React و Motion، منتشرشده روی Cloudflare Workers؛ همان مسیری که در دوره یاد می‌گیرید.', 'Built with React and Motion, deployed on Cloudflare Workers: the same path you learn in the course.')}
         </p>
         <p>
-          <a href="/media/trailer.mp4?v=2" target="_blank" rel="noreferrer">
+          {/* v3: the new trailer. The ?v= skips copies cached under the old file. */}
+          <a href={tx('/media/trailer.mp4?v=3', '/media/trailer-en.mp4?v=3')} target="_blank" rel="noreferrer">
             {tx('تریلر ۲۰ ثانیه‌ای دوره', 'The 20-second trailer')}
+          </a>{' '}
+          <a href={tx('/media/trailer-vertical.mp4?v=3', '/media/trailer-en-vertical.mp4?v=3')} target="_blank" rel="noreferrer">
+            {tx('(نسخه عمودی)', '(vertical)')}
           </a>
           {' · '}
           <a href="https://github.com/Ahouei/Ahouei-GetheredInOne-AIAgentSkills" target="_blank" rel="noreferrer">
