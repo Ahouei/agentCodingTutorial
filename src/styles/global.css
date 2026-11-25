@@ -6,7 +6,9 @@
   --card: #fffdf9;
   --ink: #2a211b;
   --ink-2: #6b5e52;
-  --ink-3: #9a8b7c;
+  --ink-3: #7a6b5c;
+  --on-coral: #2a211b;
+  --outline: var(--ink);
   --line: #e6d9c6;
 
   --coral: #ef6a4c;
@@ -67,7 +69,8 @@
     --card: #2a221c;
     --ink: #f7ede1;
     --ink-2: #cbbba9;
-    --ink-3: #8f8070;
+    --ink-3: #a99886;
+    --outline: color-mix(in oklab, var(--ink) 55%, transparent);
     --line: #3d322a;
     --coral: #f47b5e;
     --coral-ink: #ffb39f;
@@ -79,8 +82,8 @@
     --sky-soft: #1d2d3d;
     --blush-soft: #45262e;
     --code-bg: #120e0b;
-    --sticker: var(--sx) 4px 0 #0c0907;
-    --sticker-sm: calc(var(--sx) / 2) 2px 0 #0c0907;
+    --sticker: var(--sx) 4px 0 #5a2a1e;
+    --sticker-sm: calc(var(--sx) / 2) 2px 0 #5a2a1e;
     color-scheme: dark;
   }
 }
@@ -90,7 +93,8 @@
   --card: #2a221c;
   --ink: #f7ede1;
   --ink-2: #cbbba9;
-  --ink-3: #8f8070;
+  --ink-3: #a99886;
+  --outline: color-mix(in oklab, var(--ink) 55%, transparent);
   --line: #3d322a;
   --coral: #f47b5e;
   --coral-ink: #ffb39f;
@@ -102,9 +106,83 @@
   --sky-soft: #1d2d3d;
   --blush-soft: #45262e;
   --code-bg: #120e0b;
-  --sticker: var(--sx) 4px 0 #0c0907;
-  --sticker-sm: calc(var(--sx) / 2) 2px 0 #0c0907;
+  --sticker: var(--sx) 4px 0 #5a2a1e;
+  --sticker-sm: calc(var(--sx) / 2) 2px 0 #5a2a1e;
   color-scheme: dark;
+}
+
+
+/* ───────── Kashi palette (RD-09): Persian tilework — firoozeh, saffron, pomegranate, lapis ───────── */
+:root[data-palette='kashi'] {
+  --paper: #f3f6f4;
+  --paper-2: #e6eeeb;
+  --card: #ffffff;
+  --ink: #1d2a33;
+  --ink-2: #4c5d66;
+  --ink-3: #5f7078;
+  --line: #d3dfdc;
+  --coral: #17777a;
+  --on-coral: #ffffff;
+  --coral-ink: #0f5e60;
+  --coral-soft: #d8efec;
+  --butter: #f2b632;
+  --butter-soft: #fdf1d3;
+  --mint: #76c7a9;
+  --mint-ink: #1e6b52;
+  --mint-soft: #dcf2e9;
+  --sky: #9fc0e8;
+  --sky-ink: #24568d;
+  --sky-soft: #e2ecf8;
+  --blush: #f0a9b6;
+  --blush-soft: #fbe5ea;
+  --code-bg: #1d2a33;
+  --code-ink: #eaf3f1;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-palette='kashi']:not([data-theme='light']) {
+    --paper: #101a1e;
+    --paper-2: #15232a;
+    --card: #1b2a31;
+    --ink: #e9f1f0;
+    --ink-2: #b2c4c7;
+    --ink-3: #8da1a8;
+    --line: #2c3d45;
+    --coral: #45b5b1;
+    --on-coral: #0f1d22;
+    --coral-ink: #7fd6d2;
+    --coral-soft: #173537;
+    --butter-soft: #3a3218;
+    --mint-ink: #9fe3c4;
+    --mint-soft: #183a2f;
+    --sky-ink: #a9d2fb;
+    --sky-soft: #1a2c3d;
+    --blush-soft: #3d2229;
+    --code-bg: #0b1316;
+    --sticker: var(--sx) 4px 0 #0b3a3c;
+    --sticker-sm: calc(var(--sx) / 2) 2px 0 #0b3a3c;
+  }
+}
+:root[data-palette='kashi'][data-theme='dark'] {
+  --paper: #101a1e;
+  --paper-2: #15232a;
+  --card: #1b2a31;
+  --ink: #e9f1f0;
+  --ink-2: #b2c4c7;
+  --ink-3: #8da1a8;
+  --line: #2c3d45;
+  --coral: #45b5b1;
+  --on-coral: #0f1d22;
+  --coral-ink: #7fd6d2;
+  --coral-soft: #173537;
+  --butter-soft: #3a3218;
+  --mint-ink: #9fe3c4;
+  --mint-soft: #183a2f;
+  --sky-ink: #a9d2fb;
+  --sky-soft: #1a2c3d;
+  --blush-soft: #3d2229;
+  --code-bg: #0b1316;
+  --sticker: var(--sx) 4px 0 #0b3a3c;
+  --sticker-sm: calc(var(--sx) / 2) 2px 0 #0b3a3c;
 }
 
 /* ───────────────────────── Base ───────────────────────── */
@@ -129,6 +207,7 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: clip;
+  overflow-wrap: break-word;
 }
 :root[lang='en'] body {
   line-height: 1.7;
@@ -223,7 +302,7 @@ pre {
 /* ───────────────────────── Primitives ───────────────────────── */
 .sticker {
   background: var(--card);
-  border: var(--stroke) solid var(--ink);
+  border: var(--stroke) solid var(--outline);
   border-radius: var(--r-md);
   box-shadow: var(--sticker);
 }
@@ -236,7 +315,7 @@ pre {
   gap: 10px;
   min-height: 48px;
   padding: 10px 22px;
-  border: var(--stroke) solid var(--ink);
+  border: var(--stroke) solid var(--outline);
   border-radius: 999px;
   background: var(--bg);
   color: var(--ink);
@@ -269,7 +348,7 @@ pre {
 }
 .btn--primary {
   --bg: var(--coral);
-  color: #2a211b;
+  color: var(--on-coral);
 }
 .btn--butter {
   --bg: var(--butter);
@@ -336,7 +415,7 @@ kbd,
 /* Long paths/commands may wrap on narrow screens instead of pushing the page wide. */
 .inline-code {
   white-space: normal;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
 }
@@ -347,5 +426,23 @@ kbd,
   .btn:hover {
     transition: none;
     transform: none;
+  }
+}
+
+/* ───────── Page transitions (RD-08) ───────── */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 200ms;
+  animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+}
+::view-transition-group(*) {
+  animation-duration: 300ms;
+  animation-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none;
   }
 }

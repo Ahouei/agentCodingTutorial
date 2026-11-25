@@ -10,7 +10,7 @@
   gap: 10px;
   padding: 14px 18px;
   background: var(--w-tint);
-  border-bottom: var(--stroke) solid var(--ink);
+  border-bottom: var(--stroke) solid var(--outline);
 }
 .w-try {
   display: inline-flex;
@@ -81,7 +81,7 @@
   border-radius: 999px;
   font-size: 13px;
   font-weight: 800;
-  border: 1.5px solid var(--ink);
+  border: 1.5px solid var(--outline);
   background: var(--card);
 }
 .w-card {
@@ -102,14 +102,17 @@
 }
 .w-toggle {
   display: inline-flex;
+  flex-wrap: wrap;
+  max-width: 100%;
   padding: 4px;
   border-radius: 999px;
-  border: var(--stroke) solid var(--ink);
+  border: var(--stroke) solid var(--outline);
   background: var(--paper-2);
   gap: 4px;
 }
 .w-toggle button {
-  min-height: 40px;
+  flex: 1 1 auto;
+  min-height: 44px;
   padding: 6px 16px;
   border: 0;
   border-radius: 999px;
@@ -182,4 +185,66 @@ textarea.w-input {
 .w-toggle--grid button {
   border-radius: 16px;
   line-height: 1.4;
+}
+
+/* Lab standard (RD-07) */
+.w-goal {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 12px;
+  border-radius: 999px;
+  background: var(--card);
+  border: 1.5px solid var(--outline);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+.w-goal b {
+  font-weight: 900;
+}
+.w-stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-inline-start: auto;
+  padding: 3px 12px;
+  border-radius: 10px;
+  border: 2.5px solid var(--mint-ink);
+  color: var(--mint-ink);
+  background: var(--card);
+  font-weight: 900;
+  font-size: 13.5px;
+}
+.w-foot {
+  justify-content: space-between;
+}
+/* Every lab control at least 44px (QA-17). */
+.w-frame .btn--small {
+  min-height: 44px;
+}
+.eb-lab {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 18px;
+  border-radius: var(--r-lg);
+  background: var(--blush-soft);
+}
+.eb-lab > svg {
+  flex: none;
+}
+.eb-title {
+  margin: 0;
+  font-weight: 900;
+}
+.eb-text {
+  margin: 4px 0 10px;
+  color: var(--ink-2);
+}
+.eb-page {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding-block: 80px;
+  text-align: center;
 }

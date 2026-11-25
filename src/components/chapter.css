@@ -48,7 +48,7 @@
   border-radius: 20px;
   background: var(--act);
   color: #2a211b;
-  border: var(--stroke) solid var(--ink);
+  border: var(--stroke) solid var(--outline);
   box-shadow: var(--sticker);
 }
 .ch-title {
@@ -74,7 +74,7 @@
   padding: 12px 16px;
   border-radius: 20px;
   background: var(--card);
-  border: var(--stroke) solid var(--ink);
+  border: var(--stroke) solid var(--outline);
   box-shadow: var(--sticker-sm);
   font-weight: 700;
   line-height: 1.7;
@@ -89,8 +89,8 @@
   width: 16px;
   height: 16px;
   background: var(--card);
-  border-inline-end: var(--stroke) solid var(--ink);
-  border-bottom: var(--stroke) solid var(--ink);
+  border-inline-end: var(--stroke) solid var(--outline);
+  border-bottom: var(--stroke) solid var(--outline);
   transform: translateX(-50%) rotate(45deg);
 }
 :root[dir='rtl'] .ch-say::after {
@@ -205,7 +205,6 @@
 }
 .ch-section {
   padding-bottom: clamp(24px, 4vw, 44px);
-  scroll-margin-top: 90px;
 }
 .ch-h2 {
   display: flex;
@@ -225,7 +224,7 @@
   border-radius: 13px;
   background: var(--act);
   color: #2a211b;
-  border: var(--stroke) solid var(--ink);
+  border: var(--stroke) solid var(--outline);
   font-size: 18px;
   transform: rotate(-4deg);
 }
@@ -268,7 +267,7 @@
   padding: 14px 16px;
   border-radius: 6px 6px 18px 6px;
   background: var(--butter-soft);
-  border: 1.5px solid var(--ink);
+  border: 1.5px solid var(--outline);
   box-shadow: var(--sticker-sm);
   line-height: 1.7;
   font-weight: 650;
@@ -298,7 +297,7 @@
   padding: 6px 16px 6px 8px;
   border-radius: 999px;
   background: var(--card);
-  border: 1.5px solid var(--ink);
+  border: 1.5px solid var(--outline);
   font-weight: 800;
 }
 .ch-sparks {
@@ -312,7 +311,7 @@
   width: 8px;
   height: 8px;
   border-radius: 3px;
-  border: 1px solid var(--ink);
+  border: 1px solid var(--outline);
 }
 .ch-gates {
   display: grid;
@@ -388,4 +387,135 @@
   .ch-gate--prev {
     order: 2;
   }
+}
+
+/* ── Mission brief (RD-04) ── */
+.ch-mission {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.7fr) minmax(0, 1.2fr);
+  gap: 10px;
+  margin: 26px 0 0;
+}
+.ch-mission > div {
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  border: 1.5px solid var(--line);
+  background: color-mix(in oklab, var(--card) 88%, transparent);
+}
+.ch-mission dt {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--ink-2);
+}
+.ch-mission dd {
+  margin: 2px 0 0;
+  line-height: 1.7;
+}
+.ch-mission-cafe {
+  background: var(--butter-soft) !important;
+  border-color: var(--ink) !important;
+}
+@media (max-width: 760px) {
+  .ch-mission {
+    grid-template-columns: 1fr;
+  }
+}
+.ch-warmup {
+  margin-bottom: 26px;
+}
+.ch-warmup .b-quiz {
+  margin-top: 0;
+  background: var(--butter-soft);
+}
+
+/* ── Earned done ── */
+.ch-earned {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--r-md);
+  background: var(--mint-soft);
+  border: 1.5px solid var(--mint-ink);
+  font-weight: 700;
+}
+.ch-earned > svg {
+  flex: none;
+}
+.ch-done-hint {
+  font-size: 14px;
+  color: var(--ink-2);
+  font-weight: 700;
+}
+
+/* ── Voice transcript ── */
+.ch-transcript summary {
+  cursor: pointer;
+  font-weight: 800;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.ch-transcript p {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--paper-2);
+  font-size: 14.5px;
+  line-height: 1.9;
+}
+
+/* ── Mobile bottom bar (RD-05) ── */
+.ch-mbar {
+  display: none;
+}
+@media (max-width: 980px) {
+  .ch-mbar {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 45;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px max(12px, env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px));
+    background: color-mix(in oklab, var(--card) 92%, transparent);
+    backdrop-filter: saturate(1.4) blur(10px);
+    -webkit-backdrop-filter: saturate(1.4) blur(10px);
+    border-top: 1.5px solid var(--line);
+  }
+  .ch {
+    padding-bottom: 76px;
+  }
+}
+.ch-mbar-ring {
+  flex: none;
+}
+.ch-mbar-sec {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ch-mbar-next {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  cursor: pointer;
+}
+.ch-mbar-next:active {
+  transform: scale(0.95);
+}
+.ch-mbar-btn {
+  flex: none;
 }

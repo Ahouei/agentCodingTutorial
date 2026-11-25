@@ -1,11 +1,13 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { num, useApp, useTx } from '../../lib/app';
-import { Frame } from './Frame';
+import { EASE_OUT } from '../../lib/motion';
+import { Frame, useLab } from './Frame';
 import './set1.css';
 
 const TTL = 300;
 const IP = '203.0.113.42';
+const HOST = 'cafe-sahar.ir';
 
 type Hop = {
   from: { fa: string; en: string; tint: string };
@@ -18,14 +20,14 @@ type Hop = {
 const BROWSER = { fa: 'مرورگر شما', en: 'Your browser', tint: 'var(--sky)' };
 const RESOLVER = { fa: 'Resolver', en: 'Resolver', tint: 'var(--butter)' };
 const ROOT = { fa: 'Root Server (.)', en: 'Root server (.)', tint: 'var(--blush)' };
-const TLD = { fa: 'TLD Server (.com)', en: 'TLD server (.com)', tint: 'var(--mint)' };
+const TLD = { fa: 'TLD Server (.ir)', en: 'TLD server (.ir)', tint: 'var(--mint)' };
 const AUTH = { fa: 'Nameserver اصلی (Cloudflare)', en: 'Authoritative NS (Cloudflare)', tint: 'var(--coral)' };
 
 const HOPS: Hop[] = [
   {
     from: BROWSER,
     to: RESOLVER,
-    q: { fa: 'IP آدرس www.example.com چیست؟', en: 'What is the IP of www.example.com?' },
+    q: { fa: `IP آدرس ${HOST} چیست؟`, en: `What is the IP of ${HOST}?` },
     a: { fa: 'صبر کن، می‌پرسم…', en: "Hold on, I'll find out…" },
     why: {
       fa: 'Resolver معمولاً مال اینترنت‌دهنده شماست (یا سرویسی مثل 1.1.1.1). کارش این است که به‌جای شما بگردد.',
@@ -35,8 +37,8 @@ const HOPS: Hop[] = [
   {
     from: RESOLVER,
     to: ROOT,
-    q: { fa: 'چه کسی مسئول .com است؟', en: 'Who is in charge of .com?' },
-    a: { fa: 'برو سراغ سرورهای .com', en: 'Go ask the .com servers.' },
+    q: { fa: 'چه کسی مسئول .ir است؟', en: 'Who is in charge of .ir?' },
+    a: { fa: 'برو سراغ سرورهای .ir', en: 'Go ask the .ir servers.' },
     why: {
       fa: 'Root جواب نهایی را نمی‌داند؛ فقط می‌داند هر پسوند (TLD) دست کیست. مثل تابلوی ورودی یک ساختمان بزرگ.',
       en: 'The root does not know the final answer; it only knows who runs each ending (TLD). Like the directory board in a big building lobby.',
@@ -45,7 +47,7 @@ const HOPS: Hop[] = [
   {
     from: RESOLVER,
     to: TLD,
-    q: { fa: 'Nameserverهای example.com کدام‌اند؟', en: 'Which nameservers handle example.com?' },
+    q: { fa: `Nameserverهای ${HOST} کدام‌اند؟`, en: `Which nameservers handle ${HOST}?` },
     a: { fa: 'ada.ns.cloudflare.com و bob.ns.cloudflare.com', en: 'ada.ns.cloudflare.com and bob.ns.cloudflare.com' },
     why: {
       fa: 'این همان NS delegation است: وقتی در Registrar، Nameserverها را روی Cloudflare می‌گذارید، Registry این‌جا ثبتشان می‌کند. (اسم‌ها مثال‌اند.)',
@@ -55,7 +57,7 @@ const HOPS: Hop[] = [
   {
     from: RESOLVER,
     to: AUTH,
-    q: { fa: 'رکورد A برای www.example.com؟', en: 'A record for www.example.com?' },
+    q: { fa: `رکورد A برای ${HOST}؟`, en: `A record for ${HOST}?` },
     a: { fa: `${IP} (TTL = ${TTL} ثانیه)`, en: `${IP} (TTL = ${TTL} seconds)` },
     why: {
       fa: 'Nameserver اصلی همان جایی است که شما رکوردها را تنظیم می‌کنید. جواب قطعی را فقط او دارد.',
@@ -90,6 +92,10 @@ export default function DnsLookup() {
   }, [hasCache]);
 
   const done = step === HOPS.length - 1;
+  const { complete } = useLab();
+  useEffect(() => {
+    if (done && hasCache) complete(); // the answer arrived and is now cached
+  }, [done, hasCache, complete]);
 
   const next = () => {
     const n = Math.min(HOPS.length - 1, step + 1);
@@ -120,26 +126,29 @@ export default function DnsLookup() {
   return (
     <Frame
       title={tx('DNS قدم‌به‌قدم: پیدا کردن IP یک دامنه', 'DNS step by step: finding the IP of a domain')}
+      goal={tx('IP کافه را پیدا کنید، بعد بازدید دوم را امتحان کنید', "Find the café's IP, then try a second visit")}
       hint={
         cachedVisit
           ? hasCache
             ? tx('دیدید؟ بار دوم هیچ سفری لازم نشد. جواب از Cache آمد!', 'See? No trips needed the second time. The answer came from the cache!')
             : tx('Cache خالی است، پس باید دوباره کل مسیر را برویم.', 'The cache is empty, so we have to do the whole trip again.')
-          : tx('«قدم بعد» را بزنید و دنبال سؤال‌ها بیایید.', 'Press Next and follow the questions.')
+          : undefined
       }
       mood={cachedVisit && hasCache ? 'happy' : done ? 'wink' : 'think'}
       tint="var(--butter-soft)"
       footer={
         <>
-          <button type="button" className="btn btn--small btn--butter" onClick={next} disabled={done || cachedVisit}>
-            {step < 0 ? tx('شروع جست‌وجو', 'Start lookup') : tx('قدم بعد', 'Next step')}
-          </button>
-          <button type="button" className="btn btn--small" onClick={secondVisit} disabled={!done && !hasCache}>
-            {tx('بازدید دوم (با Cache)', 'Second visit (cached)')}
-          </button>
           <button type="button" className="btn btn--small btn--ghost" onClick={fullLookup}>
             {tx('از اول', 'Start over')}
           </button>
+          <div className="w-row">
+            <button type="button" className="btn btn--small" onClick={secondVisit} disabled={!done && !hasCache}>
+              {tx('بازدید دوم (با Cache)', 'Second visit (cached)')}
+            </button>
+            <button type="button" className="btn btn--small btn--butter" onClick={next} disabled={done || cachedVisit}>
+              {step < 0 ? tx('شروع جست‌وجو', 'Start lookup') : tx('قدم بعد', 'Next step')}
+            </button>
+          </div>
         </>
       }
     >
@@ -170,7 +179,7 @@ export default function DnsLookup() {
                     initial={{ opacity: 0, transform: 'translateY(6px)' }}
                     animate={{ opacity: 1, transform: 'translateY(0px)' }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.28, ease: [0.23, 1, 0.32, 1] }}
+                    transition={{ duration: 0.28, ease: EASE_OUT }}
                   >
                     <span className="dns-bubble dns-q">
                       {cachedVisit && hasCache && i === HOPS.length - 1 ? tx(`از Cache: ${IP}`, `From cache: ${IP}`) : tx(h.q.fa, h.q.en)}
@@ -194,7 +203,10 @@ export default function DnsLookup() {
         })}
       </ol>
 
-      <div className="dns-cache" aria-live="polite">
+      <p className="sr-only" aria-live="polite">
+        {hasCache ? tx('جواب در Cache ذخیره شد.', 'The answer is now cached.') : ttl === 0 ? tx('Cache منقضی شد.', 'The cache expired.') : ''}
+      </p>
+      <div className="dns-cache">
         <svg className="dns-ring" width="48" height="48" viewBox="0 0 48 48" aria-hidden>
           <circle cx="24" cy="24" r={R} fill="none" stroke="var(--line)" strokeWidth="5" />
           <circle
@@ -216,8 +228,8 @@ export default function DnsLookup() {
           <div className="w-muted">
             {hasCache
               ? tx(
-                  `www.example.com → ${IP} · ${num(ttl!, lang)} ثانیه تا انقضا`,
-                  `www.example.com → ${IP} · expires in ${ttl} s`,
+                  `${HOST} → ${IP} · ${num(ttl!, lang)} ثانیه تا انقضا`,
+                  `${HOST} → ${IP} · expires in ${ttl} s`,
                 )
               : ttl === 0
                 ? tx('منقضی شد. بازدید بعدی دوباره کل مسیر را می‌رود.', 'Expired. The next visit does the full trip again.')

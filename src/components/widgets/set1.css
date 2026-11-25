@@ -13,7 +13,7 @@
   gap: 6px;
   padding: 12px 8px 10px;
   border-radius: var(--r-md);
-  border: var(--stroke) solid var(--ink);
+  border: var(--stroke) solid var(--outline);
   background: var(--card);
   text-align: center;
   font-weight: 800;
@@ -32,7 +32,7 @@
   gap: 6px;
   padding: 3px 10px 3px 4px;
   border-radius: 999px;
-  border: 1.5px solid var(--ink);
+  border: 1.5px solid var(--outline);
   background: var(--card);
   font-weight: 800;
   font-size: 0.82rem;
@@ -43,7 +43,7 @@
 }
 .tta-combo {
   border-radius: var(--r-lg);
-  border: var(--stroke) solid var(--ink);
+  border: var(--stroke) solid var(--outline);
   background: var(--paper);
   padding: 16px;
   box-shadow: var(--sticker-sm);
@@ -105,7 +105,7 @@
   min-height: 48px;
   padding: 0 12px;
   border-radius: 999px;
-  border: var(--stroke) solid var(--ink);
+  border: var(--stroke) solid var(--outline);
   background: var(--paper);
   direction: ltr;
 }
@@ -158,7 +158,7 @@
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  border: var(--stroke) solid var(--ink);
+  border: var(--stroke) solid var(--outline);
   background: var(--card);
   transition: background-color 200ms ease, opacity 200ms ease;
 }
@@ -174,7 +174,7 @@
   height: 26px;
   padding: 0 9px;
   border-radius: 999px;
-  border: 1.5px solid var(--ink);
+  border: 1.5px solid var(--outline);
   background: var(--coral);
   color: #2a211b;
   font-family: var(--font-mono);
@@ -190,7 +190,7 @@
 }
 .rj-mock {
   margin-top: 14px;
-  border: var(--stroke) solid var(--ink);
+  border: var(--stroke) solid var(--outline);
   border-radius: var(--r-md);
   overflow: hidden;
   background: #fffaf2;
@@ -276,12 +276,20 @@
   background: var(--paper);
   transition: opacity 200ms ease, border-color 200ms ease;
 }
-.dns-hop.is-pending {
-  opacity: 0.4;
-}
+.dns-hop.is-pending,
 .dns-hop.is-skipped {
-  opacity: 0.35;
   border-style: dashed;
+  background: transparent;
+}
+/* Not reached yet: quieter, but still readable (no opacity fade on text). */
+.dns-hop.is-pending .w-pill,
+.dns-hop.is-skipped .w-pill {
+  background: var(--paper-2) !important;
+  color: var(--ink-2) !important;
+  border-style: dashed;
+}
+.dns-hop.is-skipped .w-pill {
+  text-decoration: line-through;
 }
 .dns-hop.is-current {
   border-color: var(--ink);
@@ -322,7 +330,7 @@
   padding: 12px 14px;
   border-radius: var(--r-md);
   background: var(--butter-soft);
-  border: 1.5px solid var(--ink);
+  border: 1.5px solid var(--outline);
 }
 .dns-ring {
   flex: none;
@@ -386,7 +394,7 @@
   min-height: 44px;
   padding: 8px 14px;
   border-radius: 14px;
-  border: var(--stroke) solid var(--ink);
+  border: var(--stroke) solid var(--outline);
   background: var(--card);
   font-weight: 800;
   font-size: 0.9rem;
@@ -414,7 +422,7 @@
   min-height: 140px;
   padding: 12px;
   border-radius: var(--r-md);
-  border: var(--stroke) solid var(--ink);
+  border: var(--stroke) solid var(--outline);
   background: var(--b-tint);
   color: #2a211b;
   text-align: start;

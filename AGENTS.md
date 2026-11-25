@@ -8,17 +8,19 @@ Instructions for AI coding agents (Codex, Claude Code and others) working on thi
 
 ## Stack
 
-- Vite + React 19 + TypeScript, animation with `motion` (Motion for React).
-- No router library: a tiny hash router in `src/lib/app.tsx` (`#/` and `#/c/<slug>[/<section>]`).
+- Vite + React 19 + TypeScript, animation with `motion` (Motion for React); tokens in `src/lib/motion.ts`.
+- No router library: `src/lib/router.ts` uses real URLs (`/`, `/c/<slug>[/<section>]`, `/glossary`), restores scroll on Back, and lets Back close overlays (`useOverlay`). Old `#/c/…` links redirect.
 - Fonts are self-hosted through Fontsource (no Google Fonts requests).
-- Deployed as static assets on Cloudflare Workers (`wrangler.jsonc`).
+- A Cloudflare Worker (`worker/index.ts`) sits in front of the built files: per-page title/description/Open Graph, real 404s, security headers (strict CSP: no inline scripts), immutable caching for hashed assets.
+- Optional accounts (`worker/api.ts`): passwordless email sign-in (Resend + Turnstile), D1 (`migrations/`), progress sync with a shared merge (`src/lib/progressMerge.ts`). Everything works signed-out.
 
 ## Commands
 
 - `npm run dev`: local dev server
 - `npm run validate`: content checks (must pass)
-- `npm run build`: validate, type-check and build to `dist/`
-- `npm run deploy`: build and `wrangler deploy`
+- `npm run build`: validate content, generate page metadata/sitemap, type-check app and Worker, build to `dist/`
+- `node scripts/og-cards.cjs`: regenerate the 1200×630 share cards in `public/og/` (after content titles change)
+- `npm run deploy`: build and `wrangler deploy` (CI does this on every push to `main`)
 
 ## Where things live
 
@@ -26,7 +28,8 @@ Instructions for AI coding agents (Codex, Claude Code and others) working on thi
 - `src/content/chapters/*.ts`: chapter content, grouped by act. Content only, no UI.
 - `src/content/index.ts`: acts and chapter order.
 - `src/components/blocks/`: renders content blocks (paragraph, callout, steps, quiz, prompt...).
-- `src/components/widgets/`: one interactive lab per file, registered in `widgets/index.tsx`, wrapped in `Frame`.
+- `src/components/widgets/`: one interactive lab per file, registered in `widgets/index.tsx`, wrapped in `Frame` (goal chip, footer, `useLab().complete()` at success).
+- `BUILD_PLAN.md`: the owner's prioritized queue and its status. Update it with the work.
 - `scripts/validate-content.ts`: syllabus coverage, widget usage, translations, quiz answers.
 
 ## Rules
@@ -36,5 +39,9 @@ Instructions for AI coding agents (Codex, Claude Code and others) working on thi
 - Motion: animate `transform` and `opacity` only; ease-out `cubic-bezier(0.23, 1, 0.32, 1)` for enter/exit, `cubic-bezier(0.77, 0, 0.175, 1)` for on-screen movement; UI responses under 300ms; never animate from `scale(0)`; gate hover effects behind `(hover: hover) and (pointer: fine)`. `MotionConfig reducedMotion="user"` is set app-wide; CSS keyframes need their own `prefers-reduced-motion` rule.
 - Facts about products (Cloudflare, GitHub, OpenAI, Anthropic) must match current official docs. Avoid hard numbers (prices, limits) unless verified, and link the docs.
 - Correct a common misconception with a `callout` of tone `fix`.
+- Café Sahar (`cafe-sahar.ir`) is the single running example in every chapter and lab.
+- Where steps differ by tool, use a `path` block (Codex / Lovable). Quizzes: 4 options of similar length, answer position varied, a `why` per option (the validator enforces this).
+- Do not redesign: keep the sticker style and Bit. Small Bits stay still (`ambient` only on hero/finale).
+- Never edit an applied D1 migration; add a new file.
 - Browser storage is only for per-viewer conveniences (language, theme, progress, drafts) and every access is wrapped in try/catch.
 - Run `npm run build` before you say a change is done.

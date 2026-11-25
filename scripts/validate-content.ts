@@ -15,14 +15,16 @@ import { platform } from '../src/content/chapters/platform.ts';
 import { workshop } from '../src/content/chapters/workshop.ts';
 import { building } from '../src/content/chapters/building.ts';
 import { shipping } from '../src/content/chapters/shipping.ts';
-import type { Block, Chapter, L } from '../src/content/types.ts';
+import { beFound, comparePlatforms } from '../src/content/chapters/extra.ts';
+import type { Block, Chapter, L, QuizItem } from '../src/content/types.ts';
 
-const CHAPTERS: Chapter[] = [...foundations, ...platform, ...workshop, ...building, ...shipping];
+const CHAPTERS: Chapter[] = [...foundations, ...platform, comparePlatforms, ...workshop, ...building, ...shipping, beFound];
 
 const WIDGETS = [
   'team-to-agent', 'request-journey', 'stack-layers', 'dns-lookup', 'git-playground', 'storage-picker',
   'chat-vs-agent', 'agent-loop', 'setup-checklist', 'token-builder', 'brief-builder', 'prompt-lab',
   'vibe-loop', 'bug-report', 'pipeline', 'nameserver-switch', 'hero-finale',
+  'agent-picker', 'design-flaws', 'secret-hunt', 'platform-compare', 'other-businesses',
 ];
 
 /** The 14 topics from the course brief, each with the chapter(s) that must teach it and terms that must appear there. */
@@ -41,6 +43,9 @@ const SYLLABUS: { topic: string; chapters: string[]; mustMention: string[] }[] =
   { topic: 'Vibe coding and iterative development', chapters: ['vibe-coding-loop'], mustMention: ['Vibe Coding', 'Commit'] },
   { topic: 'Testing, debugging, CI/CD, deployment', chapters: ['testing-debugging', 'cicd-deploy'], mustMention: ['Test', 'CI/CD', 'Deploy'] },
   { topic: 'Custom domain, security and maintenance', chapters: ['custom-domain', 'security-maintenance'], mustMention: ['Custom Domain', 'Secret', 'HTTPS'] },
+  { topic: 'Five-platform comparison (owner request)', chapters: ['compare-platforms'], mustMention: ['Codex', 'Lovable', 'Claude Code', 'Grok', 'DeepSeek'] },
+  { topic: 'Being findable (QA-26)', chapters: ['be-found'], mustMention: ['sitemap', 'Open Graph', 'Search Console'] },
+  { topic: 'Plan B for Iran (QA-27)', chapters: ['cloudflare', 'custom-domain'], mustMention: ['Liara'] },
 ];
 
 const errors: string[] = [];
@@ -58,6 +63,8 @@ function checkL(where: string, l: L | undefined, allowEmpty = false) {
   // Untranslated sentence: the Persian side has no Persian letters and reads like prose.
   // Short Latin-only labels ("D1", "Claude Code", "A record") are fine in Persian text,
   // and copy-paste prompts may be English in both languages.
+  if (/وبسایت/.test(l.fa)) err(`${where}: write «وب‌سایت» with a half-space, not «وبسایت»`);
+  if (/دیتابیس/.test(l.fa)) err(`${where}: use «Database», not «دیتابیس»`);
   const words = l.fa.trim().split(/\s+/).length;
   if (!/[\u0600-\u06FF]/.test(l.fa) && words > 6 && !where.includes('prompt.text')) err(`${where}: fa text looks untranslated`);
 }
@@ -76,8 +83,72 @@ function textOf(b: Block): string {
     case 'code': parts.push(b.code); push(b.caption); break;
     case 'quiz': push(b.q); b.options.forEach(push); push(b.explain); break;
     case 'links': b.items.forEach((i) => parts.push(i.label)); break;
+    case 'path': [...b.codex, ...b.lovable].forEach((x) => parts.push(textOf(x))); break;
+    case 'review': b.items.forEach((it) => { push(it.q); it.options.forEach(push); push(it.explain); }); break;
   }
   return parts.join('\n');
+}
+
+
+/* ───── Quiz rules (QA-02 / RD-06) ───── */
+const quizStats = { total: 0, longestEn: 0, longestFa: 0, positions: [0, 0, 0, 0, 0] };
+function checkQuiz(it: QuizItem, where: string, counts = true) {
+  checkL(`${where}.q`, it.q);
+  checkL(`${where}.explain`, it.explain);
+  it.options.forEach((x, j) => checkL(`${where}.o${j}`, x));
+  if (it.options.length < 3 || it.options.length > 5) err(`${where}: 3–5 options expected`);
+  if (!Number.isInteger(it.answer) || it.answer < 0 || it.answer >= it.options.length) err(`${where}: answer ${it.answer} out of range`);
+  if (!it.why || it.why.length !== it.options.length) err(`${where}: needs a "why" for every option`);
+  else it.why.forEach((x, j) => checkL(`${where}.why${j}`, x));
+  for (const lang of ['fa', 'en'] as const) {
+    const lens = it.options.map((o) => o[lang].length);
+    const mean = lens.reduce((a, b) => a + b, 0) / lens.length;
+    lens.forEach((n, j) => {
+      if (n > mean * 1.45 || n < mean * 0.55) err(`${where}: option ${j} (${lang}) length ${n} is far from the mean ${mean.toFixed(0)}; keep options similar`);
+    });
+    const max = Math.max(...lens);
+    if (counts && lens[it.answer] === max && lens.filter((n) => n === max).length === 1) lang === 'en' ? quizStats.longestEn++ : quizStats.longestFa++;
+  }
+  if (counts) { quizStats.total++; quizStats.positions[it.answer]++; }
+}
+
+function checkBlock(b: Block, bat: string, slug: string, kinds: Set<string>) {
+  kinds.add(b.type);
+  switch (b.type) {
+    case 'p': case 'h': checkL(bat, b.text); break;
+    case 'callout': if (b.title) checkL(`${bat}.title`, b.title); checkL(bat, b.text); break;
+    case 'list': b.items.forEach((x, j) => checkL(`${bat}[${j}]`, x)); break;
+    case 'steps': b.items.forEach((x, j) => { checkL(`${bat}[${j}].title`, x.title); checkL(`${bat}[${j}].text`, x.text); }); break;
+    case 'terms': b.items.forEach((x) => { if (!x.term.trim()) err(`${bat}: empty term`); checkL(`${bat}.${x.term}`, x.def); }); break;
+    case 'compare':
+      b.headers.forEach((x, j) => checkL(`${bat}.h${j}`, x, j === 0));
+      b.rows.forEach((r, j) => {
+        if (r.length !== b.headers.length) err(`${bat}: row ${j} has ${r.length} cells, header has ${b.headers.length}`);
+        r.forEach((x, k) => checkL(`${bat}.r${j}c${k}`, x));
+      });
+      break;
+    case 'prompt': checkL(`${bat}.title`, b.title); checkL(`${bat}.prompt.text`, b.text); break;
+    case 'code': if (!b.code.trim()) err(`${bat}: empty code`); if (b.caption) checkL(`${bat}.caption`, b.caption); break;
+    case 'quiz': checkQuiz(b, bat); break;
+    case 'review':
+      checkL(`${bat}.title`, b.title);
+      if (b.items.length < 3) err(`${bat}: a review needs at least 3 questions`);
+      b.items.forEach((it, j) => checkQuiz(it, `${bat}.r${j}`));
+      break;
+    case 'path':
+      if (!b.codex.length || !b.lovable.length) err(`${bat}: both Codex and Lovable paths need content`);
+      b.codex.forEach((x, j) => checkBlock(x, `${bat}.codex[${j}:${x.type}]`, slug, kinds));
+      b.lovable.forEach((x, j) => checkBlock(x, `${bat}.lovable[${j}:${x.type}]`, slug, kinds));
+      if ([...b.codex, ...b.lovable].some((x) => x.type === 'widget' || x.type === 'quiz')) err(`${bat}: keep labs and quizzes outside path blocks`);
+      break;
+    case 'links':
+      b.items.forEach((x) => { if (!/^https:\/\//.test(x.url)) err(`${bat}: link is not https: ${x.url}`); });
+      break;
+    case 'widget':
+      widgetUse.set(b.id, [...(widgetUse.get(b.id) ?? []), slug]);
+      if (!WIDGETS.includes(b.id)) err(`${bat}: unknown widget ${b.id}`);
+      break;
+  }
 }
 
 const slugs = new Set<string>();
@@ -101,39 +172,13 @@ for (const c of CHAPTERS) {
     if (ids.has(s.id)) err(`${sat}: duplicate section id`);
     ids.add(s.id);
     checkL(`${sat}.title`, s.title);
-    s.blocks.forEach((b, i) => {
-      const bat = `${sat} [${i}:${b.type}]`;
-      kinds.add(b.type);
-      switch (b.type) {
-        case 'p': case 'h': checkL(bat, b.text); break;
-        case 'callout': if (b.title) checkL(`${bat}.title`, b.title); checkL(bat, b.text); break;
-        case 'list': b.items.forEach((x, j) => checkL(`${bat}[${j}]`, x)); break;
-        case 'steps': b.items.forEach((x, j) => { checkL(`${bat}[${j}].title`, x.title); checkL(`${bat}[${j}].text`, x.text); }); break;
-        case 'terms': b.items.forEach((x) => { if (!x.term.trim()) err(`${bat}: empty term`); checkL(`${bat}.${x.term}`, x.def); }); break;
-        case 'compare':
-          b.headers.forEach((x, j) => checkL(`${bat}.h${j}`, x, j === 0));
-          b.rows.forEach((r, j) => {
-            if (r.length !== b.headers.length) err(`${bat}: row ${j} has ${r.length} cells, header has ${b.headers.length}`);
-            r.forEach((x, k) => checkL(`${bat}.r${j}c${k}`, x));
-          });
-          break;
-        case 'prompt': checkL(`${bat}.title`, b.title); checkL(`${bat}.prompt.text`, b.text); break;
-        case 'code': if (!b.code.trim()) err(`${bat}: empty code`); if (b.caption) checkL(`${bat}.caption`, b.caption); break;
-        case 'quiz':
-          checkL(`${bat}.q`, b.q); checkL(`${bat}.explain`, b.explain);
-          b.options.forEach((x, j) => checkL(`${bat}.o${j}`, x));
-          if (b.options.length < 2 || b.options.length > 5) err(`${bat}: 2–5 options expected`);
-          if (!Number.isInteger(b.answer) || b.answer < 0 || b.answer >= b.options.length) err(`${bat}: answer ${b.answer} out of range`);
-          break;
-        case 'links':
-          b.items.forEach((x) => { if (!/^https:\/\//.test(x.url)) err(`${bat}: link is not https: ${x.url}`); });
-          break;
-        case 'widget':
-          widgetUse.set(b.id, [...(widgetUse.get(b.id) ?? []), c.slug]);
-          if (!WIDGETS.includes(b.id)) err(`${bat}: unknown widget ${b.id}`);
-          break;
-      }
-    });
+    s.blocks.forEach((b, i) => checkBlock(b, `${sat} [${i}:${b.type}]`, c.slug, kinds));
+  }
+  if (!c.mission) err(`${at}: missing mission brief`);
+  else { checkL(`${at}.mission.outcome`, c.mission.outcome); checkL(`${at}.mission.cafe`, c.mission.cafe); }
+  if (c.slug !== 'welcome') {
+    if (!c.warmup) err(`${at}: missing warm-up question`);
+    else checkQuiz(c.warmup, `${at}.warmup`, false);
   }
   for (const need of ['terms', 'quiz', 'prompt', 'links']) if (!kinds.has(need)) err(`${at}: has no "${need}" block`);
 }
@@ -156,13 +201,19 @@ for (const s of SYLLABUS) {
   for (const term of s.mustMention) if (!corpus.includes(term.toLowerCase())) err(`syllabus "${s.topic}": "${term}" never mentioned in ${s.chapters.join(' + ')}`);
 }
 
+// The correct answer must not usually be the longest option, and positions must vary (QA-02).
+const maxLongest = Math.ceil(quizStats.total * 0.3);
+if (quizStats.longestEn > maxLongest) err(`quizzes: correct answer is the longest option in ${quizStats.longestEn}/${quizStats.total} (en); max ${maxLongest}`);
+if (quizStats.longestFa > maxLongest) err(`quizzes: correct answer is the longest option in ${quizStats.longestFa}/${quizStats.total} (fa); max ${maxLongest}`);
+quizStats.positions.slice(0, 4).forEach((n, i) => { if (n < Math.floor(quizStats.total * 0.12)) err(`quizzes: answer position ${'ABCD'[i]} used only ${n}/${quizStats.total} times`); });
+
 // Harness floor: if we inspected suspiciously little, the validator itself is broken.
 const blockCount = CHAPTERS.reduce((n, c) => n + c.sections.reduce((m, s) => m + s.blocks.length, 0), 0);
-if (CHAPTERS.length < 18) err(`expected at least 18 chapters, found ${CHAPTERS.length}`);
-if (blockCount < 300) err(`expected at least 300 blocks, found ${blockCount}`);
+if (CHAPTERS.length < 20) err(`expected at least 20 chapters, found ${CHAPTERS.length}`);
+if (blockCount < 380) err(`expected at least 380 blocks, found ${blockCount}`);
 
 if (errors.length) {
   console.error(`✗ ${errors.length} content problem(s):\n` + errors.map((e) => '  - ' + e).join('\n'));
   process.exit(1);
 }
-console.log(`✓ content OK: ${CHAPTERS.length} chapters, ${blockCount} blocks, ${WIDGETS.length} widgets, ${SYLLABUS.length} syllabus topics covered`);
+console.log(`✓ content OK: ${CHAPTERS.length} chapters, ${blockCount} blocks, ${WIDGETS.length} widgets, ${SYLLABUS.length} syllabus topics, ${quizStats.total} questions (answer positions A–D: ${quizStats.positions.slice(0, 4).join('/')}, correct-is-longest en ${quizStats.longestEn} fa ${quizStats.longestFa})`);

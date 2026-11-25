@@ -1,11 +1,12 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { num, useApp, useTx } from '../../lib/app';
+import { DUR, EASE_OUT } from '../../lib/motion';
 import { Mascot } from '../Mascot';
-import { Frame } from './Frame';
+import { Frame, useLab } from './Frame';
 import './set2.css';
 
-const EASE = [0.23, 1, 0.32, 1] as const;
+const EASE = EASE_OUT;
 
 type Item = {
   id: string;
@@ -57,7 +58,7 @@ const ITEMS: Item[] = [
     essential: true,
     title: ['حساب Cloudflare با 2FA', 'A Cloudflare account with 2FA'],
     why: [
-      'DNS، Hosting روی Workers و پایگاه‌داده‌ها اینجاست. چون به دامنه‌تان دسترسی دارد، 2FA ضروری است.',
+      'DNS، Hosting روی Workers و Databaseها اینجاست. چون به دامنه‌تان دسترسی دارد، 2FA ضروری است.',
       'Your DNS, Workers hosting and databases live here. It controls your domain, so 2FA is a must.',
     ],
     links: [
@@ -70,21 +71,22 @@ const ITEMS: Item[] = [
     essential: true,
     title: ['یک دامنه', 'A domain name'],
     why: [
-      'آدرسی که مردم تایپ می‌کنند. از یک Registrar بخرید (یا Cloudflare Registrar) و حتماً تمدید خودکار را روشن کنید.',
-      'The address people type. Buy it from a registrar (or Cloudflare Registrar) and switch on auto-renew.',
+      'آدرسی که مردم تایپ می‌کنند، مثل cafe-sahar.ir. از یک Registrar بخرید (یا Cloudflare Registrar) و حتماً تمدید خودکار را روشن کنید.',
+      'The address people type, like cafe-sahar.ir. Buy it from a registrar (or Cloudflare Registrar) and switch on auto-renew.',
     ],
     links: [{ label: 'Cloudflare Registrar', url: 'https://developers.cloudflare.com/registrar/' }],
   },
   {
     id: 'agent',
     essential: true,
-    title: ['اشتراک یک AI Agent', 'An AI agent subscription'],
+    title: ['یک حساب سازنده هوش مصنوعی: Codex یا Lovable', 'An AI builder account: Codex or Lovable'],
     why: [
-      'Codex (از طریق ChatGPT) یا Claude Code. یکی را انتخاب کنید که در دسترس شماست و عمیق یادش بگیرید.',
-      'Codex (through ChatGPT) or Claude Code. Pick the one available to you and learn it deeply.',
+      'دو مسیر اصلی دوره: Codex (از طریق ChatGPT) روی Repository خودتان کار می‌کند؛ Lovable در مرورگر از روی گفت‌وگو اپ می‌سازد و میزبانی هم دارد. Claude Code هم جایگزین قوی Codex است. یکی را که در دسترس شماست انتخاب کنید و شرایط استفاده‌اش را بخوانید.',
+      'The two main paths in this course: Codex (through ChatGPT) works on your own repository; Lovable builds the app from a chat in the browser and hosts it too. Claude Code is a strong alternative to Codex. Pick one that is available to you and read its terms.',
     ],
     links: [
       { label: 'OpenAI Codex', url: 'https://developers.openai.com/codex' },
+      { label: 'Lovable', url: 'https://docs.lovable.dev/introduction/getting-started' },
       { label: 'Claude Code', url: 'https://code.claude.com/docs/en/overview' },
     ],
   },
@@ -124,13 +126,17 @@ export default function SetupChecklist() {
   const { saved, save, lang } = useApp();
   const tx = useTx();
   const reduce = useReducedMotion();
-  const [ticks, setTicks] = useState<Record<string, boolean>>(() => saved('setup-checklist', {}));
+  // QA-01: keep only known items whose stored value really is `true`.
+  const [ticks, setTicks] = useState<Record<string, boolean>>(() => {
+    const raw = saved<Record<string, unknown>>('setup-checklist', {});
+    return Object.fromEntries(ITEMS.filter((i) => raw[i.id] === true).map((i) => [i.id, true]));
+  });
+  useEffect(() => save('setup-checklist', ticks), [ticks, save]);
 
   const toggle = (id: string) => {
     setTicks((prev) => {
       const next = { ...prev, [id]: !prev[id] };
       if (!next[id]) delete next[id];
-      save('setup-checklist', next);
       return next;
     });
   };
@@ -139,6 +145,10 @@ export default function SetupChecklist() {
   const doneEss = essentials.filter((i) => ticks[i.id]).length;
   const allEss = doneEss === essentials.length;
   const pct = doneEss / essentials.length;
+  const { complete } = useLab();
+  useEffect(() => {
+    if (allEss) complete();
+  }, [allEss, complete]);
 
   const R = 34;
   const C = 2 * Math.PI * R;
@@ -164,7 +174,7 @@ export default function SetupChecklist() {
                     initial={{ opacity: 0, transform: 'scale(0.6)' }}
                     animate={{ opacity: 1, transform: 'scale(1)' }}
                     exit={{ opacity: 0, transform: 'scale(0.8)' }}
-                    transition={{ duration: 0.18, ease: EASE }}
+                    transition={{ duration: DUR.press + 0.06, ease: EASE }}
                   >
                     <path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="#1d3a2c" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
                   </motion.svg>
@@ -193,9 +203,17 @@ export default function SetupChecklist() {
   return (
     <Frame
       title={tx('چک‌لیست آماده‌سازی کارگاه', 'Workshop setup checklist')}
-      hint={tx('هر کدام را که آماده کردید تیک بزنید. پیشرفت شما در همین مرورگر ذخیره می‌شود.', 'Tick each one as you finish it. Your progress is saved in this browser.')}
+      goal={tx(`همه ${num(6, lang)} مورد ضروری را آماده کنید`, 'Get all 6 essentials ready')}
+      hint={tx('تیک‌ها در همین مرورگر ذخیره می‌شوند؛ با ورود به حساب، روی دستگاه‌های دیگر هم می‌آیند.', 'Ticks are saved in this browser; sign in to carry them to your other devices.')}
       mood={mood}
       tint="var(--mint-soft)"
+      footer={
+        doneEss > 0 || Object.keys(ticks).length > 0 ? (
+          <button type="button" className="btn btn--small btn--ghost" onClick={() => setTicks({})}>
+            {tx('پاک کردن تیک‌ها', 'Clear the ticks')}
+          </button>
+        ) : undefined
+      }
     >
       <div className="sc-top">
         <div className="sc-ring" aria-hidden>
@@ -244,7 +262,7 @@ export default function SetupChecklist() {
             initial={{ opacity: 0, transform: 'scale(0.96)' }}
             animate={{ opacity: 1, transform: 'scale(1)' }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3, ease: EASE }}
+            transition={{ duration: DUR.reveal, ease: EASE }}
           >
             {!reduce &&
               SPARKS.map((c, i) => {

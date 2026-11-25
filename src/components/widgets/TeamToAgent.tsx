@@ -1,12 +1,13 @@
 import { AnimatePresence, LayoutGroup, motion } from 'motion/react';
 import { useState, type JSX } from 'react';
 import { useTx } from '../../lib/app';
+import { EASE_IN_OUT, EASE_OUT } from '../../lib/motion';
 import { Mascot } from '../Mascot';
-import { Frame } from './Frame';
+import { Frame, useLab } from './Frame';
 import './set1.css';
 
-const MOVE = { duration: 0.6, ease: [0.77, 0, 0.175, 1] } as const;
-const ENTER = { duration: 0.35, ease: [0.23, 1, 0.32, 1] } as const;
+const MOVE = { duration: 0.6, ease: EASE_IN_OUT } as const;
+const ENTER = { duration: 0.35, ease: EASE_OUT } as const;
 
 type Role = { id: string; fa: string; en: string; doFa: string; doEn: string; hair: string; shirt: string; glyph: JSX.Element };
 
@@ -122,6 +123,11 @@ function YouAvatar() {
 export default function TeamToAgent() {
   const tx = useTx();
   const [today, setToday] = useState(false);
+  const { complete } = useLab();
+  const flip = () => {
+    setToday((v) => !v);
+    if (!today) complete(); // seeing today's split is the lab's point
+  };
 
   const yours = [
     tx('چشم‌انداز و هدف پروژه', 'Vision and goals'),
@@ -134,15 +140,18 @@ export default function TeamToAgent() {
   return (
     <Frame
       title={tx('از یک تیم شش‌نفره تا شما و یک Agent', 'From a six-person team to you and an agent')}
-      hint={
-        today
-          ? tx('شما کارگردانید؛ من اجرا می‌کنم. ولی تصمیم آخر همیشه با شماست.', 'You direct, I do the work. The final call is always yours.')
-          : tx('قبلاً برای یک سایت جدی این همه آدم لازم بود. دکمه را بزنید!', 'A serious website used to need all these people. Press the button!')
-      }
+      goal={tx('ببینید امروز چه کسی چه کاری می‌کند', 'See who does what today')}
+      hint={today ? tx('شما کارگردانید؛ من اجرا می‌کنم. ولی تصمیم آخر همیشه با شماست.', 'You direct, I do the work. The final call is always yours.') : undefined}
       mood={today ? 'wink' : 'think'}
       tint="var(--blush-soft)"
       footer={
-        <button type="button" className={`btn ${today ? '' : 'btn--primary'}`} onClick={() => setToday((v) => !v)} aria-pressed={today}>
+        <button
+          type="button"
+          className={`btn ${today ? '' : 'btn--primary'}`}
+          onClick={flip}
+          aria-pressed={today}
+          style={{ marginInlineStart: 'auto' }}
+        >
           {today ? tx('برگرد به گذشته', 'Back to the old way') : tx('برو به امروز', 'Fast-forward to today')}
           <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden className="tta-arrow">
             <path d={today ? 'M11 6 5 12l6 6M19 6l-6 6 6 6' : 'm13 6 6 6-6 6M5 6l6 6-6 6'} fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
@@ -151,7 +160,10 @@ export default function TeamToAgent() {
       }
     >
       <LayoutGroup>
-        <div aria-live="polite">
+        <p className="sr-only" aria-live="polite">
+          {today ? tx('نمای امروز: شما و یک Agent', 'Today: you and an agent') : tx('نمای گذشته: تیم شش‌نفره', 'The old way: a six-person team')}
+        </p>
+        <div>
           {!today ? (
             <div className="tta-roles">
               {ROLES.map((r) => (

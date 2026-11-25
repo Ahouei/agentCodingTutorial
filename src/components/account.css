@@ -1,0 +1,87 @@
+.acc {
+  display: grid;
+  gap: 12px;
+  padding-bottom: 6px;
+}
+.acc-lead {
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.8;
+}
+.acc-label {
+  font-weight: 800;
+  font-size: 14px;
+}
+.acc-input {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1.5px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  transition: border-color 150ms ease;
+}
+.acc-input:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+.acc-turnstile {
+  min-height: 65px;
+}
+.acc-err {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--blush-soft);
+  font-size: 14.5px;
+}
+.acc-fine {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.acc-sync {
+  margin: 0;
+  color: var(--ink-2);
+}
+.acc-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.acc-sent {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+}
+.acc-sent p {
+  margin: 0 0 10px;
+  line-height: 1.8;
+}
+.hd-account[data-state='signed-in'] {
+  background: var(--mint-soft);
+  border-color: var(--mint-ink);
+}
+.welcome-toast {
+  position: fixed;
+  inset-inline: 0;
+  top: calc(76px + env(safe-area-inset-top, 0px));
+  z-index: 50;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+.welcome-toast > div {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px 8px 8px;
+  border-radius: 999px;
+  border: var(--stroke) solid var(--outline);
+  background: var(--card);
+  box-shadow: var(--sticker-sm);
+  font-weight: 800;
+  pointer-events: auto;
+}

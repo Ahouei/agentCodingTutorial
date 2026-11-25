@@ -1,7 +1,8 @@
 import { motion } from 'motion/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTx } from '../../lib/app';
-import { Frame } from './Frame';
+import { EASE_OUT } from '../../lib/motion';
+import { Frame, useLab } from './Frame';
 
 type Kind = 'static' | 'dynamic' | 'edge';
 
@@ -27,6 +28,13 @@ const ACTIVE: Record<Kind, string[]> = {
 export default function StackLayers() {
   const tx = useTx();
   const [kind, setKind] = useState<Kind>('static');
+  const [seen, setSeen] = useState<Set<Kind>>(() => new Set(['static']));
+  const { complete } = useLab();
+
+  // Done once the learner has compared all three kinds of site.
+  useEffect(() => {
+    if (seen.size === 3) complete();
+  }, [seen, complete]);
 
   const notes: Record<Kind, string> = {
     static: tx(
@@ -48,7 +56,7 @@ export default function StackLayers() {
   return (
     <Frame
       title={tx('هر سایت به کدام لایه‌ها نیاز دارد؟', 'Which layers does each kind of site need?')}
-      hint={tx('یکی را انتخاب کنید و ببینید کدام طبقه‌ها روشن می‌شوند.', 'Pick one and watch which floors light up.')}
+      goal={tx('هر سه نوع سایت را مقایسه کنید', 'Compare all three kinds of site')}
       tint="var(--butter-soft)"
     >
       <div className="w-toggle w-toggle--grid" role="group" aria-label={tx('نوع سایت', 'Kind of site')}>
@@ -59,7 +67,10 @@ export default function StackLayers() {
             ['edge', tx('Web App روی Cloudflare', 'Web app on Cloudflare')],
           ] as [Kind, string][]
         ).map(([k, label]) => (
-          <button key={k} type="button" aria-pressed={kind === k} onClick={() => setKind(k)}>
+          <button key={k} type="button" aria-pressed={kind === k} onClick={() => {
+              setKind(k);
+              setSeen((prev) => (prev.has(k) ? prev : new Set(prev).add(k)));
+            }}>
             {label}
           </button>
         ))}
@@ -80,7 +91,7 @@ export default function StackLayers() {
             <motion.div
               key={l.id}
               animate={{ opacity: on ? 1 : 0.32, transform: on ? 'scale(1)' : 'scale(0.98)' }}
-              transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1], delay: on ? i * 0.05 : 0 }}
+              transition={{ duration: 0.3, ease: EASE_OUT, delay: on ? i * 0.05 : 0 }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -116,8 +127,8 @@ export default function StackLayers() {
 
       <motion.p
         key={kind}
-        initial={{ opacity: 0, filter: 'blur(4px)' }}
-        animate={{ opacity: 1, filter: 'blur(0px)' }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
         transition={{ duration: 0.25 }}
         className="w-card"
         style={{ marginTop: 16, marginBottom: 0 }}

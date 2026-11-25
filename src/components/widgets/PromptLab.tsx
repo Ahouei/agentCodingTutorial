@@ -1,12 +1,13 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { num, useApp, useTx } from '../../lib/app';
+import { DUR, EASE_OUT } from '../../lib/motion';
 import { CopyButton } from '../blocks/CopyButton';
 import { Mascot } from '../Mascot';
-import { Frame } from './Frame';
+import { Frame, useLab } from './Frame';
 import './set2.css';
 
-const EASE = [0.23, 1, 0.32, 1] as const;
+const EASE = EASE_OUT;
 
 type Ing = {
   id: string;
@@ -21,35 +22,35 @@ const INGREDIENTS: Ing[] = [
   {
     id: 'context',
     label: ['زمینه (Context)', 'Context'],
-    line: 'Context: I run a small bakery in Shiraz and I have no coding experience. The repo is empty and Cloudflare is already connected.',
+    line: 'Context: I run Café Sahar, a small café, and I have no coding experience. The repo cafe-sahar is empty and Cloudflare is already connected.',
     weight: 14,
     guess: ['حدس می‌زند سایت مال چه کسب‌وکاری است؛ شاید یک استارتاپ فناوری!', 'Guesses what business this is for. A tech startup, maybe?'],
   },
   {
     id: 'goal',
     label: ['هدف (Goal)', 'Goal'],
-    line: 'Goal: build a one-page website that shows our menu, opening hours and location, and gets people to order cakes on WhatsApp.',
+    line: 'Goal: build the menu page for cafe-sahar.ir: drinks and cakes with prices, opening hours, and a "Book a table" button.',
     weight: 18,
     guess: ['نمی‌داند سایت قرار است چه کاری انجام دهد؛ یک صفحه کلی و بی‌هدف می‌سازد.', 'Has no idea what the site is for, so it builds a generic page with no purpose.'],
   },
   {
     id: 'audience',
     label: ['مخاطب (Audience)', 'Audience'],
-    line: 'Audience: local customers, mostly on mobile phones, reading in Persian.',
+    line: 'Audience: neighbours and visitors, mostly on mobile phones, reading in Persian.',
     weight: 10,
     guess: ['برای کاربر انگلیسی‌زبان روی کامپیوتر طراحی می‌کند.', 'Designs for English readers on a desktop.'],
   },
   {
     id: 'constraints',
     label: ['محدودیت‌ها (Constraints)', 'Constraints'],
-    line: 'Constraints: Cloudflare Workers free plan, static site, no database for now, right-to-left Persian layout, fast on slow mobile data.',
+    line: 'Constraints: Cloudflare Workers free plan, no database for this page (bookings come later in D1), right-to-left Persian layout, fast on slow mobile data.',
     weight: 14,
-    guess: ['ممکن است یک Framework سنگین و پایگاه‌داده‌ای انتخاب کند که اصلاً لازم ندارید.', 'May pick a heavy framework and a database you do not need at all.'],
+    guess: ['ممکن است یک Framework سنگین و Databaseای انتخاب کند که برای این صفحه لازم ندارید.', 'May pick a heavy framework and a database this page does not need.'],
   },
   {
     id: 'done',
     label: ['معیار پایان (Done means)', 'Acceptance criteria'],
-    line: 'Done means: looks right on a 360px-wide phone, all text is in Persian, the WhatsApp button works, and it is deployed to a preview URL.',
+    line: 'Done means: looks right on a 360px-wide phone, all text is in Persian, prices are easy to read, the "Book a table" button links to /book, and it is deployed to a preview URL.',
     weight: 14,
     guess: ['هر وقت خودش فکر کند کافی است، کار را تمام شده اعلام می‌کند.', 'Declares victory whenever it feels finished.'],
   },
@@ -92,6 +93,11 @@ export default function PromptLab() {
 
   const active = INGREDIENTS.filter((i) => on[i.id]);
   const clarity = Math.min(100, 8 + active.reduce((n, i) => n + i.weight, 0));
+  const { complete } = useLab();
+  const allOn = active.length === INGREDIENTS.length;
+  useEffect(() => {
+    if (allOn || clarity >= 90) complete();
+  }, [allOn, clarity, complete]);
   const lines = [...(on.goal ? [] : [VAGUE]), ...active.map((i) => i.line)];
   const prompt = lines.join('\n');
   const missing = INGREDIENTS.filter((i) => !on[i.id]);
@@ -100,8 +106,8 @@ export default function PromptLab() {
   const tier =
     clarity >= 100
       ? tx(
-          'دقیق: یک برنامه برای سایت یک‌صفحه‌ای فارسی و موبایل‌محور پیشنهاد می‌دهد، اگر سؤالی دارد می‌پرسد و منتظر تأیید شما می‌ماند.',
-          'Precise: it proposes a plan for a Persian, mobile-first one-pager, asks anything it needs to, and waits for your go-ahead.',
+          'دقیق: برای صفحه منوی کافه سحر (فارسی و موبایل‌محور) برنامه می‌دهد، اگر سؤالی دارد می‌پرسد و منتظر تأیید شما می‌ماند.',
+          "Precise: it proposes a plan for Café Sahar's menu page (Persian, mobile-first), asks anything it needs to, and waits for your go-ahead.",
         )
       : clarity >= 70
         ? tx('خیلی نزدیک! فقط چند جای کوچک را هنوز حدس می‌زند:', 'Close! It still has to guess a few small things:')
@@ -112,19 +118,20 @@ export default function PromptLab() {
   return (
     <Frame
       title={tx('آزمایشگاه Prompt: از مبهم تا دقیق', 'Prompt lab: from vague to precise')}
+      goal={tx('Prompt صفحه منوی کافه سحر را به وضوح ۹۰٪ برسانید', "Get Café Sahar's menu-page prompt to 90% clarity")}
       hint={tx(
-        'مواد اولیه را یکی‌یکی اضافه کنید و ببینید Prompt و رفتار احتمالی Agent چطور عوض می‌شود.',
-        'Add ingredients one by one and watch the prompt, and the agent’s likely behaviour, change.',
+        'هر ماده که اضافه کنید، یک خط به Prompt اضافه می‌شود و Agent کمتر حدس می‌زند.',
+        'Each ingredient adds a line to the prompt, and the agent guesses less.',
       )}
       mood={mood}
       tint="var(--sky-soft)"
       footer={
         <>
-          <button type="button" className="btn btn--small" onClick={() => setOn(Object.fromEntries(INGREDIENTS.map((i) => [i.id, true])))}>
-            {tx('همه را اضافه کن', 'Add everything')}
-          </button>
           <button type="button" className="btn btn--small btn--ghost" onClick={() => setOn({})}>
-            {tx('برگرد به مبهم', 'Back to vague')}
+            {tx('برگشت به Prompt مبهم', 'Back to the vague prompt')}
+          </button>
+          <button type="button" className="btn btn--small btn--primary" onClick={() => setOn(Object.fromEntries(INGREDIENTS.map((i) => [i.id, true])))}>
+            {tx('اضافه کردن همه مواد', 'Add every ingredient')}
           </button>
         </>
       }
@@ -156,7 +163,7 @@ export default function PromptLab() {
             <motion.span
               initial={false}
               animate={{ transform: `scaleX(${clarity / 100})` }}
-              transition={{ duration: reduce ? 0 : 0.35, ease: EASE }}
+              transition={{ duration: reduce ? 0 : DUR.sheet, ease: EASE }}
             />
           </div>
         </div>
@@ -179,8 +186,8 @@ export default function PromptLab() {
                   initial={{ opacity: 0, transform: 'translateY(-6px)', filter: 'blur(3px)' }}
                   animate={{ opacity: 1, transform: 'translateY(0px)', filter: 'blur(0px)' }}
                   exit={{ opacity: 0, transform: 'translateY(-4px)', filter: 'blur(3px)' }}
-                  transition={{ duration: 0.25, ease: EASE }}
-                  style={!ing ? { color: 'var(--ink-3)', fontStyle: 'italic' } : undefined}
+                  transition={{ duration: DUR.ui, ease: EASE }}
+                  style={!ing ? { color: 'var(--ink-2)', fontStyle: 'italic' } : undefined}
                 >
                   {l}
                 </motion.div>

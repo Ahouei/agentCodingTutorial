@@ -1,10 +1,9 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { num, useApp, useTx } from '../../lib/app';
-import { Frame } from './Frame';
+import { DUR, EASE_OUT } from '../../lib/motion';
+import { Frame, useLab } from './Frame';
 import './set2.css';
-
-const EASE = [0.23, 1, 0.32, 1] as const;
 
 type Level = 'account' | 'zone' | 'danger';
 type Perm = {
@@ -26,6 +25,17 @@ const PERMS: Perm[] = [
     desc: ['فقط دیدن اطلاعات حساب؛ ابزارها برای پیدا کردن Account ID به آن نیاز دارند.', 'View-only account info; tools need it to find your account ID.'],
   },
   {
+    id: 'tail',
+    level: 'account',
+    name: 'Workers Tail: Read',
+    weight: 1,
+    recommended: true,
+    desc: [
+      'فقط خواندن لاگ زنده Worker؛ برای دستور npx wrangler tail هنگام پیدا کردن باگ لازم است.',
+      'Read-only live Worker logs; needed for npx wrangler tail when hunting a bug.',
+    ],
+  },
+  {
     id: 'workers',
     level: 'account',
     name: 'Workers Scripts: Edit',
@@ -39,7 +49,7 @@ const PERMS: Perm[] = [
     name: 'D1: Edit',
     weight: 6,
     recommended: true,
-    desc: ['ساختن و نوشتن در پایگاه‌داده D1؛ برای فرم تماس پروژه پایانی دوره لازم است.', 'Create and write D1 databases; the course capstone saves its contact form in D1.'],
+    desc: ['ساختن و نوشتن در Database D1؛ فرم رزرو میز کافه سحر در D1 ذخیره می‌شود.', 'Create and write D1 databases; Café Sahar saves its table bookings in D1.'],
   },
   {
     id: 'kv',
@@ -113,23 +123,28 @@ export default function TokenBuilder() {
 
   const sumLevel = (l: Level) => PERMS.filter((p) => p.level === l && on[p.id]).reduce((n, p) => n + p.weight, 0);
   const raw = sumLevel('account') * (allAccounts ? 2.2 : 1) + sumLevel('zone') * (allZones ? 2.5 : 1) + sumLevel('danger');
-  const score = Math.min(100, Math.round(raw * (expiry ? 0.85 : 1) * (ipFilter ? 0.85 : 1)));
-
   const missing = PERMS.filter((p) => p.recommended && !on[p.id]);
   const dangerOn = PERMS.some((p) => p.level === 'danger' && on[p.id]) || allZones || allAccounts;
+  // QA-03: any danger choice means a huge blast radius; expiry or an IP filter cannot talk it down.
+  const guarded = Math.min(100, Math.round(raw * (expiry ? 0.85 : 1) * (ipFilter ? 0.85 : 1)));
+  const score = dangerOn ? Math.max(90, guarded) : guarded;
   const extras = PERMS.filter((p) => !p.recommended && p.level !== 'danger' && on[p.id]);
   const perfect = missing.length === 0 && !dangerOn && extras.length === 0 && expiry;
+  const { complete } = useLab();
+  useEffect(() => {
+    if (perfect) complete();
+  }, [perfect, complete]);
 
   const verdict =
     score === 0
       ? tx('هنوز هیچ مجوزی ندارد؛ Agent با آن کاری نمی‌تواند بکند.', 'No permissions yet: the agent can do nothing with it.')
       : score <= 35
         ? tx('کوچک و مهارشده. اگر لو برود، خسارت محدود است.', 'Small and contained. If it leaks, the damage is limited.')
-        : score <= 65
+        : score <= 65 && !dangerOn
           ? tx('متوسط. ببینید همه‌ی این مجوزها واقعاً لازم‌اند؟', 'Medium. Is every one of these permissions really needed?')
           : tx('خیلی بزرگ! اگر این Token لو برود، کل حساب در خطر است.', 'Huge! If this token leaks, your whole account is at risk.');
 
-  const meterColor = score <= 35 ? 'var(--mint-ink)' : score <= 65 ? '#8a5a00' : 'var(--coral-ink)';
+  const meterColor = score <= 35 ? 'var(--mint-ink)' : score <= 65 && !dangerOn ? '#8a5a00' : 'var(--coral-ink)';
 
   const applyRecommended = () => {
     setOn({ ...RECOMMENDED });
@@ -139,48 +154,41 @@ export default function TokenBuilder() {
     setIpFilter(false);
   };
 
+  // QA-17: the whole row header is the switch (≥48px tall), the visual pill stays the same.
   const row = (p: Perm) => {
     const checked = !!on[p.id];
-    const id = `tb-${p.id}`;
     return (
       <div key={p.id} className={`tb-row ${checked ? 'is-on' : ''} ${p.level === 'danger' ? 'is-danger' : ''}`}>
-        <label htmlFor={id} style={{ cursor: 'pointer' }}>
-          <span className="tb-name">{p.name}</span>
-          {p.recommended && <span className="tb-badge">{tx('پیشنهادی', 'recommended')}</span>}
-        </label>
-        <button
-          id={id}
-          type="button"
-          role="switch"
-          aria-checked={checked}
-          className={`s2-switch ${p.level === 'danger' ? 'is-danger' : ''}`}
-          onClick={() => flip(p.id)}
-        >
-          <span className="sr-only">{p.name}</span>
+        <button type="button" role="switch" aria-checked={checked} className="tb-switch" onClick={() => flip(p.id)}>
+          <span className="tb-label">
+            <span className="tb-name">{p.name}</span>
+            {p.recommended && <span className="tb-badge">{tx('پیشنهادی', 'recommended')}</span>}
+          </span>
+          <span className={`s2-switch ${p.level === 'danger' ? 'is-danger' : ''}`} aria-hidden />
         </button>
         <p className="tb-desc">{tx(...p.desc)}</p>
       </div>
     );
   };
 
-  const toggle = ({ id, label, desc, value, set, danger }: { id: string; label: string; desc: string; value: boolean; set: (v: boolean) => void; danger?: boolean }) => (
+  const toggle = ({ label, desc, value, set, danger }: { label: string; desc: string; value: boolean; set: (v: boolean) => void; danger?: boolean }) => (
     <div className={`tb-row ${value ? 'is-on' : ''} ${danger ? 'is-danger' : ''}`}>
-      <label htmlFor={id} style={{ cursor: 'pointer', fontWeight: 800 }}>
-        {label}
-      </label>
-      <button id={id} type="button" role="switch" aria-checked={value} className={`s2-switch ${danger ? 'is-danger' : ''}`} onClick={() => set(!value)}>
-        <span className="sr-only">{label}</span>
+      <button type="button" role="switch" aria-checked={value} className="tb-switch" onClick={() => set(!value)}>
+        <span className="tb-label" style={{ fontWeight: 800 }}>
+          {label}
+        </span>
+        <span className={`s2-switch ${danger ? 'is-danger' : ''}`} aria-hidden />
       </button>
       <p className="tb-desc">{desc}</p>
     </div>
   );
 
   const summaryLines = [
-    `Token name: agent-my-site`,
+    `Token name: agent-cafe-sahar`,
     `Permissions:`,
     ...PERMS.filter((p) => on[p.id]).map((p) => `  - ${p.level === 'zone' ? 'Zone' : p.level === 'danger' ? '!!' : 'Account'} · ${p.name}`),
     `Account resources: ${allAccounts ? 'All accounts  ⚠' : 'Include · My account'}`,
-    `Zone resources:    ${allZones ? 'All zones  ⚠' : 'Include · Specific zone · my-site.com'}`,
+    `Zone resources:    ${allZones ? 'All zones  ⚠' : 'Include · Specific zone · cafe-sahar.ir'}`,
     `Client IP filter:  ${ipFilter ? 'On (only listed IPs)' : 'Off'}`,
     `TTL / expiry:      ${expiry ? 'Expires in 90 days' : 'Never expires  ⚠'}`,
   ];
@@ -188,10 +196,31 @@ export default function TokenBuilder() {
   return (
     <Frame
       title={tx('یک API Token کم‌خطر برای Agent بسازید', 'Build a low-risk API token for your agent')}
+      goal={tx('فقط مجوزهای لازم برای کافه سحر، با تاریخ انقضا', 'Only what Café Sahar needs, with an expiry date')}
       hint={tx(
-        'مجوزها را روشن و خاموش کنید و «شعاع خسارت» را ببینید: اگر این Token لو برود، چقدر از حسابتان در خطر است؟',
-        'Switch permissions on and off and watch the blast radius: if this token leaked, how much of your account would be exposed?',
+        '«شعاع خسارت» یعنی اگر این Token لو برود، چقدر از حسابتان در خطر است.',
+        'Blast radius: how much of your account is exposed if this token leaks.',
       )}
+      footer={
+        <>
+          <button
+            type="button"
+            className="btn btn--small btn--ghost"
+            onClick={() => {
+              setOn({});
+              setAllZones(false);
+              setAllAccounts(false);
+              setExpiry(false);
+              setIpFilter(false);
+            }}
+          >
+            {tx('پاک کردن همه', 'Clear all')}
+          </button>
+          <button type="button" className="btn btn--small btn--mint" onClick={applyRecommended}>
+            {tx('اعمال تنظیم پیشنهادی', 'Apply the recommended setup')}
+          </button>
+        </>
+      }
       mood={dangerOn ? 'wow' : perfect ? 'happy' : 'think'}
       tint="var(--butter-soft)"
     >
@@ -205,30 +234,12 @@ export default function TokenBuilder() {
             className="tb-meter-fill"
             initial={false}
             animate={{ transform: `scaleX(${Math.max(score, 0) / 100})` }}
-            transition={{ duration: reduce ? 0 : 0.35, ease: EASE }}
+            transition={{ duration: reduce ? 0 : DUR.sheet, ease: EASE_OUT }}
           />
         </div>
         <span className="w-muted">{verdict}</span>
       </div>
 
-      <div className="w-row" style={{ marginTop: 8 }}>
-        <button type="button" className="btn btn--small btn--mint" onClick={applyRecommended}>
-          {tx('تنظیم پیشنهادی دوره', "Use the course's recommended setup")}
-        </button>
-        <button
-          type="button"
-          className="btn btn--small btn--ghost"
-          onClick={() => {
-            setOn({});
-            setAllZones(false);
-            setAllAccounts(false);
-            setExpiry(false);
-            setIpFilter(false);
-          }}
-        >
-          {tx('پاک کردن', 'Clear')}
-        </button>
-      </div>
 
       <p className="tb-group">
         <span className="s2-dot" style={{ background: 'var(--sky)' }} aria-hidden />
@@ -236,7 +247,7 @@ export default function TokenBuilder() {
       </p>
       <div className="tb-rows">
         {PERMS.filter((p) => p.level === 'account').map((p) => row(p))}
-        {toggle({ id: 'tb-all-accounts', danger: true, label: tx('Account Resources: همه‌ی حساب‌ها', 'Account resources: all accounts'), desc: tx('بهتر است فقط حساب خودتان را انتخاب کنید.', 'Better to include only your own account.'), value: allAccounts, set: setAllAccounts })}
+        {toggle({ danger: true, label: tx('Account Resources: همه‌ی حساب‌ها', 'Account resources: all accounts'), desc: tx('بهتر است فقط حساب خودتان را انتخاب کنید.', 'Better to include only your own account.'), value: allAccounts, set: setAllAccounts })}
       </div>
 
       <p className="tb-group">
@@ -258,7 +269,7 @@ export default function TokenBuilder() {
           <p className="tb-desc">
             {allZones
               ? tx('Token به همه‌ی دامنه‌های فعلی و آینده‌ی شما دسترسی دارد. لازم نیست.', 'The token reaches every domain you have now or add later. Not needed.')
-              : tx('فقط my-site.com. اگر لو برود، بقیه دامنه‌ها امن می‌مانند.', 'Only my-site.com. If it leaks, your other domains stay safe.')}
+              : tx('فقط cafe-sahar.ir. اگر لو برود، بقیه دامنه‌ها امن می‌مانند.', 'Only cafe-sahar.ir. If it leaks, your other domains stay safe.')}
           </p>
         </div>
       </div>
@@ -268,8 +279,8 @@ export default function TokenBuilder() {
         {tx('محافظ‌های اضافه', 'Extra guards')}
       </p>
       <div className="tb-rows">
-        {toggle({ id: 'tb-expiry', label: tx('تاریخ انقضا (TTL)', 'Expiry date (TTL)'), desc: tx('Token بعد از مدتی خودش باطل می‌شود؛ قبلش یک Token تازه می‌سازید.', 'The token dies on its own after a while; you make a fresh one before then.'), value: expiry, set: setExpiry })}
-        {toggle({ id: 'tb-ip', label: tx('محدودیت IP', 'Client IP filtering'), desc: tx(
+        {toggle({ label: tx('تاریخ انقضا (TTL)', 'Expiry date (TTL)'), desc: tx('Token بعد از مدتی خودش باطل می‌شود؛ قبلش یک Token تازه می‌سازید.', 'The token dies on its own after a while; you make a fresh one before then.'), value: expiry, set: setExpiry })}
+        {toggle({ label: tx('محدودیت IP', 'Client IP filtering'), desc: tx(
             'فقط از IPهای مشخص کار می‌کند. عالی برای کامپیوتر خودتان؛ اما Agentهای ابری IP ثابت ندارند و ممکن است بلاک شوند.',
             'Works only from listed IPs. Great for your own machine, but cloud agents have no fixed IP and may get blocked.',
           ), value: ipFilter, set: setIpFilter })}
@@ -293,14 +304,14 @@ export default function TokenBuilder() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: DUR.ui, ease: EASE_OUT }}
             >
               {tx('برای پروژه دوره هنوز کم دارد: ', 'Still missing for the course project: ')}
               <span className="ltr">{missing.map((m) => m.name).join(' · ')}</span>
             </motion.p>
           )}
           {dangerOn && (
-            <motion.p key="danger" className="tb-warn" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+            <motion.p key="danger" className="tb-warn" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: DUR.ui, ease: EASE_OUT }}>
               {tx(
                 'گزینه‌ی خطرناکی روشن است. اصل «کمترین دسترسی»: فقط همان چیزی که برای این کار لازم است.',
                 'A dangerous option is on. Least privilege: give only what this job needs.',
@@ -315,7 +326,7 @@ export default function TokenBuilder() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: DUR.ui, ease: EASE_OUT }}
             >
               {tx('عالی! دقیقاً همان چیزی که پروژه لازم دارد، نه بیشتر.', 'Perfect. Exactly what the project needs, nothing more.')}
             </motion.p>

@@ -1,8 +1,9 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 import { useTx } from '../../lib/app';
+import { EASE_OUT } from '../../lib/motion';
 import { Mascot, type Mood } from '../Mascot';
-import { Frame } from './Frame';
+import { Frame, useLab } from './Frame';
 import './set1.css';
 
 type Branch = 'main' | 'feature';
@@ -58,6 +59,7 @@ export default function GitPlayground() {
   const tx = useTx();
   const [st, setSt] = useState<State>(initial);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { complete } = useLab();
 
   const { commits, head, tips } = st;
   const full = commits.length >= MAX;
@@ -121,7 +123,8 @@ export default function GitPlayground() {
       ),
     );
 
-  const merge = () =>
+  const merge = () => {
+    complete(); // a feature branch merged into main: the lab's goal
     setSt((s) => {
       const c: Commit = { id: s.commits.length, branch: 'main', parents: [s.tips.main, s.tips.feature!], msg: "Merge branch 'feature'" };
       return push(
@@ -134,6 +137,7 @@ export default function GitPlayground() {
         'happy',
       );
     });
+  };
 
   const reset = () => setSt(initial());
 
@@ -145,10 +149,12 @@ export default function GitPlayground() {
   return (
     <Frame
       title={tx('زمین بازی Git: Commit، Branch و Merge', 'Git playground: commit, branch and merge')}
-      hint={tx(
-        'چند Commit بزنید، یک شاخه بسازید، رویش کار کنید، برگردید روی main و Merge کنید.',
-        'Make a few commits, create a branch, work on it, switch back to main and merge.',
-      )}
+      goal={tx('Commit بزنید، شاخه بسازید، برگردید روی main و Merge کنید', 'Commit, branch, switch back to main and merge')}
+      footer={
+        <button type="button" className="btn btn--small btn--ghost" onClick={reset}>
+          {tx('از اول', 'Reset')}
+        </button>
+      }
       tint="var(--mint-soft)"
       mood={st.mood}
     >
@@ -182,7 +188,7 @@ export default function GitPlayground() {
                   strokeLinecap="round"
                   initial={{ pathLength: 0 }}
                   animate={{ pathLength: 1 }}
-                  transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
+                  transition={{ duration: 0.35, ease: EASE_OUT }}
                 />
               );
             }),
@@ -206,7 +212,7 @@ export default function GitPlayground() {
                 key={c.id}
                 initial={{ opacity: 0, scale: 0.6 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+                transition={{ duration: 0.3, ease: EASE_OUT }}
                 style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
               >
                 {isHead && <circle cx={xOf(c.id)} cy={yOf(c)} r={17} fill="none" stroke="var(--coral)" strokeWidth="3" />}
@@ -253,9 +259,6 @@ export default function GitPlayground() {
         <button type="button" className="btn btn--small btn--mint" onClick={merge} disabled={!canMerge}>
           {tx('Merge در main', 'Merge into main')}
         </button>
-        <button type="button" className="btn btn--small btn--ghost" onClick={reset}>
-          {tx('از اول', 'Reset')}
-        </button>
       </div>
       {hasFeature && !featureMerged && head === 'feature' && (
         <p className="w-muted" style={{ margin: '8px 0 0' }}>
@@ -277,7 +280,7 @@ export default function GitPlayground() {
               initial={{ opacity: 0, transform: 'translateY(-6px)' }}
               animate={{ opacity: 1, transform: 'translateY(0px)' }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+              transition={{ duration: 0.25, ease: EASE_OUT }}
               style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}
             >
               {i === 0 && (

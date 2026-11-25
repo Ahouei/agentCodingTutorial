@@ -4,6 +4,7 @@ import { platform } from './chapters/platform';
 import { workshop } from './chapters/workshop';
 import { building } from './chapters/building';
 import { shipping } from './chapters/shipping';
+import { beFound, comparePlatforms } from './chapters/extra';
 
 export const ACTS: Act[] = [
   {
@@ -40,7 +41,38 @@ export const ACTS: Act[] = [
   },
 ];
 
-export const CHAPTERS: Chapter[] = [...foundations, ...platform, ...workshop, ...building, ...shipping];
+const ALL: Chapter[] = [...foundations, ...platform, comparePlatforms, ...workshop, ...building, ...shipping, beFound];
+
+/** The course order. Slugs are stable; this list is the single source of order. */
+const ORDER = [
+  'welcome',
+  'how-the-web-works',
+  'domains-dns',
+  'github',
+  'cloudflare',
+  'generative-vs-agentic',
+  'meet-the-agents',
+  'compare-platforms',
+  'accounts-and-tools',
+  'connect-agent',
+  'project-brief',
+  'prompts-and-skills',
+  'design-first',
+  'vibe-coding-loop',
+  'testing-debugging',
+  'cicd-deploy',
+  'custom-domain',
+  'be-found',
+  'security-maintenance',
+  'hero',
+];
+
+export const CHAPTERS: Chapter[] = ORDER.map((slug) => {
+  const c = ALL.find((x) => x.slug === slug);
+  if (!c) throw new Error(`Missing chapter: ${slug}`);
+  return c;
+});
+if (CHAPTERS.length !== ALL.length) throw new Error('A chapter exists that is not placed in ORDER');
 
 export function chapterIndex(slug: string): number {
   return CHAPTERS.findIndex((c) => c.slug === slug);

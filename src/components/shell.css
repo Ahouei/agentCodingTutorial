@@ -50,7 +50,7 @@
   height: 44px;
   border-radius: 14px;
   background: var(--butter-soft);
-  border: 1.5px solid var(--ink);
+  border: 1.5px solid var(--outline);
   padding-top: 3px;
   flex: none;
   transition: transform 200ms var(--ease-out);
@@ -184,7 +184,7 @@
   height: 9px;
   border-radius: 50%;
   background: var(--mint);
-  border: 1.5px solid var(--ink);
+  border: 1.5px solid var(--outline);
   flex: none;
 }
 .hero-title {
@@ -197,7 +197,7 @@
 .hero-hl {
   position: relative;
   display: inline-block;
-  color: var(--coral);
+  color: var(--ink);
 }
 .hero-hl svg {
   position: absolute;
@@ -281,7 +281,7 @@
   height: 38px;
   border-radius: 50%;
   background: var(--blush);
-  border: 1.5px solid var(--ink);
+  border: 1.5px solid var(--outline);
   font-size: 12px;
   font-weight: 900;
   color: #2a211b;
@@ -294,7 +294,7 @@
   border-radius: 18px;
   border-end-end-radius: 5px;
   background: var(--coral-soft);
-  border: 1.5px solid var(--ink);
+  border: 1.5px solid var(--outline);
   line-height: 1.75;
   font-size: 15.5px;
 }
@@ -353,7 +353,7 @@
   border-radius: 50%;
   background: var(--mint);
   color: #1d3a2c;
-  border: 1.5px solid var(--ink);
+  border: 1.5px solid var(--outline);
 }
 .story-thinking {
   margin: 0;
@@ -393,7 +393,7 @@
 }
 .story-site {
   border-radius: 20px;
-  border: var(--stroke) solid var(--ink);
+  border: var(--stroke) solid var(--outline);
   overflow: hidden;
   background: #fffaf2;
   color: #2a211b;
@@ -488,7 +488,7 @@
   padding: 16px;
   border-radius: var(--r-md);
   background: var(--card);
-  border: var(--stroke) solid var(--ink);
+  border: var(--stroke) solid var(--outline);
   box-shadow: var(--sticker-sm);
   line-height: 1.6;
 }
@@ -508,7 +508,7 @@
   margin-bottom: 6px;
   border-radius: 11px;
   background: var(--tint);
-  border: 1.5px solid var(--ink);
+  border: 1.5px solid var(--outline);
   font-weight: 900;
   color: #2a211b;
 }
@@ -576,7 +576,7 @@
   border-radius: var(--r-lg);
   background: var(--tint);
   color: #2a211b;
-  border: var(--stroke) solid var(--ink);
+  border: var(--stroke) solid var(--outline);
   box-shadow: var(--sticker);
 }
 .map-gate h3 {
@@ -624,7 +624,7 @@
   border-radius: 50%;
   background: var(--tint);
   color: #2a211b;
-  border: var(--stroke) solid var(--ink);
+  border: var(--stroke) solid var(--outline);
   box-shadow: var(--sticker-sm);
 }
 .map-stop.is-done .map-node {
@@ -678,7 +678,7 @@
   border-radius: 999px;
   background: var(--mint);
   color: #1d3a2c;
-  border: 1.5px solid var(--ink);
+  border: 1.5px solid var(--outline);
   font-size: 12px;
   font-weight: 900;
   transform: rotate(3deg);
@@ -783,4 +783,88 @@
 .b-code-cap .inline-code {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.14);
+}
+
+/* Hero progress line + resume (RD-02) */
+.hero-track.is-rtl {
+  transform: scaleX(-1);
+}
+.hero-progress-note {
+  margin: 14px 0 0;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+.hero-resume {
+  display: inline-grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 10px 16px 10px 12px;
+  max-width: 100%;
+  border-radius: 18px;
+  border: var(--stroke) solid var(--outline);
+  background: var(--butter-soft);
+  text-decoration: none;
+  box-shadow: var(--sticker-sm);
+  transition: transform 160ms var(--ease-out), box-shadow 160ms var(--ease-out);
+}
+.hero-resume b {
+  display: block;
+  line-height: 1.5;
+}
+.hero-resume small {
+  color: var(--ink-2);
+  font-size: 13.5px;
+}
+.hero-resume:active {
+  transform: scale(0.98);
+}
+@media (hover: hover) and (pointer: fine) {
+  .hero-resume:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--sticker);
+  }
+}
+
+/* Header: on phones, secondary controls live in one sheet */
+.hd-more {
+  display: none;
+}
+@media (max-width: 560px) {
+  .hd-extra {
+    display: none;
+  }
+  .hd-more {
+    display: grid;
+  }
+}
+.hd-sheet {
+  display: grid;
+  gap: 8px;
+  padding-bottom: 6px;
+}
+.hd-sheet-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 52px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1.5px solid var(--line);
+  background: var(--paper);
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  text-align: start;
+  transition: border-color 150ms ease;
+}
+.hd-sheet-row:active {
+  transform: scale(0.99);
+}
+@media (hover: hover) and (pointer: fine) {
+  .hd-sheet-row:hover {
+    border-color: var(--ink);
+  }
 }
