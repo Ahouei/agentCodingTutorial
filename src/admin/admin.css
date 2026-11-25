@@ -830,3 +830,26 @@
   display: flex;
   gap: 4px;
 }
+.adm-picker {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.adm-picker select {
+  max-width: 340px;
+}
+.adm-price {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+.adm-price .adm-input--sm {
+  width: 72px;
+}
+.adm-key small.adm-error {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  word-break: break-word;
+}

@@ -9,6 +9,7 @@
  */
 import meta from './meta.json';
 import { handleApi, type Env as ApiEnv } from './api';
+import { syncAll } from './ai/registry';
 
 export interface Env extends ApiEnv {
   ASSETS: Fetcher;
@@ -112,11 +113,11 @@ async function html(request: Request, env: Env, url: URL) {
 }
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
     if (url.pathname.startsWith('/api/')) {
-      const res = await handleApi(request, env, url);
+      const res = await handleApi(request, env, url, ctx);
       const h = secure(new Headers(res.headers));
       if (!h.has('Cache-Control')) h.set('Cache-Control', 'no-store');
       return new Response(res.body, { status: res.status, headers: h });
@@ -136,5 +137,9 @@ export default {
 
     if (request.method !== 'GET' && request.method !== 'HEAD') return new Response('Method not allowed', { status: 405 });
     return html(request, env, url);
+  },
+  // Twice a day: refresh the AI model registry from every provider that has a key (llm-provider-registry).
+  async scheduled(_event: ScheduledController, env: Env, ctx: ExecutionContext) {
+    if (env.DB) ctx.waitUntil(syncAll(env.DB, env).then(() => undefined));
   },
 } satisfies ExportedHandler<Env>;

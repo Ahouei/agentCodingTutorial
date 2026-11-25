@@ -15,6 +15,7 @@ import { json, roleOf, sameOrigin, sessionUser, type Env, type Role } from './ap
 import { clean, defaults, emailDayKey, readSettings, SETTING_DEFS, SETTING_KEYS } from './settings';
 import { DEFAULT_AI, evictAi, hasKey, PROVIDERS, readAi, sanitizeAi } from './ai/config';
 import { DEFAULT_PERSONA, generate, poolKeyOf, promptVersion, storeLines, topic } from './ai/bit';
+import { catalogueIsStale, catalogueStatus, isRegistered, listModels, syncAll } from './ai/registry';
 
 type Actor = { id: string; email: string; role: Role };
 const DAY = 24 * 3600 * 1000;
@@ -88,7 +89,7 @@ function cleanAnnouncement(b: Record<string, unknown>) {
 
 /* ───────────── Router ───────────── */
 
-export async function handleAdmin(r: Request, env: Env, db: D1Database, url: URL): Promise<Response> {
+export async function handleAdmin(r: Request, env: Env, db: D1Database, url: URL, ctx?: ExecutionContext): Promise<Response> {
   const path = url.pathname.slice('/api/admin'.length); // e.g. /overview
   const s = await sessionUser(r, env, false);
   if (!s) return json({ error: 'signed_out' }, 401);
@@ -442,6 +443,8 @@ export async function handleAdmin(r: Request, env: Env, db: D1Database, url: URL
     if (!b || typeof b.config !== 'object' || !b.config) return ok({ error: 'bad_request' }, 400);
     const { config, rejected } = sanitizeAi(b.config);
     if (rejected.length) return ok({ error: 'invalid', fields: rejected }, 400);
+    // The chain may only name models that are active rows in the registry (never a free string).
+    for (const c of config.chain) if (!(await isRegistered(db, c.provider, c.model))) return ok({ error: 'unknown_model', model: `${c.provider}/${c.model}` }, 400);
     const before = await readAi(db);
     const diff: Record<string, unknown> = {};
     for (const k of Object.keys(config) as (keyof typeof config)[]) {
@@ -459,6 +462,31 @@ export async function handleAdmin(r: Request, env: Env, db: D1Database, url: URL
     }
     return ok({ ok: true, config, changed: Object.keys(diff), promptVersion: promptVersion(config) });
   }
+  /* Model registry: the picker's source. Stale-on-read refresh runs after the response. */
+  if (path === '/ai/models' && r.method === 'GET') {
+    const [models, status] = await Promise.all([listModels(db), catalogueStatus(db)]);
+    if (ctx && (await catalogueIsStale(db, env))) ctx.waitUntil(syncAll(db, env).catch(() => undefined));
+    return ok({ models, status, keys: Object.fromEntries(PROVIDERS.map((p) => [p, hasKey(env, p)])) });
+  }
+  if (path === '/ai/models/sync' && r.method === 'POST') {
+    const providers = await syncAll(db, env);
+    await audit(db, me, 'ai.models_sync', 'ai_models', 'all', Object.fromEntries(providers.map((p) => [p.provider, p.skipped ? 'no key' : p.error ?? `+${p.added} ~${p.updated} -${p.deactivated}`])));
+    return ok({ providers, models: await listModels(db), status: await catalogueStatus(db) });
+  }
+  if (path === '/ai/models/price' && r.method === 'PUT') {
+    const b = await body(r);
+    const provider = typeof b?.provider === 'string' ? b.provider : '';
+    const model = typeof b?.model === 'string' ? b.model : '';
+    const pin = typeof b?.in === 'number' && b.in >= 0 && b.in <= 500 ? Math.round(b.in * 1000) / 1000 : null;
+    const pout = typeof b?.out === 'number' && b.out >= 0 && b.out <= 2000 ? Math.round(b.out * 1000) / 1000 : null;
+    if (!provider || !model || pin === null || pout === null) return ok({ error: 'bad_request' }, 400);
+    const before = await db.prepare('SELECT price_in, price_out FROM ai_models WHERE provider = ?1 AND model_id = ?2').bind(provider, model).first<{ price_in: number | null; price_out: number | null }>();
+    if (!before) return ok({ error: 'not_found' }, 404);
+    await db.prepare('UPDATE ai_models SET price_in = ?3, price_out = ?4 WHERE provider = ?1 AND model_id = ?2').bind(provider, model, pin, pout).run();
+    await audit(db, me, 'ai.model_price', 'ai_models', `${provider}/${model}`, { in: { from: before.price_in, to: pin }, out: { from: before.price_out, to: pout } });
+    return ok({ ok: true });
+  }
+
   if (path === '/ai/lines' && r.method === 'GET') {
     const cfg = await readAi(db);
     const slug = url.searchParams.get('slug') ?? '';

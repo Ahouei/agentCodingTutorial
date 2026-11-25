@@ -128,7 +128,7 @@ function continuePage(token: string, fa: boolean, error?: string) {
   );
 }
 
-export async function handleApi(r: Request, env: Env, url: URL): Promise<Response> {
+export async function handleApi(r: Request, env: Env, url: URL, ctx?: ExecutionContext): Promise<Response> {
   const path = url.pathname;
 
   if (path === '/api/config' && r.method === 'GET') {
@@ -155,7 +155,7 @@ export async function handleApi(r: Request, env: Env, url: URL): Promise<Respons
   if (!enabled(env) || !env.DB) return json({ error: 'accounts_unavailable' }, 503);
   const db = env.DB;
 
-  if (path.startsWith('/api/admin/')) return handleAdmin(r, env, db, url);
+  if (path.startsWith('/api/admin/')) return handleAdmin(r, env, db, url, ctx);
 
   // ── Start sign-in: Turnstile + rate limits + email the link ──
   if (path === '/api/auth/start' && r.method === 'POST') {
