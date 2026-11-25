@@ -6,13 +6,29 @@ export const foundations: Chapter[] = [
     slug: 'welcome',
     act: 1,
     icon: 'spark',
-    voice: '/audio/voice1.mp3',
+    voice: {
+      src: '/audio/voice1.mp3',
+      from: 0,
+      to: 182,
+      transcript:
+        'سلام و صبح بخیر. قرار است یک سری پروژه را راه‌اندازی کنیم: یک وب‌سایت، یک Web App یا فراتر از آن. تمرکز روی این است که این پروژه‌ها به وسیله یک AI Agent و با رویکرد Vibe Coding انجام شوند، نه الزاماً با دانش عمیق برنامه‌نویسی یا طراحی. در گذشته، وب‌سایتی که از یک حدی بزرگ‌تر بود چند تخصص لازم داشت: یکی طراحی‌اش کند، یکی Frontend را اجرا کند، یکی Backend را، یکی آن را روی سرور Deploy کند، یکی SEO کند و یکی پشتیبانی. امروز همه این کارها را یک نفر می‌تواند بر عهده بگیرد: دوست عزیز و متخصص‌مان، AI. ولی هنوز یک سری زیرساخت هست که آدم‌ها باید خودشان سراغش بروند.',
+    },
     title: { fa: 'سلام! از صفر تا قهرمان', en: 'Hello! From zero to hero' },
     tagline: {
       fa: 'قرار است با یک AI Agent، سایت واقعی بسازید و منتشر کنید',
       en: 'You are about to build and publish real websites with an AI agent',
     },
-    minutes: 8,
+    minutes: 16,
+    mission: {
+      outcome: {
+        fa: 'بعد از این فصل می‌دانید در این دوره چه می‌سازید، نقش شما و نقش Agent چیست و هر فصل را چطور بخوانید.',
+        en: "After this chapter you know what you'll build in this course, what your role and the agent's role are, and how to work through each chapter.",
+      },
+      cafe: {
+        fa: 'ایده کافه سحر روی کاغذ می‌آید: منو، ساعت کاری و رزرو میز، روی دامنه خودش.',
+        en: "Café Sahar's idea gets written down: a menu, opening hours and table booking, on its own domain.",
+      },
+    },
     mascotLine: {
       fa: 'سلام! من «بیت» هستم، همسفر کوچک شما. قول می‌دهم آخر این مسیر، سایت خودتان را روی دامنه خودتان ببینیم.',
       en: "Hi! I'm Bit, your tiny travel buddy. By the end of this trip, we'll see your own site live on your own domain.",
@@ -25,7 +41,7 @@ export const foundations: Chapter[] = [
           {
             type: 'p',
             text: {
-              fa: 'این دوره برای کسی است که یک ایده دارد (یک وبسایت شخصی، یک فروشگاه کوچک، یک Web App برای کار خودش یا مشتری‌اش) ولی **برنامه‌نویس، طراح یا مدیر سرور نیست**. هدف این است که در پایان مسیر بتوانید با کمک یک AI Agent، یک پروژه واقعی را از ایده تا انتشار روی دامنه اختصاصی جلو ببرید و بعد هم نگهش دارید.',
+              fa: 'این دوره برای کسی است که یک ایده دارد (یک وب‌سایت شخصی، یک فروشگاه کوچک، یک Web App برای کار خودش یا مشتری‌اش) ولی **برنامه‌نویس، طراح یا مدیر سرور نیست**. هدف این است که در پایان مسیر بتوانید با کمک یک AI Agent، یک پروژه واقعی را از ایده تا انتشار روی دامنه اختصاصی جلو ببرید و بعد هم نگهش دارید.',
               en: "This course is for anyone with an idea (a personal site, a small shop, a web app for their own work or a client) who is **not a programmer, designer or server admin**. By the end, you'll be able to take a real project from idea to a live site on your own domain with an AI agent, and keep it running afterwards.",
             },
           },
@@ -40,7 +56,7 @@ export const foundations: Chapter[] = [
             type: 'list',
             items: [
               {
-                fa: 'بفهمید یک وبسایت از چه قطعه‌هایی ساخته شده: Frontend، Backend، Database، Hosting، Domain و DNS.',
+                fa: 'بفهمید یک وب‌سایت از چه قطعه‌هایی ساخته شده: Frontend، Backend، Database، Hosting، Domain و DNS.',
                 en: 'Understand the pieces a website is made of: frontend, backend, database, hosting, domain and DNS.',
               },
               {
@@ -66,7 +82,7 @@ export const foundations: Chapter[] = [
           {
             type: 'p',
             text: {
-              fa: 'تا همین چند سال پیش، ساختن یک وبسایت که از یک حدی بزرگ‌تر بود چند تخصص لازم داشت: یک نفر **طراحی** می‌کرد، یک نفر **Frontend** را پیاده می‌کرد، یک نفر **Backend** را می‌نوشت، یک نفر سایت را روی سرور **Deploy** می‌کرد، یک نفر **SEO** انجام می‌داد و یک نفر هم **پشتیبانی** می‌کرد. هر کدام از این‌ها یک شغل محترم و جدی است.',
+              fa: 'تا همین چند سال پیش، ساختن یک وب‌سایت که از یک حدی بزرگ‌تر بود چند تخصص لازم داشت: یک نفر **طراحی** می‌کرد، یک نفر **Frontend** را پیاده می‌کرد، یک نفر **Backend** را می‌نوشت، یک نفر سایت را روی سرور **Deploy** می‌کرد، یک نفر **SEO** انجام می‌داد و یک نفر هم **پشتیبانی** می‌کرد. هر کدام از این‌ها یک شغل محترم و جدی است.',
               en: 'Until a few years ago, building any website beyond a certain size took several specialists: someone **designed** it, someone built the **frontend**, someone wrote the **backend**, someone **deployed** it to a server, someone handled **SEO**, and someone did **support**. Each of these is a real, respected profession.',
             },
           },
@@ -174,6 +190,47 @@ export const foundations: Chapter[] = [
             ],
           },
           {
+            type: 'h',
+            text: { fa: 'دو مسیر ساخت: Codex یا Lovable', en: 'Two ways to build: Codex or Lovable' },
+          },
+          {
+            type: 'p',
+            text: {
+              fa: 'در همه دوره، پروژه اصلی ما **کافه سحر** (`cafe-sahar.ir`) است و آن را با یکی از دو مسیر می‌سازیم. هر جا قدم‌ها فرق کند، فصل هر دو مسیر را نشان می‌دهد؛ مسیری که انتخاب کنید در همه فصل‌ها یادتان می‌ماند و هر وقت خواستید می‌توانید عوضش کنید.',
+              en: "Throughout the course our main project is **Café Sahar** (`cafe-sahar.ir`), and we build it along one of two paths. Wherever the steps differ, the chapter shows both paths; the one you pick is remembered across chapters, and you can switch any time.",
+            },
+          },
+          {
+            type: 'path',
+            codex: [
+              {
+                type: 'p',
+                text: {
+                  fa: '**مسیر Codex**: یک Agent برنامه‌نویس از OpenAI که روی **Repository** شما در GitHub کار می‌کند؛ کد را می‌نویسد، تست می‌کند و تغییرات را برای بازبینی شما می‌فرستد. کد و میزبانی کاملاً دست خودتان است و سایت را روی Cloudflare منتشر می‌کنیم. وقتی کنترل دقیق، مالکیت کامل کد و پروژه‌ای می‌خواهید که با شما بزرگ شود، این مسیر مناسب است.',
+                  en: "**The Codex path**: a coding agent from OpenAI that works on your **repository** on GitHub; it writes the code, tests it and sends changes for you to review. The code and the hosting stay fully yours, and we publish the site on Cloudflare. Pick it when you want precise control, full ownership of the code and a project that can grow with you.",
+                },
+              },
+            ],
+            lovable: [
+              {
+                type: 'p',
+                text: {
+                  fa: '**مسیر Lovable**: یک سازنده اپ با AI در مرورگر. در چت توضیح می‌دهید، Lovable اپ را می‌سازد و همان لحظه Preview آن را می‌بینید؛ Backend داخلی، تاریخچه نسخه‌ها و انتشار با یک دکمه دارد. کد را می‌توانید با GitHub همگام کنید و بعداً روی Cloudflare هم منتشر کنید. وقتی می‌خواهید خیلی سریع به یک نسخه قابل‌دیدن برسید و کمتر درگیر ابزارها شوید، این مسیر مناسب است.',
+                  en: "**The Lovable path**: an AI app builder in the browser. You describe what you want in chat, Lovable builds the app and you see a live preview right away; it has a built-in backend, version history and one-click publishing. You can sync the code to GitHub and later publish it on Cloudflare too. Pick it when you want to reach something visible fast, with less tooling to manage.",
+                },
+              },
+            ],
+          },
+          {
+            type: 'callout',
+            tone: 'warn',
+            title: { fa: 'دسترسی و پرداخت', en: 'Access and payment' },
+            text: {
+              fa: 'دسترسی به هر دو سرویس به کشور محل زندگی و روش پرداخت شما بستگی دارد. در فصل مقایسه ابزارها می‌بینیم هر کدام کجا در دسترس است و اگر یکی در دسترس نبود، چه گزینه‌های جایگزینی دارید.',
+              en: "Access to both services depends on where you live and how you can pay. In the tools comparison chapter we look at where each one is available, and what to use instead if one isn't.",
+            },
+          },
+          {
             type: 'terms',
             items: [
               {
@@ -203,8 +260,8 @@ export const foundations: Chapter[] = [
             type: 'prompt',
             title: { fa: 'اولین گفت‌وگو با Agent', en: 'Your first chat with an agent' },
             text: {
-              fa: 'من می‌خواهم با کمک تو یک وبسایت بسازم ولی برنامه‌نویس نیستم. قبل از هر کاری، با چند سؤال کوتاه از من بپرس: هدف سایت چیست، مخاطبش کیست، چه صفحه‌هایی لازم دارد و چه حس و ظاهری باید داشته باشد. هنوز هیچ کدی ننویس؛ فقط در آخر یک خلاصه یک‌صفحه‌ای از پروژه به من بده تا تأییدش کنم.',
-              en: "I want to build a website with your help, but I'm not a programmer. Before anything else, ask me a few short questions: what the site is for, who it's for, which pages it needs, and how it should look and feel. Don't write any code yet; at the end, give me a one-page summary of the project for me to approve.",
+              fa: 'می‌خواهم با کمک تو برای کافه‌ام، «کافه سحر»، یک وب‌سایت بسازم: منو، ساعت کاری و رزرو میز، روی دامنه `cafe-sahar.ir`. برنامه‌نویس نیستم. قبل از هر کاری، با چند سؤال کوتاه از من بپرس: هدف سایت چیست، مخاطبش کیست، چه صفحه‌هایی لازم دارد و چه حس و ظاهری باید داشته باشد. هنوز هیچ کدی ننویس؛ فقط در آخر یک خلاصه یک‌صفحه‌ای از پروژه به من بده تا تأییدش کنم.',
+              en: "I want to build a website for my café, Café Sahar, with your help: a menu, opening hours and table booking, on the domain `cafe-sahar.ir`. I'm not a programmer. Before anything else, ask me a few short questions: what the site is for, who it's for, which pages it needs, and how it should look and feel. Don't write any code yet; at the end, give me a one-page summary of the project for me to approve.",
             },
           },
           {
@@ -214,15 +271,22 @@ export const foundations: Chapter[] = [
               en: 'In vibe coding, what is your main role?',
             },
             options: [
-              { fa: 'نوشتن تک‌تک خط‌های کد', en: 'Typing every line of code' },
-              { fa: 'تعیین جهت، بازبینی خروجی و تصمیم‌گیری', en: 'Setting direction, reviewing output and making decisions' },
-              { fa: 'هیچ؛ Agent همه چیز را خودش درست انجام می‌دهد', en: 'Nothing; the agent gets everything right on its own' },
+              { fa: 'تایپ کردن تک‌تک خط‌های کد با دست خودتان', en: 'Typing every line of code by hand yourself' },
+              { fa: 'سپردن کامل کار و پذیرفتن هر خروجی', en: 'Handing over everything, accepting all output' },
+              { fa: 'فقط انتخاب مدل هوش مصنوعی و تنظیماتش', en: 'Only picking the AI model and its settings' },
+              { fa: 'تعیین جهت، بازبینی خروجی و تصمیم نهایی', en: 'Setting direction, reviewing and deciding' },
             ],
-            answer: 1,
+            answer: 3,
             explain: {
-              fa: 'Agent کار اجرایی را انجام می‌دهد، ولی هدف، معیار «خوب» و تأیید نهایی با شماست. خروجی بدون بازبینی، همان دام اول است.',
-              en: "The agent does the hands-on work, but the goal, the definition of 'good' and the final approval are yours. Unreviewed output is trap number one.",
+              fa: 'Agent کار اجرایی را انجام می‌دهد، ولی هدف، معیار «خوب» و تأیید نهایی با شماست.',
+              en: "The agent does the hands-on work, but the goal, the definition of 'good' and the final approval are yours.",
             },
+            why: [
+              { fa: 'Agent کد را می‌نویسد؛ کار شما هدایت و بازبینی است، نه تایپ.', en: 'The agent writes the code; your job is steering and review, not typing.' },
+              { fa: 'Agent اشتباه می‌کند؛ خروجی بدون بازبینی همان دام اول است.', en: 'Agents make mistakes; unreviewed output is trap number one.' },
+              { fa: 'مدل مهم است، ولی هدف و معیار «خوب» را باید خودتان تعیین کنید.', en: "The model matters, but you still define the goal and what 'good' means." },
+              { fa: 'درست است: هدف، معیار کیفیت و تأیید نهایی با شماست.', en: 'Right: the goal, the quality bar and the final approval are yours.' },
+            ],
           },
           {
             type: 'links',
@@ -236,7 +300,7 @@ export const foundations: Chapter[] = [
       },
     ],
     connects: {
-      fa: 'این فصل نقشه کلی سفر بود. در فصل بعد از پایه شروع می‌کنیم: وقتی یک آدرس را در مرورگر تایپ می‌کنید، واقعاً چه اتفاقی می‌افتد و یک وبسایت از چه لایه‌هایی ساخته شده است.',
+      fa: 'این فصل نقشه کلی سفر بود. در فصل بعد از پایه شروع می‌کنیم: وقتی یک آدرس را در مرورگر تایپ می‌کنید، واقعاً چه اتفاقی می‌افتد و یک وب‌سایت از چه لایه‌هایی ساخته شده است.',
       en: "This chapter was the big-picture map. Next we start from the ground: what really happens when you type an address into a browser, and which layers a website is built from.",
     },
     takeaways: [
@@ -252,13 +316,50 @@ export const foundations: Chapter[] = [
     slug: 'how-the-web-works',
     act: 1,
     icon: 'globe',
-    voice: '/audio/voice1.mp3',
+    voice: {
+      src: '/audio/voice2.mp3',
+      from: 0,
+      to: 130,
+      transcript:
+        'برای اینکه یک وب‌سایت راه بیندازید، طبیعتاً یک سری زیرساخت نرم‌افزاری روی سرور هم نیاز دارید. بسته به کارکرد، طراحی و امکانات وب‌سایت، این می‌تواند فقط یک Web Server باشد که یک One Page یا Static وب‌سایت را Host کند و فقط آن را Load کند. می‌تواند Front-end وب‌سایت را Load کند، Back-end وب‌سایت را هم با هر تکنولوژی، زبان یا Framework‌ی که هست. و خیلی وقت‌ها هم وب‌سایت شما مشخصاً به یک Database نیاز دارد. این حالت‌های ساده وب‌سایت است، تا چیزهای بیشتری که یک وب‌سایت به‌خاطر سرویس‌هایی که ارائه می‌دهد ممکن است لازم داشته باشد.',
+    },
     title: { fa: 'وب چطور کار می‌کند؟', en: 'How the web works' },
     tagline: {
       fa: 'از تایپ یک آدرس تا دیدن صفحه: Frontend، Backend، Database و Hosting',
       en: 'From typing an address to seeing a page: frontend, backend, database and hosting',
     },
-    minutes: 12,
+    minutes: 21,
+    mission: {
+      outcome: {
+        fa: 'بعد از این فصل می‌دانید وقتی آدرسی را باز می‌کنید چه اتفاقی می‌افتد و هر سایت به کدام لایه‌ها نیاز دارد: Frontend، Backend، Database و Hosting.',
+        en: 'After this chapter you know what happens when you open an address, and which layers a site needs: frontend, backend, database and hosting.',
+      },
+      cafe: {
+        fa: 'می‌دانیم کافه سحر چه قطعه‌هایی لازم دارد: صفحه‌های ثابت برای منو و ساعت کاری، و یک Backend کوچک برای رزرو میز.',
+        en: 'We know which parts Café Sahar needs: static pages for the menu and hours, plus a small backend for table bookings.',
+      },
+    },
+    warmup: {
+      q: {
+        fa: 'از فصل قبل: کدام کار حتی با یک Agent خوب هم با خود شماست؟',
+        en: 'From the last chapter: which job stays yours even with a good agent?',
+      },
+      options: [
+        { fa: 'نوشتن دستی سخت‌ترین بخش‌های کد', en: 'Hand-writing the hardest parts of the code' },
+        { fa: 'تأیید نهایی و تعیین معیار «خوب»', en: "Final approval and defining what's good" },
+        { fa: 'فقط انتخاب رنگ دکمه‌ها و فونت‌ها', en: 'Only choosing button colours and fonts' },
+      ],
+      answer: 1,
+      explain: {
+        fa: 'Agent کار اجرایی را انجام می‌دهد؛ هدف، کیفیت و تأیید با شماست.',
+        en: 'The agent does the hands-on work; the goal, quality and sign-off are yours.',
+      },
+      why: [
+        { fa: 'Agent بخش‌های سخت کد را هم می‌نویسد؛ لازم نیست خودتان بنویسید.', en: "The agent writes the hard parts too; you don't have to." },
+        { fa: 'درست است: هدف، معیار کیفیت و تأیید نهایی با شماست.', en: 'Right: the goal, the quality bar and the sign-off are yours.' },
+        { fa: 'ظاهر مهم است، ولی نقش شما خیلی بزرگ‌تر از رنگ و فونت است.', en: 'Looks matter, but your role is far bigger than colours and fonts.' },
+      ],
+    },
     mascotLine: {
       fa: 'بیایید یک درخواست کوچک را دنبال کنیم و ببینیم از مرورگر تا سرور و برگشت، کجاها می‌رود!',
       en: "Let's follow one little request and see everywhere it travels, from your browser to a server and back!",
@@ -281,8 +382,8 @@ export const foundations: Chapter[] = [
               {
                 title: { fa: 'تایپ آدرس', en: 'You type a URL' },
                 text: {
-                  fa: 'مثلاً `https://example.com/about`. این آدرس می‌گوید با چه پروتکلی، از کدام دامنه، کدام صفحه را می‌خواهید.',
-                  en: 'For example `https://example.com/about`. It says which protocol, which domain, and which page you want.',
+                  fa: 'مثلاً `https://cafe-sahar.ir/menu`. این آدرس می‌گوید با چه پروتکلی، از کدام دامنه، کدام صفحه را می‌خواهید.',
+                  en: 'For example `https://cafe-sahar.ir/menu`. It says which protocol, which domain, and which page you want.',
                 },
               },
               {
@@ -460,26 +561,33 @@ export const foundations: Chapter[] = [
             type: 'prompt',
             title: { fa: 'از Agent بخواهید معماری را توضیح دهد', en: 'Ask your agent to explain the architecture' },
             text: {
-              fa: 'می‌خواهم این سایت را بسازم: [ایده‌تان را در یک یا دو جمله بنویسید]. قبل از نوشتن کد، به زبان ساده بگو: آیا این پروژه می‌تواند استاتیک باشد یا Backend لازم دارد؟ اگر Backend لازم است، دقیقاً برای کدام قابلیت؟ آیا Database لازم دارد و چه داده‌ای در آن ذخیره می‌شود؟ ساده‌ترین معماری ممکن را پیشنهاد بده و دلیل هر لایه را توضیح بده.',
-              en: "I want to build this site: [describe your idea in one or two sentences]. Before writing any code, explain in plain language: can this project be static, or does it need a backend? If it needs a backend, for which feature exactly? Does it need a database, and what data would live there? Propose the simplest architecture that works and explain why each layer is there.",
+              fa: 'می‌خواهم این سایت را بسازم: وب‌سایت «کافه سحر» با منو، ساعت کاری و فرم رزرو میز، روی دامنه `cafe-sahar.ir`. قبل از نوشتن کد، به زبان ساده بگو: آیا این پروژه می‌تواند استاتیک باشد یا Backend لازم دارد؟ اگر Backend لازم است، دقیقاً برای کدام قابلیت؟ آیا Database لازم دارد و چه داده‌ای در آن ذخیره می‌شود؟ ساده‌ترین معماری ممکن را پیشنهاد بده و دلیل هر لایه را توضیح بده.',
+              en: "I want to build this site: a website for Café Sahar with a menu, opening hours and a table booking form, on the domain `cafe-sahar.ir`. Before writing any code, explain in plain language: can this project be static, or does it need a backend? If it needs a backend, for which feature exactly? Does it need a database, and what data would live there? Propose the simplest architecture that works and explain why each layer is there.",
             },
           },
           {
             type: 'quiz',
             q: {
-              fa: 'یک وبسایت رزومه شخصی با چند صفحه ثابت و یک لینک ایمیل، حداقل به چه چیزی نیاز دارد؟',
-              en: 'A personal résumé site with a few fixed pages and an email link needs, at minimum:',
+              fa: 'نسخه اول سایت کافه سحر فقط منو و ساعت کاری را نشان می‌دهد (هنوز رزرو ندارد). حداقل به چه چیزی نیاز دارد؟',
+              en: "The first version of Café Sahar's site only shows the menu and opening hours (no booking yet). What does it need, at minimum?",
             },
             options: [
-              { fa: 'Frontend، Backend و Database', en: 'A frontend, a backend and a database' },
-              { fa: 'فقط فایل‌های استاتیک و یک جای Hosting', en: 'Just static files and somewhere to host them' },
-              { fa: 'یک VPS اختصاصی با Nginx', en: 'A dedicated VPS running Nginx' },
+              { fa: 'فایل‌های استاتیک و یک جای Hosting', en: 'Static files and somewhere to host them' },
+              { fa: 'Frontend به‌همراه Backend و Database', en: 'A frontend plus a backend and a database' },
+              { fa: 'یک VPS اختصاصی که Nginx دارد', en: 'A dedicated VPS with Nginx running on it' },
+              { fa: 'یک Backend که صفحه‌ها را بسازد', en: 'A backend that builds every page live' },
             ],
-            answer: 1,
+            answer: 0,
             explain: {
-              fa: 'محتوای ثابت را بدون Backend و Database هم می‌شود سرو کرد. لینک ایمیل (`mailto:`) هم کار Frontend است. افزودن لایه‌های بیشتر فقط هزینه و پیچیدگی می‌آورد.',
-              en: "Fixed content can be served with no backend or database. An email link (`mailto:`) is plain frontend. Extra layers would only add cost and complexity.",
+              fa: 'محتوای ثابت را بدون Backend و Database هم می‌شود سرو کرد؛ لایه بیشتر فقط هزینه و پیچیدگی می‌آورد.',
+              en: 'Fixed content can be served with no backend or database; extra layers only add cost and complexity.',
             },
+            why: [
+              { fa: 'درست است: محتوای ثابت بدون Backend و Database هم سرو می‌شود.', en: 'Right: fixed content is served without a backend or database.' },
+              { fa: 'Backend و Database برای ذخیره رزروها لازم می‌شوند، نه برای نمایش منو.', en: 'A backend and database are needed to save bookings, not to show a menu.' },
+              { fa: 'شدنی است، ولی نگهداری سرور برای چند صفحه ثابت دردسر اضافه است.', en: 'Possible, but running a server for a few fixed pages is extra hassle.' },
+              { fa: 'صفحه‌ای که تغییر نمی‌کند لازم نیست هر بار از نو ساخته شود.', en: "A page that never changes doesn't need to be rebuilt on every visit." },
+            ],
           },
           {
             type: 'links',
@@ -510,12 +618,50 @@ export const foundations: Chapter[] = [
     slug: 'domains-dns',
     act: 1,
     icon: 'signpost',
+    voice: {
+      src: '/audio/voice1.mp3',
+      from: 236,
+      to: 390,
+      transcript:
+        'دوم یک دامنه است. شما طبیعتاً در نود و نه ممیز نود و نه درصد اوقات باید یک دامنه برای وب‌سایت داشته باشید. برای دامنه همیشه به یک Name Server Provider نیاز دارید که به زبان ساده، خودش را به عنوان Name Server وب‌سایت شما به دنیا «اعلام» کند. البته خودش این کار را نمی‌کند؛ Registry شما این را اولین بار اعلام می‌کند و بعد از آن، خود دامنه و همه Subdomainها را این Name Server Provider مدیریت می‌کند. و Cloudflare فقط این نیست؛ خیلی فراتر از این‌هاست.',
+    },
     title: { fa: 'Domain، DNS و Nameserver', en: 'Domains, DNS and nameservers' },
     tagline: {
       fa: 'اسم سایت شما چطور به سرور درست می‌رسد',
       en: "How your site's name finds the right server",
     },
-    minutes: 12,
+    minutes: 17,
+    mission: {
+      outcome: {
+        fa: 'بعد از این فصل می‌دانید وقتی کسی `cafe-sahar.ir` را تایپ می‌کند، دقیقاً چه کسی و چطور جواب می‌دهد.',
+        en: 'After this chapter you know exactly who answers, and how, when someone types `cafe-sahar.ir`.',
+      },
+      cafe: {
+        fa: 'کافه سحر آدرس اینترنتی‌اش را می‌گیرد: `cafe-sahar.ir`.',
+        en: 'Café Sahar gets its internet address: `cafe-sahar.ir`.',
+      },
+    },
+    warmup: {
+      q: {
+        fa: 'از فصل قبل: کدام بخش سایت در مرورگر کاربر اجرا می‌شود؟',
+        en: "From the last chapter: which part of a site runs in the visitor's browser?",
+      },
+      options: [
+        { fa: 'Database', en: 'Database' },
+        { fa: 'Backend', en: 'Backend' },
+        { fa: 'Frontend', en: 'Frontend' },
+      ],
+      answer: 2,
+      explain: {
+        fa: 'HTML، CSS و JavaScript در مرورگر اجرا می‌شوند؛ Backend و Database روی سرور می‌مانند.',
+        en: 'HTML, CSS and JavaScript run in the browser; the backend and database stay on the server.',
+      },
+      why: [
+        { fa: 'Database روی سرور یا یک سرویس داده است و داده‌ها را نگه می‌دارد.', en: 'The database lives on a server or data service and stores the data.' },
+        { fa: 'Backend روی سرور اجرا می‌شود و رازها را همان‌جا نگه می‌دارد.', en: 'The backend runs on the server and keeps secrets there.' },
+        { fa: 'درست است: HTML، CSS و JavaScript در مرورگر اجرا می‌شوند.', en: 'Right: HTML, CSS and JavaScript run in the browser.' },
+      ],
+    },
     mascotLine: {
       fa: 'DNS مثل دفترچه تلفن اینترنت است. بیایید ببینیم چه کسی این دفترچه را نگه می‌دارد!',
       en: "DNS is the internet's phone book. Let's find out who keeps that book!",
@@ -528,15 +674,15 @@ export const foundations: Chapter[] = [
           {
             type: 'p',
             text: {
-              fa: 'کامپیوترها همدیگر را با **IP Address** پیدا می‌کنند؛ عددهایی مثل `203.0.113.10` که به خاطر سپردنشان سخت است. **Domain** یک اسم قابل‌خواندن است، مثل `example.com`، که به‌جای آن عدد استفاده می‌کنیم. تقریباً هر وبسایت جدی به یک Domain نیاز دارد.',
-              en: "Computers find each other by **IP address**: numbers like `203.0.113.10` that are hard to remember. A **domain** is a human-readable name, like `example.com`, that we use instead. Nearly every serious website needs one.",
+              fa: 'کامپیوترها همدیگر را با **IP Address** پیدا می‌کنند؛ عددهایی مثل `203.0.113.10` که به خاطر سپردنشان سخت است. **Domain** یک اسم قابل‌خواندن است، مثل `cafe-sahar.ir`، که به‌جای آن عدد استفاده می‌کنیم. تقریباً هر وب‌سایت جدی به یک Domain نیاز دارد.',
+              en: "Computers find each other by **IP address**: numbers like `203.0.113.10` that are hard to remember. A **domain** is a human-readable name, like `cafe-sahar.ir`, that we use instead. Nearly every serious website needs one.",
             },
           },
           {
             type: 'p',
             text: {
-              fa: 'یک Domain از راست به چپ خوانده می‌شود: بخش آخر (`.com`، `.ir`، `.dev`) **TLD** یا دامنه سطح بالاست. بخش قبلی (`example`) اسمی است که شما ثبت می‌کنید. هر چیزی که جلوتر بیاید، مثل `blog.example.com` یا `shop.example.com`، یک **Subdomain** است که خودتان بدون خرید جداگانه می‌سازید.',
-              en: "A domain reads from right to left: the last part (`.com`, `.ir`, `.dev`) is the **TLD**, or top-level domain. The part before it (`example`) is the name you register. Anything added in front, like `blog.example.com` or `shop.example.com`, is a **subdomain** that you create yourself without buying anything extra.",
+              fa: 'یک Domain از راست به چپ خوانده می‌شود: بخش آخر (`.com`، `.ir`، `.dev`) **TLD** یا دامنه سطح بالاست. بخش قبلی (`cafe-sahar`) اسمی است که شما ثبت می‌کنید. هر چیزی که جلوتر بیاید، مثل `blog.cafe-sahar.ir` یا `menu.cafe-sahar.ir`، یک **Subdomain** است که خودتان بدون خرید جداگانه می‌سازید.',
+              en: "A domain reads from right to left: the last part (`.com`, `.ir`, `.dev`) is the **TLD**, or top-level domain. The part before it (`cafe-sahar`) is the name you register. Anything added in front, like `blog.cafe-sahar.ir` or `menu.cafe-sahar.ir`, is a **subdomain** that you create yourself without buying anything extra.",
             },
           },
           {
@@ -553,7 +699,7 @@ export const foundations: Chapter[] = [
             items: [
               { term: 'IP Address', def: { fa: 'آدرس عددی یک دستگاه در اینترنت (IPv4 یا IPv6).', en: 'The numeric address of a device on the internet (IPv4 or IPv6).' } },
               { term: 'TLD', def: { fa: 'بخش آخر دامنه، مثل `.com` یا `.ir`.', en: 'The last part of a domain, such as `.com` or `.ir`.' } },
-              { term: 'Subdomain', def: { fa: 'زیربخشی از دامنه شما، مثل `blog.example.com`.', en: 'A section under your domain, such as `blog.example.com`.' } },
+              { term: 'Subdomain', def: { fa: 'زیربخشی از دامنه شما، مثل `blog.cafe-sahar.ir`.', en: 'A section under your domain, such as `blog.cafe-sahar.ir`.' } },
               { term: 'Nameserver', def: { fa: 'سروری که به سؤال‌های DNS درباره یک دامنه، جواب رسمی (Authoritative) می‌دهد.', en: 'A server that gives the official (authoritative) answers to DNS questions about a domain.' } },
             ],
           },
@@ -613,8 +759,8 @@ export const foundations: Chapter[] = [
           {
             type: 'p',
             text: {
-              fa: 'وقتی `www.example.com` را باز می‌کنید، دستگاه شما سؤال را به یک **Resolver** می‌دهد (معمولاً مال اینترنت‌دهنده یا سرویسی مثل `1.1.1.1`). Resolver اگر جواب را از قبل در حافظه (Cache) نداشته باشد، این مسیر را می‌رود:',
-              en: "When you open `www.example.com`, your device asks a **resolver** (usually your ISP's, or a service like `1.1.1.1`). If the resolver doesn't already have the answer cached, it walks this path:",
+              fa: 'وقتی `www.cafe-sahar.ir` را باز می‌کنید، دستگاه شما سؤال را به یک **Resolver** می‌دهد (معمولاً مال اینترنت‌دهنده یا سرویسی مثل `1.1.1.1`). Resolver اگر جواب را از قبل در حافظه (Cache) نداشته باشد، این مسیر را می‌رود:',
+              en: "When you open `www.cafe-sahar.ir`, your device asks a **resolver** (usually your ISP's, or a service like `1.1.1.1`). If the resolver doesn't already have the answer cached, it walks this path:",
             },
           },
           {
@@ -622,15 +768,15 @@ export const foundations: Chapter[] = [
             items: [
               {
                 title: { fa: 'Root', en: 'Root' },
-                text: { fa: 'از سرورهای ریشه می‌پرسد: «`.com` را چه کسی می‌داند؟»', en: "Asks the root servers: 'Who knows about `.com`?'" },
+                text: { fa: 'از سرورهای ریشه می‌پرسد: «`.ir` را چه کسی می‌داند؟»', en: "Asks the root servers: 'Who knows about `.ir`?'" },
               },
               {
                 title: { fa: 'TLD', en: 'TLD' },
-                text: { fa: 'از Nameserverهای `.com` می‌پرسد: «Nameserverهای `example.com` کدام‌اند؟»', en: "Asks the `.com` nameservers: 'Which nameservers handle `example.com`?'" },
+                text: { fa: 'از Nameserverهای `.ir` می‌پرسد: «Nameserverهای `cafe-sahar.ir` کدام‌اند؟»', en: "Asks the `.ir` nameservers: 'Which nameservers handle `cafe-sahar.ir`?'" },
               },
               {
                 title: { fa: 'Authoritative', en: 'Authoritative' },
-                text: { fa: 'از Nameserver رسمی دامنه (مثلاً Cloudflare) می‌پرسد: «IP آدرس `www.example.com` چیست؟» و جواب نهایی را می‌گیرد.', en: "Asks the domain's own nameserver (say, Cloudflare): 'What is the IP of `www.example.com`?' and gets the final answer." },
+                text: { fa: 'از Nameserver رسمی دامنه (مثلاً Cloudflare) می‌پرسد: «IP آدرس `www.cafe-sahar.ir` چیست؟» و جواب نهایی را می‌گیرد.', en: "Asks the domain's own nameserver (say, Cloudflare): 'What is the IP of `www.cafe-sahar.ir`?' and gets the final answer." },
               },
               {
                 title: { fa: 'Cache', en: 'Cache' },
@@ -672,22 +818,22 @@ export const foundations: Chapter[] = [
               [
                 { fa: 'A', en: 'A' },
                 { fa: 'این اسم به این IPv4 اشاره می‌کند.', en: 'This name points to this IPv4 address.' },
-                { fa: '`example.com → 203.0.113.10`', en: '`example.com → 203.0.113.10`' },
+                { fa: '`cafe-sahar.ir → 203.0.113.10`', en: '`cafe-sahar.ir → 203.0.113.10`' },
               ],
               [
                 { fa: 'AAAA', en: 'AAAA' },
                 { fa: 'همان A، ولی برای IPv6.', en: 'Same as A, but for IPv6.' },
-                { fa: '`example.com → 2001:db8::10`', en: '`example.com → 2001:db8::10`' },
+                { fa: '`cafe-sahar.ir → 2001:db8::10`', en: '`cafe-sahar.ir → 2001:db8::10`' },
               ],
               [
                 { fa: 'CNAME', en: 'CNAME' },
                 { fa: 'این اسم، نام مستعار یک اسم دیگر است.', en: 'This name is an alias of another name.' },
-                { fa: '`www → example.com`', en: '`www → example.com`' },
+                { fa: '`www → cafe-sahar.ir`', en: '`www → cafe-sahar.ir`' },
               ],
               [
                 { fa: 'MX', en: 'MX' },
                 { fa: 'ایمیل‌های این دامنه را به کدام سرور ایمیل بفرستید.', en: "Which mail server receives this domain's email." },
-                { fa: '`example.com → mail.provider.com`', en: '`example.com → mail.provider.com`' },
+                { fa: '`cafe-sahar.ir → mail.provider.com`', en: '`cafe-sahar.ir → mail.provider.com`' },
               ],
               [
                 { fa: 'TXT', en: 'TXT' },
@@ -697,7 +843,7 @@ export const foundations: Chapter[] = [
               [
                 { fa: 'NS', en: 'NS' },
                 { fa: 'کدام Nameserverها مسئول این دامنه هستند.', en: 'Which nameservers are in charge of this domain.' },
-                { fa: '`example.com → ada.ns.cloudflare.com`', en: '`example.com → ada.ns.cloudflare.com`' },
+                { fa: '`cafe-sahar.ir → ada.ns.cloudflare.com`', en: '`cafe-sahar.ir → ada.ns.cloudflare.com`' },
               ],
             ],
           },
@@ -744,26 +890,33 @@ export const foundations: Chapter[] = [
             type: 'prompt',
             title: { fa: 'از Agent بخواهید DNS فعلی را بررسی کند', en: 'Ask your agent to audit your current DNS' },
             text: {
-              fa: 'دامنه من `example.com` است. با ابزارهایی مثل `dig` یا `nslookup` بررسی کن: Nameserverهای فعلی‌اش کدام‌اند، چه رکوردهای A، AAAA، CNAME، MX و TXT دارد و TTL هر کدام چقدر است. نتیجه را در یک جدول ساده به من نشان بده و توضیح بده هر رکورد احتمالاً برای چه کاری است. هیچ چیزی را تغییر نده.',
-              en: "My domain is `example.com`. Using tools like `dig` or `nslookup`, check: which nameservers it currently uses, which A, AAAA, CNAME, MX and TXT records it has, and the TTL of each. Show me the result in a simple table and explain what each record is probably for. Don't change anything.",
+              fa: 'دامنه کافه من `cafe-sahar.ir` است. با ابزارهایی مثل `dig` یا `nslookup` بررسی کن: Nameserverهای فعلی‌اش کدام‌اند، چه رکوردهای A، AAAA، CNAME، MX و TXT دارد و TTL هر کدام چقدر است. نتیجه را در یک جدول ساده به من نشان بده و توضیح بده هر رکورد احتمالاً برای چه کاری است. هیچ چیزی را تغییر نده.',
+              en: "My café's domain is `cafe-sahar.ir`. Using tools like `dig` or `nslookup`, check: which nameservers it currently uses, which A, AAAA, CNAME, MX and TXT records it has, and the TTL of each. Show me the result in a simple table and explain what each record is probably for. Don't change anything.",
             },
           },
           {
             type: 'quiz',
             q: {
-              fa: 'می‌خواهید DNS دامنه‌تان را Cloudflare مدیریت کند. Nameserverهای جدید را کجا وارد می‌کنید؟',
-              en: 'You want Cloudflare to manage your DNS. Where do you enter the new nameservers?',
+              fa: 'می‌خواهید DNS دامنه `cafe-sahar.ir` را Cloudflare مدیریت کند. Nameserverهای جدید را کجا وارد می‌کنید؟',
+              en: 'You want Cloudflare to manage DNS for `cafe-sahar.ir`. Where do you enter the new nameservers?',
             },
             options: [
-              { fa: 'در پنل Registrar، همان جایی که دامنه را خریده‌اید', en: "In your registrar's panel, where you bought the domain" },
-              { fa: 'در یک رکورد CNAME در Cloudflare', en: 'In a CNAME record inside Cloudflare' },
-              { fa: 'مستقیم با تماس با Registry', en: 'By contacting the registry directly' },
+              { fa: 'در یک رکورد CNAME داخل Cloudflare', en: 'In a CNAME record inside Cloudflare' },
+              { fa: 'در تنظیمات Hosting یا Worker سایت', en: "In the site's Worker or hosting settings" },
+              { fa: 'در پنل Registrar که دامنه را خریدید', en: 'At the registrar where you bought it' },
+              { fa: 'با نامه‌نگاری مستقیم با خود Registry', en: 'By writing to the .ir registry directly' },
             ],
-            answer: 0,
+            answer: 2,
             explain: {
-              fa: 'Nameserverها در Registrar تعیین می‌شوند؛ Registrar آن را به Registry می‌دهد و Registry آن را برای TLD منتشر می‌کند. رکوردهای داخل Cloudflare فقط بعد از این مرحله اعتبار پیدا می‌کنند.',
-              en: "Nameservers are set at the registrar; it passes them to the registry, which publishes them for the TLD. The records inside Cloudflare only take effect after that step.",
+              fa: 'Nameserverها در Registrar تعیین می‌شوند؛ Registrar آن را به Registry می‌دهد و Registry برای TLD منتشرش می‌کند.',
+              en: 'Nameservers are set at the registrar, which passes them to the registry to publish for the TLD.',
             },
+            why: [
+              { fa: 'رکوردهای داخل Cloudflare فقط بعد از تغییر Nameserver اعتبار پیدا می‌کنند.', en: 'Records inside Cloudflare only count after the nameservers change.' },
+              { fa: 'Hosting کد را اجرا می‌کند؛ Nameserverهای دامنه را تعیین نمی‌کند.', en: "Hosting runs code; it doesn't decide a domain's nameservers." },
+              { fa: 'درست است: Registrar آن را به Registry می‌دهد تا برای TLD منتشر شود.', en: 'Right: the registrar passes it to the registry, which publishes it for the TLD.' },
+              { fa: 'Registry با Registrarها کار می‌کند، نه مستقیم با صاحب دامنه.', en: 'The registry works with registrars, not directly with domain owners.' },
+            ],
           },
           {
             type: 'links',

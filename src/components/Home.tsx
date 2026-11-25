@@ -1,30 +1,30 @@
 import { motion, useScroll, useSpring } from 'motion/react';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { ACTS, CHAPTERS } from '../content';
 import { href, num, useApp, useTx } from '../lib/app';
+import { EASE_OUT } from '../lib/motion';
+import { usePageTitle } from '../lib/title';
 import { HeroStory } from './HeroStory';
+import { Rich } from './blocks/Rich';
 import { ACT_TINT, Icon } from './Icon';
 import { Mascot } from './Mascot';
 
-const EASE = [0.23, 1, 0.32, 1] as const;
+const EASE = EASE_OUT;
 const LABS = CHAPTERS.flatMap((c) => c.sections.flatMap((s) => s.blocks)).filter((b) => b.type === 'widget').length;
 
 export function Home() {
   const tx = useTx();
-  const { lang, done } = useApp();
+  const { lang, done, position, t } = useApp();
   const firstOpen = CHAPTERS.find((c) => !done[c.slug]) ?? CHAPTERS[0];
-  const started = CHAPTERS.some((c) => done[c.slug]);
+  const doneCount = CHAPTERS.filter((c) => done[c.slug]).length;
+  const started = doneCount > 0 || !!position;
+  // The underline under «قهرمان» is the learner's own progress line (RD-02).
+  const progress = doneCount / CHAPTERS.length;
+  const resumeChapter = position ? CHAPTERS.find((c) => c.slug === position.slug) : undefined;
+  const resumeIndex = resumeChapter ? CHAPTERS.indexOf(resumeChapter) : -1;
+  const resumeSection = resumeChapter && position?.section ? resumeChapter.sections.find((x) => x.id === position.section) : undefined;
 
-  useEffect(() => {
-    try {
-      if (sessionStorage.getItem('scroll-to') === 'map') {
-        sessionStorage.removeItem('scroll-to');
-        document.getElementById('map')?.scrollIntoView({ block: 'start' });
-      }
-    } catch {
-      /* ignore */
-    }
-  }, []);
+  usePageTitle(null, lang);
 
   return (
     <main id="main">
@@ -45,14 +45,15 @@ export function Home() {
           </motion.p>
           <motion.h1
             className="display hero-title"
-            initial={{ opacity: 0, filter: 'blur(8px)', transform: 'translateY(12px)' }}
-            animate={{ opacity: 1, filter: 'blur(0px)', transform: 'translateY(0px)' }}
-            transition={{ duration: 0.7, ease: EASE, delay: 0.05 }}
+            initial={{ opacity: 0, transform: 'translateY(12px)' }}
+            animate={{ opacity: 1, transform: 'translateY(0px)' }}
+            transition={{ duration: 0.6, ease: EASE, delay: 0.05 }}
           >
             {tx('از صفر تا ', 'From zero to ')}
             <span className="hero-hl">
               {tx('قهرمان', 'hero')}
-              <svg viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden>
+              <svg viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden className={lang === 'fa' ? 'hero-track is-rtl' : 'hero-track'}>
+                <path d="M3 14 C 50 4, 120 4, 197 12" fill="none" stroke="var(--line)" strokeWidth="6" strokeLinecap="round" strokeDasharray="2 11" />
                 <motion.path
                   d="M3 14 C 50 4, 120 4, 197 12"
                   fill="none"
@@ -60,8 +61,8 @@ export function Home() {
                   strokeWidth="6"
                   strokeLinecap="round"
                   initial={{ pathLength: 0 }}
-                  animate={{ pathLength: 1 }}
-                  transition={{ duration: 0.9, ease: EASE, delay: 0.5 }}
+                  animate={{ pathLength: Math.max(0.03, progress) }}
+                  transition={{ duration: 0.9, ease: EASE, delay: 0.4 }}
                 />
               </svg>
             </span>
@@ -91,6 +92,27 @@ export function Home() {
               {tx('نقشه راه را ببینید', 'See the map')}
             </a>
           </motion.div>
+          <p className="hero-progress-note">
+            {doneCount
+              ? tx(`خط زیر «قهرمان» مسیر شماست: ${num(doneCount, lang)} از ${num(CHAPTERS.length, lang)} فصل.`, `The line under "hero" is your path: ${doneCount} of ${CHAPTERS.length} chapters.`)
+              : tx('خط زیر «قهرمان» مسیر شماست؛ با هر فصل جلوتر می‌رود.', 'The line under "hero" is your path; it grows with every chapter.')}
+          </p>
+          {resumeChapter && (
+            <a className="hero-resume" href={href.chapter(resumeChapter.slug, resumeSection?.id)}>
+              <ProgressRingBig value={progress} />
+              <span>
+                <b>
+                  {tx('ادامه از فصل', 'Continue chapter')} {num(resumeIndex + 1, lang)}: <Rich text={t(resumeChapter.title)} />
+                </b>
+                {resumeSection && (
+                  <small>
+                    {tx('بخش', 'Section')} «<Rich text={t(resumeSection.title)} />»
+                  </small>
+                )}
+              </span>
+              <Arrow />
+            </a>
+          )}
           <ul className="hero-facts">
             <li>
               <strong>{num(4, lang)}</strong> {tx('پرده', 'acts')}
@@ -143,7 +165,7 @@ export function Home() {
       {/* ── Author note ── */}
       <section className="author wrap">
         <div className="author-card sticker">
-          <Mascot size={92} mood="wink" />
+          <Mascot size={92} mood="wink" ambient />
           <div>
             <p className="eyebrow">{tx('درباره این دوره', 'About this course')}</p>
             <p className="author-text">
@@ -244,7 +266,7 @@ function JourneyMap() {
                       viewport={{ once: true, margin: '-40px' }}
                       transition={{ duration: 0.5, ease: EASE }}
                     >
-                      <span className="map-node" style={{ ['--tint' as string]: ACT_TINT[act.id] }} aria-hidden>
+                      <span className="map-node" style={{ ['--tint' as string]: ACT_TINT[act.id], viewTransitionName: `vt-${c.slug}` } as React.CSSProperties} aria-hidden>
                         {isDone ? (
                           <svg width="22" height="22" viewBox="0 0 24 24">
                             <path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
@@ -274,11 +296,34 @@ function JourneyMap() {
           ))}
 
           <div className="map-finish">
-            <Mascot size={110} mood="happy" />
+            <Mascot size={110} mood="happy" ambient />
             <p className="display">{tx('و حالا شما یک قهرمان هستید.', 'And now, you are a hero.')}</p>
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+function ProgressRingBig({ value }: { value: number }) {
+  return (
+    <svg width="44" height="44" viewBox="0 0 44 44" aria-hidden className="hero-resume-ring">
+      <circle cx="22" cy="22" r="18" fill="none" stroke="var(--line)" strokeWidth="5" />
+      <motion.circle
+        cx="22"
+        cy="22"
+        r="18"
+        fill="none"
+        stroke="var(--mint-ink)"
+        strokeWidth="5"
+        strokeLinecap="round"
+        pathLength={1}
+        strokeDasharray="1"
+        initial={{ strokeDashoffset: 1 }}
+        animate={{ strokeDashoffset: 1 - value }}
+        transition={{ duration: 0.9, ease: EASE }}
+        transform="rotate(-90 22 22)"
+      />
+    </svg>
   );
 }

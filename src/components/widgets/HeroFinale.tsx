@@ -2,13 +2,14 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useState } from 'react';
 import { ACTS, CHAPTERS } from '../../content';
 import { href, num, useApp, useTx } from '../../lib/app';
+import { EASE_OUT } from '../../lib/motion';
 import { CopyButton } from '../blocks/CopyButton';
+import { Certificate } from './Certificate';
 import { ACT_TINT, Icon } from '../Icon';
 import { Mascot } from '../Mascot';
-import { Frame } from './Frame';
+import { Frame, useLab } from './Frame';
 import './set3.css';
 
-const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 const CANDY = ['#ef6a4c', '#ffd36a', '#8fd5b5', '#a6cdf3', '#f6bccb'];
 
 export default function HeroFinale() {
@@ -16,12 +17,14 @@ export default function HeroFinale() {
   const tx = useTx();
   const reduce = useReducedMotion();
   const [cheer, setCheer] = useState(false);
+  const lab = useLab();
 
   const total = CHAPTERS.length;
   const count = CHAPTERS.filter((c) => done[c.slug]).length;
   const heroDone = !!done.hero;
 
   const celebrate = async () => {
+    lab.complete();
     setCheer(true);
     window.setTimeout(() => setCheer(false), 1800);
     if (reduce) return;
@@ -36,7 +39,7 @@ export default function HeroFinale() {
     }
   };
 
-  const complete = () => {
+  const markCourse = () => {
     toggleDone('hero', true);
     void celebrate();
   };
@@ -49,7 +52,8 @@ export default function HeroFinale() {
   return (
     <Frame
       title={tx('قفسه جام‌های شما', 'Your trophy shelf')}
-      hint={tx('هر فصلی که تمام کنید، یک نشان پر می‌شود. روی هر نشان بزنید تا به آن فصل بروید.', 'Every chapter you finish fills a badge. Tap any badge to jump to that chapter.')}
+      goal={tx('سفرتان را جشن بگیرید', 'Celebrate your journey')}
+      hint={tx('روی هر نشان بزنید تا به همان فصل بروید.', 'Tap any badge to jump to that chapter.')}
       tint="var(--butter-soft)"
     >
       <div className="hf-top">
@@ -76,7 +80,7 @@ export default function HeroFinale() {
           <button type="button" className="btn btn--primary" onClick={celebrate}>
             {tx('جشن بگیریم!', 'Celebrate!')}
           </button>
-          <button type="button" className="btn btn--mint" onClick={complete} disabled={heroDone}>
+          <button type="button" className="btn btn--mint" onClick={markCourse} disabled={heroDone}>
             {heroDone ? tx('دوره کامل شد ✓', 'Course complete ✓') : tx('دوره را کامل‌شده علامت بزن', 'Mark the course complete')}
           </button>
         </div>
@@ -127,6 +131,7 @@ export default function HeroFinale() {
         })}
       </div>
 
+      <Certificate />
       <div className="hf-share">
         <p className="w-label">{tx('یک متن برای اشتراک‌گذاری', 'Something to share')}</p>
         <p>{share}</p>

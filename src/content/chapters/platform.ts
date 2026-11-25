@@ -11,10 +11,57 @@ export const platform: Chapter[] = [
       fa: "دفترچه خاطرات کد شما؛ هر تغییر ثبت می‌شود و هر اشتباه قابل برگشت است",
       en: "Your code's diary: every change recorded, every mistake reversible",
     },
-    minutes: 14,
+    minutes: 17,
     mascotLine: {
       fa: "من خیلی کار می‌کنم، ولی همه‌اش را در GitHub ثبت می‌کنم تا شما همیشه بتوانید ببینید چه کرده‌ام و اگر لازم شد برگردید.",
       en: "I work fast, but I write everything down in GitHub, so you can always see what I did and roll it back if needed.",
+    },
+    voice: {
+      src: '/audio/voice1.mp3',
+      from: 255,
+      to: 315,
+      transcript:
+        "سومین چیزی که الزاماً جزو ملزومات نیست، ولی وقتی بخواهید حرفه‌ای کار کنید حتماً به آن نیاز پیدا می‌کنید، یک Code Repository است تا کدهای مرجع وب‌سایتتان را در آن نگه دارید. اینجا دارم درباره GitHub صحبت می‌کنم. GitHub یک Code Repository خیلی قوی است: خیلی ساده و در عین حال کارآمد و فراگیر، با یک عالمه امکانات مختلف که در اختیار شما می‌گذارد و می‌توانید از آن‌ها استفاده کنید.",
+    },
+    mission: {
+      outcome: {
+        fa: "می‌فهمید Git و GitHub چطور هر تغییر را ثبت می‌کنند، و چطور کار Agent را قبل از انتشار در یک Pull Request ببینید و تأیید کنید.",
+        en: "You'll understand how Git and GitHub record every change, and how to review and approve the agent's work in a pull request before it goes live.",
+      },
+      cafe: {
+        fa: "کد کافه سحر یک خانه پیدا می‌کند: یک Repository در GitHub به اسم `cafe-sahar`.",
+        en: "Café Sahar's code gets a home: a GitHub repository called `cafe-sahar`.",
+      },
+    },
+    warmup: {
+      q: {
+        fa: "از فصل قبل: دامنه `cafe-sahar.ir` را از کجا می‌خرید؟",
+        en: "From last chapter: where do you buy the domain `cafe-sahar.ir`?",
+      },
+      options: [
+        { fa: "از Registry که مدیر کل پسوند .ir است", en: "From the registry that runs the .ir ending" },
+        { fa: "از یک Registrar، مثل یک فروشنده مجاز", en: "From a registrar, an authorised seller" },
+        { fa: "از DNS Provider که به سؤال‌ها جواب می‌دهد", en: "From the DNS provider that answers lookups" },
+      ],
+      answer: 1,
+      explain: {
+        fa: "دامنه را از Registrar می‌خرید. Registry کل پسوند را اداره می‌کند و DNS Provider فقط به سؤال «این دامنه کجاست؟» جواب می‌دهد.",
+        en: "You buy from a registrar. The registry runs the whole ending, and the DNS provider only answers 'where is this domain?'.",
+      },
+      why: [
+        {
+          fa: "Registry مدیر پسوند است و معمولاً مستقیم به شما دامنه نمی‌فروشد.",
+          en: "The registry runs the ending and usually doesn't sell to you directly.",
+        },
+        {
+          fa: "درست است: Registrar فروشنده مجازی است که دامنه را به نام شما ثبت می‌کند.",
+          en: "Right: a registrar is the authorised seller that registers the name for you.",
+        },
+        {
+          fa: "DNS Provider جواب سؤال‌های DNS را می‌دهد؛ مالکیت دامنه را نمی‌فروشد.",
+          en: "A DNS provider answers DNS questions; it doesn't sell domain ownership.",
+        },
+      ],
     },
     sections: [
       {
@@ -51,7 +98,7 @@ export const platform: Chapter[] = [
           {
             type: 'p',
             text: {
-              fa: "این دو را زیاد با هم اشتباه می‌گیرند. **Git** نرم‌افزاری است که روی کامپیوتر اجرا می‌شود و تاریخچه را نگه می‌دارد. **GitHub** یک سرویس آنلاین است که مخزن‌های Git را روی اینترنت نگه می‌دارد و امکاناتی مثل Pull Request، بازبینی کد، Issue و GitHub Actions را به آن اضافه می‌کند. یعنی Git موتور است و GitHub پارکینگ و کارگاه آنلاین آن.",
+              fa: "این دو را زیاد با هم اشتباه می‌گیرند. **Git** نرم‌افزاری است که روی کامپیوتر اجرا می‌شود و تاریخچه را نگه می‌دارد. **GitHub** یک سرویس آنلاین است که Repositoryهای Git را روی اینترنت نگه می‌دارد و امکاناتی مثل Pull Request، بازبینی کد، Issue و GitHub Actions را به آن اضافه می‌کند. یعنی Git موتور است و GitHub پارکینگ و کارگاه آنلاین آن.",
               en: "People mix these up a lot. **Git** is software that runs on a computer and keeps the history. **GitHub** is an online service that hosts Git repositories and adds things like pull requests, code review, issues and GitHub Actions. Git is the engine; GitHub is the online garage and workshop around it.",
             },
           },
@@ -164,7 +211,7 @@ export const platform: Chapter[] = [
             tone: 'warn',
             title: { fa: "رمزها را هرگز Commit نکنید", en: "Never commit secrets" },
             text: {
-              fa: "API Key، Token، رمز دیتابیس و فایل‌هایی مثل `.env` و `.dev.vars` نباید وارد Repo شوند، حتی Private. تاریخچه Git همه چیز را به خاطر می‌سپارد؛ اگر یک کلید یک بار Commit شود، حتی بعد از پاک کردن هم در تاریخچه می‌ماند و باید آن کلید را باطل و عوض کنید. نام این فایل‌ها را در `.gitignore` بگذارید و رمزها را در بخش Secrets سرویس‌ها نگه دارید.",
+              fa: "API Key، Token، رمز Database و فایل‌هایی مثل `.env` و `.dev.vars` نباید وارد Repo شوند، حتی Private. تاریخچه Git همه چیز را به خاطر می‌سپارد؛ اگر یک کلید یک بار Commit شود، حتی بعد از پاک کردن هم در تاریخچه می‌ماند و باید آن کلید را باطل و عوض کنید. نام این فایل‌ها را در `.gitignore` بگذارید و رمزها را در بخش Secrets سرویس‌ها نگه دارید.",
               en: "API keys, tokens, database passwords and files like `.env` and `.dev.vars` must never go into a repo, private or not. Git history remembers everything: once a key is committed, it stays in history even after you delete it, and you must revoke and replace it. List these files in `.gitignore` and keep secrets in each service's secrets settings.",
             },
           },
@@ -239,30 +286,45 @@ dist
             type: 'prompt',
             title: { fa: "از Agent بخواهید Repo را درست راه بیندازد", en: "Ask your agent to set up the repo properly" },
             text: {
-              fa: "یک Repository جدید و Private در GitHub با نام my-first-site بساز. یک README.md بنویس که توضیح بدهد پروژه چیست، چطور اجرا می‌شود و چطور منتشر می‌شود. یک .gitignore بگذار که node_modules، dist، .wrangler، .env و .dev.vars را نادیده بگیرد. برای هر تغییر یک Branch جدا بساز، پیام‌های Commit را کوتاه و دقیق بنویس، و به جای Push مستقیم روی main، یک Pull Request باز کن تا من بازبینی کنم.",
-              en: "Create a new private GitHub repository called my-first-site. Write a README.md explaining what the project is, how to run it locally and how to deploy it. Add a .gitignore that ignores node_modules, dist, .wrangler, .env and .dev.vars. Use a separate branch for each change, write short, specific commit messages, and open a pull request for me to review instead of pushing straight to main.",
+              fa: "یک Repository جدید و Private در GitHub با نام cafe-sahar برای وب‌سایت کافه سحر بساز. یک README.md بنویس که توضیح بدهد پروژه چیست، چطور اجرا می‌شود و چطور منتشر می‌شود. یک .gitignore بگذار که node_modules، dist، .wrangler، .env و .dev.vars را نادیده بگیرد. برای هر تغییر یک Branch جدا بساز، پیام‌های Commit را کوتاه و دقیق بنویس، و به جای Push مستقیم روی main، یک Pull Request باز کن تا من بازبینی کنم.",
+              en: "Create a new private GitHub repository called cafe-sahar for the Café Sahar website. Write a README.md explaining what the project is, how to run it locally and how to deploy it. Add a .gitignore that ignores node_modules, dist, .wrangler, .env and .dev.vars. Use a separate branch for each change, write short, specific commit messages, and open a pull request for me to review instead of pushing straight to main.",
             },
           },
           {
             type: 'quiz',
             q: {
-              fa: "Agent شما یک API Key را اشتباهی Commit کرده و بعد در Commit بعدی آن را پاک کرده است. چه باید کرد؟",
-              en: "Your agent accidentally committed an API key, then deleted it in the next commit. What should you do?",
+              fa: "Agent کافه سحر یک API Key را اشتباهی Commit کرده و در Commit بعدی پاکش کرده است. اول چه کنید؟",
+              en: "Café Sahar's agent accidentally committed an API key, then deleted it in the next commit. What comes first?",
             },
             options: [
-              { fa: "هیچ؛ چون پاک شده دیگر مشکلی نیست.", en: "Nothing; it was deleted, so it's fine." },
-              { fa: "Repo را Private کنیم و ادامه دهیم.", en: "Make the repo private and carry on." },
-              {
-                fa: "کلید را در سرویس مربوطه باطل کنیم، کلید جدید بسازیم و آن را در Secrets نگه داریم.",
-                en: "Revoke the key at the provider, create a new one and store it in secrets.",
-              },
-              { fa: "پیام Commit را عوض کنیم.", en: "Change the commit message." },
+              { fa: "کاری لازم نیست، چون در Commit بعدی پاک شده است", en: "Nothing, since the next commit already removed it" },
+              { fa: "Repository را Private کنیم و کار را همین‌طور ادامه دهیم", en: "Make the repository private and simply carry on" },
+              { fa: "فقط پیام آن Commit را به چیز دیگری عوض کنیم", en: "Just rewrite that commit's message to hide it" },
+              { fa: "کلید را باطل و کلید نو را در Secrets ذخیره کنیم", en: "Revoke the key and store a fresh one in secrets" },
             ],
-            answer: 2,
+            answer: 3,
             explain: {
               fa: "تاریخچه Git همه نسخه‌ها را نگه می‌دارد، پس آن کلید هنوز قابل پیدا شدن است. تنها راه امن، باطل کردن و تعویض کلید است.",
               en: "Git history keeps every version, so the key can still be found. The only safe fix is to revoke and replace it.",
             },
+            why: [
+              {
+                fa: "پاک کردن در Commit بعدی، نسخه قبلی را از تاریخچه حذف نمی‌کند؛ کلید هنوز آنجاست.",
+                en: "Deleting it later doesn't remove the earlier version from history; the key is still there.",
+              },
+              {
+                fa: "Private کردن دسترسی‌های بعدی را کم می‌کند، ولی کسی که کلید را دیده هنوز آن را دارد.",
+                en: "Going private limits future access, but anyone who already saw the key still has it.",
+              },
+              {
+                fa: "پیام Commit فقط توضیح است؛ محتوای فایل‌ها با عوض کردن پیام تغییر نمی‌کند.",
+                en: "The message is only a description; changing it doesn't change the files.",
+              },
+              {
+                fa: "درست است: کلید لورفته را بی‌اثر کنید، بعد کلید جدید را فقط در Secrets نگه دارید.",
+                en: "Right: make the leaked key useless first, then keep the new one only in secrets.",
+              },
+            ],
           },
           {
             type: 'links',
@@ -277,8 +339,8 @@ dist
       },
     ],
     connects: {
-      fa: "در فصل قبل دیدیم وب از چه قطعاتی ساخته شده. GitHub جایی است که کد همه آن قطعات نگهداری می‌شود. در فصل بعد Cloudflare را می‌شناسیم که کد را از همین GitHub برمی‌دارد و روی اینترنت منتشر می‌کند، و در پرده دوم Agent را به GitHub وصل می‌کنیم تا خودش Branch بسازد و Pull Request باز کند.",
-      en: "Last chapter showed the pieces the web is built from. GitHub is where the code for all those pieces lives. Next we meet Cloudflare, which takes the code from this same GitHub and publishes it to the internet, and in Act II we connect the agent to GitHub so it can create branches and open pull requests itself.",
+      fa: "در فصل قبل دیدیم دامنه و DNS چطور اسم سایت را به سرور می‌رسانند، و پیش‌تر هم دیدیم وب از چه قطعاتی ساخته شده. GitHub جایی است که کد همه آن قطعات نگهداری می‌شود. در فصل بعد Cloudflare را می‌شناسیم که کد را از همین GitHub برمی‌دارد و روی اینترنت منتشر می‌کند، و در پرده دوم Agent را به GitHub وصل می‌کنیم تا خودش Branch بسازد و Pull Request باز کند.",
+      en: "Last chapter showed how a domain and DNS lead visitors to your server, and before that we saw the pieces the web is built from. GitHub is where the code for all those pieces lives. Next we meet Cloudflare, which takes the code from this same GitHub and publishes it to the internet, and in Act II we connect the agent to GitHub so it can create branches and open pull requests itself.",
     },
     takeaways: [
       { fa: "Git تاریخچه را نگه می‌دارد؛ GitHub آن را آنلاین و قابل همکاری می‌کند.", en: "Git keeps the history; GitHub puts it online and makes it collaborative." },
@@ -294,13 +356,59 @@ dist
     slug: 'cloudflare',
     act: 1,
     icon: 'cloud',
-    voice: '/audio/voice2.mp3',
+    voice: {
+      src: '/audio/voice2.mp3',
+      from: 0,
+      to: 200,
+      transcript:
+        "برای اینکه یک وب‌سایت راه بیندازید، یک سری زیرساخت نرم‌افزاری روی سرور هم لازم دارید. بسته به وب‌سایت، این می‌تواند فقط یک Web Server باشد که یک صفحه Static را Load کند، یا Frontend و Backend و خیلی وقت‌ها یک Database هم لازم باشد. Cloudflare همه این‌ها را سرویس‌دهی می‌کند و تا حد خیلی خوبی هم رایگان. تنها مشکلش برای ما ایرانی‌ها این است که در ایران سرور ندارد و با کمال تعجب، یکی از اولین جاهایی است که در فیلترینگ شدید تحت تأثیر قرار می‌گیرد؛ چون بخش بزرگی از اینترنت امروز را تشکیل می‌دهد.",
+    },
+    mission: {
+      outcome: {
+        fa: "می‌فهمید Cloudflare چه سرویس‌هایی دارد و برای هر نوع داده (جدول، کلید-مقدار، فایل) کدام انبار مناسب است.",
+        en: "You'll know what Cloudflare offers and which storage fits each kind of data: tables, key-value pairs or files.",
+      },
+      cafe: {
+        fa: "تصمیم می‌گیریم کافه سحر کجا اجرا شود: یک Worker برای سایت و D1 برای رزرو میزها.",
+        en: "We decide where Café Sahar runs: a Worker for the site and D1 for table bookings.",
+      },
+    },
+    warmup: {
+      q: {
+        fa: "از فصل قبل: Agent تغییرات کافه را چطور برای بازبینی شما می‌فرستد؟",
+        en: "From last chapter: how does the agent send the café's changes for your review?",
+      },
+      options: [
+        { fa: "مستقیم روی main Push می‌کند و منتشر می‌شود", en: "It pushes straight to main and goes live" },
+        { fa: "روی یک Branch کار می‌کند و Pull Request باز می‌کند", en: "It works on a branch and opens a pull request" },
+        { fa: "فایل‌ها را برایتان ایمیل می‌کند تا خودتان کپی کنید", en: "It emails you the files to copy over yourself" },
+      ],
+      answer: 1,
+      explain: {
+        fa: "Branch و Pull Request یعنی تغییرات جدا می‌ماند تا شما ببینید و تأیید کنید؛ بعد Merge و منتشر می‌شود.",
+        en: "A branch and a pull request keep changes separate until you see and approve them; then they merge and go live.",
+      },
+      why: [
+        {
+          fa: "Push مستقیم روی main یعنی تغییر بدون بازبینی شما روی سایت می‌رود.",
+          en: "Pushing straight to main puts changes live without your review.",
+        },
+        {
+          fa: "درست است: Branch کار را جدا نگه می‌دارد و Pull Request جای بازبینی است.",
+          en: "Right: the branch keeps work separate and the pull request is where you review.",
+        },
+        {
+          fa: "کپی دستی فایل‌ها همان دردسری است که GitHub و Agent حذفش می‌کنند.",
+          en: "Copying files by hand is exactly the chore GitHub and the agent remove.",
+        },
+      ],
+    },
     title: { fa: "Cloudflare: خیلی بیشتر از DNS", en: "Cloudflare: far more than DNS" },
     tagline: {
-      fa: "یک شبکه جهانی که هم دامنه شما را می‌گرداند، هم سایت و دیتابیس‌تان را میزبانی می‌کند",
+      fa: "یک شبکه جهانی که هم دامنه شما را می‌گرداند، هم سایت و Database شما را میزبانی می‌کند",
       en: "One global network that runs your domain and hosts your site and data",
     },
-    minutes: 18,
+    minutes: 20,
     mascotLine: {
       fa: "Cloudflare مثل یک شهر بزرگ است: هم تابلوی آدرس دارد، هم نگهبان، هم کارگاه و انبار. بیایید با محله‌هایش آشنا شویم.",
       en: "Cloudflare is like a big city: it has street signs, guards, workshops and warehouses. Let's tour the neighbourhoods.",
@@ -362,7 +470,7 @@ dist
             tone: 'why',
             title: { fa: "چرا این دوره Cloudflare را انتخاب کرده؟", en: "Why this course uses Cloudflare" },
             text: {
-              fa: "چون دامنه، DNS، HTTPS، میزبانی، دیتابیس و ذخیره فایل همه در یک جا هستند. برای شروع پروژه‌های کوچک تا متوسط، پلن رایگان آن سخاوتمند است و لازم نیست سرور اجاره کنید یا Web Server نصب و نگهداری کنید. و مهم‌تر از همه: Agent فقط باید به **یک** حساب وصل شود تا کل زیرساخت را راه بیندازد.",
+              fa: "چون دامنه، DNS، HTTPS، میزبانی، Database و ذخیره فایل همه در یک جا هستند. برای شروع پروژه‌های کوچک تا متوسط، پلن رایگان آن سخاوتمند است و لازم نیست سرور اجاره کنید یا Web Server نصب و نگهداری کنید. و مهم‌تر از همه: Agent فقط باید به **یک** حساب وصل شود تا کل زیرساخت را راه بیندازد.",
               en: "Because domain, DNS, HTTPS, hosting, database and file storage all live in one place. For small to medium projects the free plan is generous, and you don't have to rent a server or install and maintain a web server. Most importantly, your agent only needs access to **one** account to set up the whole infrastructure.",
             },
           },
@@ -399,7 +507,7 @@ dist
             type: 'code',
             lang: 'jsonc',
             code: `{
-  "name": "my-first-site",
+  "name": "cafe-sahar",
   "compatibility_date": "2026-11-01",
   "assets": {
     "directory": "./dist",
@@ -416,6 +524,15 @@ dist
             text: {
               fa: "**Wrangler** ابزار خط فرمان Cloudflare است. Agent با آن پروژه را می‌سازد، اجرا می‌کند و منتشر می‌کند. شما هم می‌توانید Repo را در داشبورد Cloudflare به Worker وصل کنید تا هر Push روی main خودکار منتشر شود.",
               en: "**Wrangler** is Cloudflare's command-line tool. The agent uses it to create, run and deploy the project. You can also connect the repo to the Worker in the Cloudflare dashboard so every push to main deploys automatically.",
+            },
+          },
+          {
+            type: 'callout',
+            tone: 'tip',
+            title: { fa: "Lovable هم روی همین Workers اجرا می‌شود", en: "Lovable runs on Workers too" },
+            text: {
+              fa: "به گفته وبلاگ رسمی Lovable، اپ‌هایی که از اواسط ۲۰۲۶ در Lovable ساخته می‌شوند روی **Cloudflare Workers** اجرا می‌شوند. یعنی چه مسیر Codex را بروید و چه Lovable، آخرش با همین مفاهیم سروکار دارید، و می‌توانید کد ساخته‌شده در Lovable را به GitHub ببرید و روی Workers حساب خودتان هم منتشر کنید.",
+              en: "According to Lovable's official blog, apps created in Lovable since mid-2026 run on **Cloudflare Workers**. So whether you take the Codex path or the Lovable path, you end up with the same ideas, and you can take code built in Lovable to GitHub and deploy it on Workers in your own account.",
             },
           },
         ],
@@ -463,10 +580,10 @@ dist
           {
             type: 'callout',
             tone: 'fix',
-            title: { fa: "R2 دیتابیس نیست", en: "R2 is not a database" },
+            title: { fa: "R2 یک Database نیست", en: "R2 is not a database" },
             text: {
-              fa: "در صحبت‌های اولیه دوره از «R2 Database» نام برده شد. دقیق‌تر این است: **R2 فضای ذخیره فایل (Object Storage)** است، شبیه یک هارد بزرگ آنلاین. دیتابیس SQL در Cloudflare **D1** است و **KV** یک انبار کلید-مقدار. اگر جای این‌ها را اشتباه بگیرید، مثلاً لیست سفارش‌ها را در R2 بریزید، جست‌وجو و به‌روزرسانی‌شان سخت و کند می‌شود.",
-              en: "The early voice notes mention an 'R2 database'. More precisely: **R2 is file storage (object storage)**, like a giant online drive. Cloudflare's SQL database is **D1**, and **KV** is a key-value store. Mix them up, for example by keeping orders in R2, and searching and updating them becomes slow and painful.",
+              fa: "در صحبت‌های اولیه دوره از «R2 Database» نام برده شد. دقیق‌تر این است: **R2 فضای ذخیره فایل (Object Storage)** است، شبیه یک هارد بزرگ آنلاین. Database از نوع SQL در Cloudflare **D1** است و **KV** یک انبار کلید-مقدار. اگر جای این‌ها را اشتباه بگیرید، مثلاً رزروهای کافه را در R2 بریزید، جست‌وجو و به‌روزرسانی‌شان سخت و کند می‌شود.",
+              en: "The early voice notes mention an 'R2 database'. More precisely: **R2 is file storage (object storage)**, like a giant online drive. Cloudflare's SQL database is **D1**, and **KV** is a key-value store. Mix them up, for example by keeping the café's bookings in R2, and searching and updating them becomes slow and painful.",
             },
           },
           {
@@ -508,27 +625,45 @@ dist
             type: 'prompt',
             title: { fa: "از Agent بخواهید معماری Cloudflare را پیشنهاد دهد", en: "Ask your agent to propose a Cloudflare architecture" },
             text: {
-              fa: "می‌خواهم یک سایت کوچک فروش آنلاین روی Cloudflare بسازم: صفحه محصولات، سبد خرید، فرم سفارش و آپلود عکس محصول توسط من. قبل از نوشتن کد، معماری را پیشنهاد بده: کدام بخش روی Workers با Static Assets، چه داده‌ای در D1، چه چیزی در KV و چه فایل‌هایی در R2. برای هر انتخاب یک جمله دلیل بنویس، و بگو کدام بخش‌ها در پلن رایگان جا می‌شوند و کجا باید صفحه Limits رسمی را چک کنم. هنوز چیزی نساز.",
-              en: "I want to build a small online shop on Cloudflare: product pages, a cart, an order form, and product photo uploads by me. Before writing any code, propose the architecture: what runs on Workers with static assets, what data goes in D1, what goes in KV and which files go in R2. Give a one-sentence reason for each choice, and tell me which parts fit the free plan and where I should check the official limits page. Don't build anything yet.",
+              fa: "می‌خواهم وب‌سایت کافه سحر (cafe-sahar.ir) را روی Cloudflare بسازم: صفحه منو، ساعت کاری، فرم رزرو میز و آپلود عکس غذاها توسط من. قبل از نوشتن کد، معماری را پیشنهاد بده: کدام بخش روی Workers با Static Assets، چه داده‌ای در D1، چه چیزی در KV و چه فایل‌هایی در R2. برای هر انتخاب یک جمله دلیل بنویس، و بگو کدام بخش‌ها در پلن رایگان جا می‌شوند و کجا باید صفحه Limits رسمی را چک کنم. هنوز چیزی نساز.",
+              en: "I want to build the Café Sahar website (cafe-sahar.ir) on Cloudflare: a menu page, opening hours, a table-booking form, and dish photos that I upload. Before writing any code, propose the architecture: what runs on Workers with static assets, what data goes in D1, what goes in KV and which files go in R2. Give a one-sentence reason for each choice, and tell me which parts fit the free plan and where I should check the official limits page. Don't build anything yet.",
             },
           },
           {
             type: 'quiz',
             q: {
-              fa: "عکس‌های محصولاتی که کاربران آپلود می‌کنند را کجا نگه داریم؟",
-              en: "Where should product photos uploaded by users go?",
+              fa: "سحر می‌خواهد عکس غذاهای منو را آپلود کند. این عکس‌ها را کجا نگه داریم؟",
+              en: "Sahar wants to upload photos of the menu dishes. Where should the photos live?",
             },
             options: [
-              { fa: "D1", en: "D1" },
-              { fa: "KV", en: "KV" },
-              { fa: "R2", en: "R2" },
-              { fa: "داخل کد Worker", en: "Inside the Worker's code" },
+              { fa: "در KV، کنار تنظیمات سایت", en: "In KV, next to the site settings" },
+              { fa: "در R2، به‌صورت فایل", en: "In R2, as separate files" },
+              { fa: "در D1، داخل جدول منو", en: "In D1, inside the menu table" },
+              { fa: "داخل کد خود Worker", en: "Inside the Worker's own code" },
             ],
-            answer: 2,
+            answer: 1,
             explain: {
-              fa: "عکس فایل است، و R2 مخصوص ذخیره فایل (Object Storage) است. در D1 فقط آدرس یا نام فایل را کنار اطلاعات محصول نگه می‌دارید.",
-              en: "A photo is a file, and R2 is built for file (object) storage. In D1 you just keep the file's name or URL alongside the product data.",
+              fa: "عکس فایل است، و R2 مخصوص ذخیره فایل (Object Storage) است. در D1 فقط نام یا آدرس عکس را کنار اطلاعات غذا نگه می‌دارید.",
+              en: "A photo is a file, and R2 is built for file (object) storage. In D1 you just keep the photo's name or URL next to the dish data.",
             },
+            why: [
+              {
+                fa: "KV برای مقدارهای کوچک و خواندن سریع است، نه برای نگهداری فایل‌های عکس.",
+                en: "KV is for small values read fast, not for storing image files.",
+              },
+              {
+                fa: "درست است: R2 انبار فایل است و برای عکس و ویدیو ساخته شده.",
+                en: "Right: R2 is file storage, built for images and video.",
+              },
+              {
+                fa: "D1 برای داده جدولی است؛ در جدول منو فقط آدرس عکس را بگذارید، نه خود فایل را.",
+                en: "D1 is for table data; keep only the photo's address in the menu table, not the file.",
+              },
+              {
+                fa: "هر عکس جدید یعنی انتشار دوباره کد؛ و سحر نمی‌تواند خودش عکس اضافه کند.",
+                en: "Every new photo would mean redeploying code, and Sahar couldn't add photos herself.",
+              },
+            ],
           },
           {
             type: 'links',
@@ -546,6 +681,77 @@ dist
           },
         ],
       },
+      {
+        id: 'plan-b-iran',
+        title: { fa: "اگر Cloudflare برای مخاطبان شما فیلتر شد", en: "If Cloudflare is filtered for your audience" },
+        blocks: [
+          {
+            type: 'p',
+            text: {
+              fa: "Cloudflare برای مخاطب جهانی عالی است، ولی اگر مشتری‌های کافه سحر بیشتر در ایران هستند، باید یک **نقشه دوم** داشته باشید. خبر خوب این است که سایتی که درست ساخته شده، به یک سرویس قفل نیست: همان خروجی Build را می‌شود روی یک میزبان دیگر هم گذاشت.",
+              en: "Cloudflare is great for a global audience, but if most of Café Sahar's customers are in Iran, you need a **plan B**. The good news: a well-built site isn't locked to one service. The same build output can be placed on another host too.",
+            },
+          },
+          {
+            type: 'steps',
+            items: [
+              {
+                title: { fa: "خروجی را قابل‌حمل نگه دارید", en: "Keep the output portable" },
+                text: {
+                  fa: "بخش‌های ثابت سایت با `npm run build` به یک پوشه `dist` تبدیل می‌شوند که روی هر میزبان فایل ثابت کار می‌کند. از Agent بخواهید وابستگی غیرضروری به یک سرویس خاص اضافه نکند.",
+                  en: "The static parts of the site become a `dist` folder with `npm run build`, which works on any static host. Ask the agent not to add needless ties to one specific service.",
+                },
+              },
+              {
+                title: { fa: "یک میزبان ایرانی انتخاب کنید", en: "Pick an Iranian host" },
+                text: {
+                  fa: "سرویس‌هایی مثل **Liara** (میزبانی ابری و PaaS با ابزار خط فرمان `liara deploy`) و **همروش / Darkube** (PaaS برای اپ‌های کانتینری و Database مدیریت‌شده) وجود دارند. **ابرآروان** هم CDN و فضای ابری ارائه می‌دهد؛ فهرست دقیق خدماتش را از سایت خودش ببینید.",
+                  en: "Services such as **Liara** (cloud hosting and PaaS with a `liara deploy` command-line tool) and **Hamravesh / Darkube** (PaaS for container apps and managed databases) exist. **ArvanCloud** also offers CDN and cloud services; check its own site for the exact product list.",
+                },
+              },
+              {
+                title: { fa: "دامنه‌ها را جدا کنید", en: "Split the domains" },
+                text: {
+                  fa: "مثلاً `cafe-sahar.com` روی Cloudflare برای مخاطب جهانی، و `cafe-sahar.ir` جدا، رو به میزبان ایرانی. دو دامنه، دو میزبان؛ مگر اینکه با Geo-DNS کار کرده باشید، این دو را در یک Zone قاطی نکنید.",
+                  en: "For example `cafe-sahar.com` on Cloudflare for a global audience, and a separate `cafe-sahar.ir` pointing to the Iranian host. Two domains, two hosts; unless you know geo-DNS, don't mix them in one zone.",
+                },
+              },
+              {
+                title: { fa: "Backend را بسنجید", en: "Decide about the backend" },
+                text: {
+                  fa: "چیزی که روی Workers و D1 است، بین‌المللی می‌ماند. برای نسخه ایرانی یا از Database همان میزبان ایرانی استفاده کنید، یا آن نسخه را فقط‌خواندنی (مثلاً فقط منو و ساعت کاری) نگه دارید.",
+                  en: "Anything on Workers and D1 stays international. For the Iranian copy, either use the Iranian host's own database or keep that copy read-only (for example, just the menu and opening hours).",
+                },
+              },
+            ],
+          },
+          {
+            type: 'callout',
+            tone: 'warn',
+            title: { fa: "قبل از اعلام، از شبکه مخاطب تست کنید", en: "Test from your audience's network before announcing" },
+            text: {
+              fa: "دسترس‌پذیری هر سرویس از داخل ایران با زمان تغییر می‌کند. نسخه ایرانی را از چند اپراتور موبایل و اینترنت ثابت باز کنید. قوانین ثبت دامنه `.ir` را هم از سایت رسمی IRNIC (nic.ir) بخوانید؛ منابع مختلف درباره شرایطش یکسان نمی‌گویند.",
+              en: "Whether a service can be reached from inside Iran changes over time. Open the Iranian copy from several mobile and fixed-line providers. For `.ir` registration rules, read IRNIC's official site (nic.ir); sources don't agree on the current conditions.",
+            },
+          },
+          {
+            type: 'callout',
+            tone: 'tip',
+            text: {
+              fa: "یک نکته برای Agent: در فایل دستورالعمل پروژه بنویسید که سایت باید هم روی Workers و هم به شکل فایل‌های ثابت قابل انتشار باشد. این‌طوری نقشه دوم همیشه یک دستور فاصله دارد.",
+              en: "A tip for your agent: write in the project's instruction file that the site must deploy both to Workers and as plain static files. That keeps plan B one command away.",
+            },
+          },
+          {
+            type: 'links',
+            items: [
+              { label: 'Liara docs', url: 'https://docs.liara.ir/' },
+              { label: 'Hamravesh', url: 'https://hamravesh.com/' },
+              { label: 'IANA: .ir domain', url: 'https://www.iana.org/domains/root/db/ir' },
+            ],
+          },
+        ],
+      },
     ],
     connects: {
       fa: "Cloudflare به همه فصل‌های قبل وصل است: Nameserver دامنه شما می‌شود (فصل DNS)، کد را از GitHub برمی‌دارد (فصل GitHub) و نقش Hosting و Web Server را بازی می‌کند (فصل «وب چطور کار می‌کند»). در فصل‌های بعد Agent را می‌شناسیم و در پرده دوم یک API Token محدود از Cloudflare به آن می‌دهیم تا Worker، D1، KV و R2 را خودش راه بیندازد.",
@@ -556,7 +762,7 @@ dist
       { fa: "پروژه‌های جدید را روی Workers (با Static Assets) شروع کنید؛ Pages هنوز کار می‌کند.", en: "Start new projects on Workers (with static assets); Pages still works." },
       { fa: "D1 برای داده جدولی، KV برای خواندن سریع کلید-مقدار، R2 برای فایل.", en: "D1 for structured data, KV for fast key-value reads, R2 for files." },
       { fa: "سقف‌های رایگان را از صفحه رسمی بخوانید، نه از حافظه.", en: "Read free limits from the official page, not from memory." },
-      { fa: "اگر مخاطبتان در ایران است، از شبکه خود او تست کنید.", en: "If your audience is in Iran, test from their networks." },
+      { fa: "اگر مخاطبتان در ایران است، از شبکه خود او تست کنید و یک نقشه دوم (میزبان ایرانی و دامنه .ir جدا) آماده داشته باشید.", en: "If your audience is in Iran, test from their networks and keep a plan B ready: an Iranian host on a separate .ir domain." },
     ],
   },
 
@@ -565,13 +771,59 @@ dist
     slug: 'generative-vs-agentic',
     act: 1,
     icon: 'brain',
-    voice: '/audio/voice2.mp3',
+    voice: {
+      src: '/audio/voice2.mp3',
+      from: 270,
+      to: 437,
+      transcript:
+        "Agentic با Generativeهای ساده چه فرقی دارد؟ چیزی که حدود چهار سال پیش همه به عنوان هوش مصنوعی با آن برخورد داشتند، Generative AI بود. هوش مصنوعی در تعریف کلی، هر کاری است که توسط ماشین و بدون دخالت انسان انجام می‌شود. بعد مدل‌های زبانی آمدند و Generative AIها روی آن‌ها ساخته شدند و دنیای جدیدی باز شد. کمی بعدتر Agentic AIها آمدند؛ Agent یعنی مأمور و عامل. اینجا دیگر شما فقط سؤال نمی‌پرسید و جواب نمی‌گیرید: کاری را می‌خواهید و خودش انجامش می‌دهد، دقیق و از صفر تا صد.",
+    },
+    mission: {
+      outcome: {
+        fa: "فرق «جواب دادن» و «انجام دادن» را می‌فهمید و می‌دانید حلقه برنامه، اقدام و مشاهده یک Agent چطور کار می‌کند.",
+        en: "You'll understand the difference between answering and doing, and how an agent's plan, act and observe loop works.",
+      },
+      cafe: {
+        fa: "کافه سحر یک Agent استخدام می‌کند، نه فقط یک چت‌بات که کد تحویل بدهد.",
+        en: "Café Sahar hires an agent, not just a chatbot that hands over code.",
+      },
+    },
+    warmup: {
+      q: {
+        fa: "از فصل قبل: رزروهای میز کافه سحر را در کدام انبار Cloudflare نگه داریم؟",
+        en: "From last chapter: which Cloudflare store should keep Café Sahar's table bookings?",
+      },
+      options: [
+        { fa: "R2، چون برای نگهداری فایل‌ها ساخته شده", en: "R2, because it's built for storing files" },
+        { fa: "D1، چون داده جدولی و قابل جست‌وجوست", en: "D1, because it's searchable table data" },
+        { fa: "KV، چون خواندنش در همه‌جا خیلی سریع است", en: "KV, because reads are very fast everywhere" },
+      ],
+      answer: 1,
+      explain: {
+        fa: "رزروها ردیف‌های مرتبط با تاریخ، ساعت و نام‌اند و باید فیلتر و جست‌وجو شوند؛ این کار D1 است.",
+        en: "Bookings are related rows with a date, time and name that you filter and search; that's D1's job.",
+      },
+      why: [
+        {
+          fa: "R2 انبار فایل است؛ جست‌وجو بین رزروها در آن سخت و کند می‌شود.",
+          en: "R2 stores files; searching bookings there would be slow and awkward.",
+        },
+        {
+          fa: "درست است: D1 یک Database از نوع SQL برای داده جدولی است.",
+          en: "Right: D1 is an SQL database for table data.",
+        },
+        {
+          fa: "KV سریع است ولی Eventually Consistent؛ برای رزروی که نباید دوبار ثبت شود مناسب نیست.",
+          en: "KV is fast but eventually consistent; risky for bookings that must not double up.",
+        },
+      ],
+    },
     title: { fa: "از Generative AI تا Agentic AI", en: "From generative AI to agentic AI" },
     tagline: {
       fa: "فرق کسی که جواب می‌دهد با کسی که کار را انجام می‌دهد",
       en: "The difference between something that answers and something that does",
     },
-    minutes: 15,
+    minutes: 21,
     mascotLine: {
       fa: "یک چت‌بات به شما می‌گوید چطور سایت بسازید. من سایت را می‌سازم، تستش می‌کنم و بعد از شما می‌پرسم خوب شد یا نه.",
       en: "A chatbot tells you how to build a site. I build it, test it, and then ask you whether it looks right.",
@@ -679,8 +931,8 @@ dist
           {
             type: 'p',
             text: {
-              fa: "کلمه **Agent** یعنی «عامل» یا «مأمور»: کسی که از طرف شما کاری را پیش می‌برد. تفاوت را با یک مثال ببینید. اگر به یک چت‌بات بگویید «یک سایت معرفی برای کافه من بساز»، یک تکه کد و یک توضیح تحویل می‌گیرید. بعد خودتان باید فایل بسازید، کد را کپی کنید، اجرا کنید، خطاها را پیدا کنید، دوباره بپرسید و آخر سر هم خودتان منتشرش کنید.",
-              en: "**Agent** means someone who acts on your behalf. See the difference with an example. Ask a chatbot to 'build a website for my cafe' and you get a block of code and an explanation. Then you create the files, paste the code, run it, find the errors, ask again, and finally publish it yourself.",
+              fa: "کلمه **Agent** یعنی «عامل» یا «مأمور»: کسی که از طرف شما کاری را پیش می‌برد. تفاوت را با یک مثال ببینید. اگر به یک چت‌بات بگویید «یک سایت معرفی برای کافه سحر بساز»، یک تکه کد و یک توضیح تحویل می‌گیرید. بعد خودتان باید فایل بسازید، کد را کپی کنید، اجرا کنید، خطاها را پیدا کنید، دوباره بپرسید و آخر سر هم خودتان منتشرش کنید.",
+              en: "**Agent** means someone who acts on your behalf. See the difference with an example. Ask a chatbot to 'build a website for Café Sahar' and you get a block of code and an explanation. Then you create the files, paste the code, run it, find the errors, ask again, and finally publish it yourself.",
             },
           },
           {
@@ -780,8 +1032,8 @@ dist
             type: 'prompt',
             title: { fa: "از Agent بخواهید اول برنامه بدهد", en: "Ask the agent for a plan first" },
             text: {
-              fa: "هدف: یک صفحه معرفی یک‌صفحه‌ای برای کافه من با منو، ساعت کاری، نقشه و دکمه تماس، که روی موبایل عالی باشد. قبل از هر کاری، برنامه‌ات را قدم به قدم بنویس: چه فایل‌هایی می‌سازی، از چه ابزارهایی استفاده می‌کنی و چطور بررسی می‌کنی که کار درست انجام شده. هر جا اطلاعاتی از من لازم داری، فهرستش کن. تا برنامه را تأیید نکرده‌ام، شروع نکن.",
-              en: "Goal: a one-page site for my cafe with the menu, opening hours, a map and a call button, and it must look great on mobile. Before doing anything, write your plan step by step: which files you'll create, which tools you'll use, and how you'll check the work is correct. List anything you need from me. Don't start until I approve the plan.",
+              fa: "هدف: یک صفحه معرفی یک‌صفحه‌ای برای کافه سحر (cafe-sahar.ir) با منو، ساعت کاری، نقشه و دکمه تماس، که روی موبایل عالی باشد. قبل از هر کاری، برنامه‌ات را قدم به قدم بنویس: چه فایل‌هایی می‌سازی، از چه ابزارهایی استفاده می‌کنی و چطور بررسی می‌کنی که کار درست انجام شده. هر جا اطلاعاتی از من لازم داری، فهرستش کن. تا برنامه را تأیید نکرده‌ام، شروع نکن.",
+              en: "Goal: a one-page site for Café Sahar (cafe-sahar.ir) with the menu, opening hours, a map and a call button, and it must look great on mobile. Before doing anything, write your plan step by step: which files you'll create, which tools you'll use, and how you'll check the work is correct. List anything you need from me. Don't start until I approve the plan.",
             },
           },
           {
@@ -791,16 +1043,34 @@ dist
               en: "Which statement about agentic AI is most accurate?",
             },
             options: [
-              { fa: "Agentic AI یک فناوری کاملاً جدا از مدل‌های زبانی است.", en: "Agentic AI is a technology completely separate from language models." },
-              { fa: "Agent معمولاً روی یک مدل زبانی ساخته می‌شود و با ابزارها و یک حلقه برنامه-اقدام-مشاهده کار را انجام می‌دهد.", en: "An agent is usually built on a language model and gets work done with tools and a plan-act-observe loop." },
-              { fa: "Agent هیچ‌وقت اشتباه نمی‌کند چون خودش تست می‌کند.", en: "An agent never makes mistakes because it tests itself." },
-              { fa: "Agent فقط به سؤال‌ها جواب متنی می‌دهد.", en: "An agent only gives text answers to questions." },
+              { fa: "روی مدل زبانی ساخته می‌شود و با ابزار و حلقه کار می‌کند", en: "It runs on a language model, using tools and a work loop" },
+              { fa: "یک فناوری کاملاً جداست و هیچ ربطی به مدل‌های زبانی ندارد", en: "It's a separate technology with no link to language models" },
+              { fa: "هرگز اشتباه نمی‌کند، چون همه کارهایش را خودش تست می‌کند", en: "It never makes mistakes, because it tests all its own work" },
+              { fa: "فقط به سؤال‌ها جواب متنی می‌دهد و هیچ ابزاری اجرا نمی‌کند", en: "It only answers questions in text and never runs any tools" },
             ],
-            answer: 1,
+            answer: 0,
             explain: {
               fa: "مدل زبانی مغز Agent است؛ ابزارها و حلقه اقدام آن را عامل می‌کنند. با این حال Agent هم اشتباه می‌کند و بازبینی شما لازم است.",
               en: "The language model is the agent's brain; tools and the action loop make it an agent. It still makes mistakes, so your review matters.",
             },
+            why: [
+              {
+                fa: "درست است: مدل زبانی فکر می‌کند، ابزارها اجرا می‌کنند و حلقه تا تمام شدن کار می‌چرخد.",
+                en: "Right: the model thinks, the tools act, and the loop runs until the job is done.",
+              },
+              {
+                fa: "Agentها معمولاً روی همان مدل‌های زبانی ساخته می‌شوند؛ جدا نیستند.",
+                en: "Agents are usually built on those same language models; they aren't separate.",
+              },
+              {
+                fa: "تست خطا را کم می‌کند، ولی توهم و برداشت اشتباه هنوز پیش می‌آید؛ بازبینی شما لازم است.",
+                en: "Tests reduce errors, but hallucinations and misunderstandings still happen; you still review.",
+              },
+              {
+                fa: "این توصیف یک چت‌بات Generative است؛ Agent ابزار اجرا می‌کند و کار را انجام می‌دهد.",
+                en: "That describes a generative chatbot; an agent runs tools and does the work.",
+              },
+            ],
           },
           {
             type: 'links',
@@ -813,8 +1083,8 @@ dist
       },
     ],
     connects: {
-      fa: "تا اینجا زیرساخت را شناختیم: وب، دامنه، GitHub و Cloudflare. حالا فهمیدیم چه کسی قرار است با این زیرساخت کار کند: یک Agent که هدف می‌گیرد و با ابزارها اجرا می‌کند. در فصل بعد دو Agent معروف، Codex و Claude Code را می‌شناسیم، و در پرده دوم ابزارهایش (GitHub و Cloudflare) را به آن وصل می‌کنیم.",
-      en: "So far we've met the infrastructure: the web, domains, GitHub and Cloudflare. Now we know who will work with it: an agent that takes a goal and executes it with tools. Next we meet two well-known agents, Codex and Claude Code, and in Act II we connect their tools (GitHub and Cloudflare).",
+      fa: "تا اینجا زیرساخت را شناختیم: وب، دامنه، GitHub و Cloudflare. حالا فهمیدیم چه کسی قرار است با این زیرساخت کار کند: یک Agent که هدف می‌گیرد و با ابزارها اجرا می‌کند. در فصل بعد دو مسیر اصلی ساخت را می‌شناسیم، Codex و Lovable، به همراه Claude Code، و در پرده دوم ابزارها (GitHub و Cloudflare) را به Agent وصل می‌کنیم.",
+      en: "So far we've met the infrastructure: the web, domains, GitHub and Cloudflare. Now we know who will work with it: an agent that takes a goal and executes it with tools. Next we meet the two main build paths, Codex and Lovable, plus Claude Code, and in Act II we connect the tools (GitHub and Cloudflare) to the agent.",
     },
     takeaways: [
       { fa: "Generative AI جواب می‌دهد و می‌سازد؛ Agentic AI هدف را می‌گیرد و کار را انجام می‌دهد.", en: "Generative AI answers and creates; agentic AI takes a goal and does the work." },
@@ -824,63 +1094,191 @@ dist
     ],
   },
 
-  // ───────────────────────────────────────────────────────────── Meet the agents
+  // ───────────────────────────────────────────────────────────── Meet the agents (Codex, Lovable and friends)
   {
     slug: 'meet-the-agents',
     act: 1,
     icon: 'robot',
-    voice: '/audio/voice2.mp3',
-    title: { fa: "آشنایی با Codex و Claude Code", en: "Meet Codex and Claude Code" },
-    tagline: {
-      fa: "دو همکار قدرتمند برنامه‌نویسی؛ یکی را انتخاب کنید و عمیق یاد بگیرید",
-      en: "Two powerful coding teammates: pick one and learn it deeply",
+    voice: {
+      src: '/audio/voice2.mp3',
+      from: 215,
+      to: 275,
+      transcript:
+        "برای Setup نیاز به یک سرویس هوش مصنوعی داریم؛ آن هم حالتی که از Agentic AI استفاده می‌کنید، نه یک Generative AI ساده. معروف‌ترینشان، اگر خیلی کلی بخواهم بگویم، ChatGPT Codex یا OpenAI Codex و Claude Code هستند. من خودم با Claude خیلی راحت‌ترم، چون واقعاً عالی کار می‌کند؛ ولی در ایران دسترسی به آن خیلی سخت است. OpenAI هنوز این‌طور نشده، پس سراغ Codex می‌رویم. در مفهوم و ساختار، کلیت این‌ها تفاوت چندانی با هم ندارد.",
     },
-    minutes: 14,
+    title: { fa: "Codex، Lovable و دوستان", en: "Codex, Lovable and friends" },
+    tagline: {
+      fa: "دو مسیر اصلی ساخت: Agent کدنویس یا سازنده اپ؛ یکی را انتخاب کنید و عمیق یاد بگیرید",
+      en: "Two main ways to build: a coding agent or an app builder. Pick one and learn it deeply",
+    },
+    minutes: 23,
     mascotLine: {
-      fa: "من خانواده بزرگی دارم! بیایید با دو تا از معروف‌ترین پسرعموهایم آشنا شوید.",
-      en: "I come from a big family! Let me introduce two of my best-known cousins.",
+      fa: "من خانواده بزرگی دارم! امروز دو تا از کاربردی‌ترین‌هایشان را می‌شناسید: Codex که در کد شما کار می‌کند، و Lovable که از یک گفت‌وگو اپ زنده می‌سازد.",
+      en: "I come from a big family! Today you meet two of the most useful members: Codex, which works in your code, and Lovable, which turns a conversation into a live app.",
+    },
+    mission: {
+      outcome: {
+        fa: "می‌دانید Codex و Lovable هر کدام چطور کار می‌کنند، کد کجا می‌ماند، میزبانی با کیست و کدام مسیر به پروژه شما می‌خورد.",
+        en: "You'll know how Codex and Lovable each work, where the code lives, who handles hosting, and which path fits your project.",
+      },
+      cafe: {
+        fa: "سحر مسیر ساخت کافه را انتخاب می‌کند: Codex یا Lovable.",
+        en: "Sahar chooses the café's build path: Codex or Lovable.",
+      },
+    },
+    warmup: {
+      q: {
+        fa: "از فصل قبل: چه چیزی یک Agent را از یک چت‌بات ساده جدا می‌کند؟",
+        en: "From last chapter: what sets an agent apart from a plain chatbot?",
+      },
+      options: [
+        { fa: "یک مدل زبانی کاملاً متفاوت و جدید", en: "A completely different, newer language model" },
+        { fa: "ابزارها و حلقه برنامه، اقدام و مشاهده", en: "Tools and a plan, act and observe loop" },
+        { fa: "اینکه هرگز و در هیچ کاری اشتباه نمی‌کند", en: "The fact that it never makes mistakes" },
+      ],
+      answer: 1,
+      explain: {
+        fa: "Agent معمولاً روی همان نوع مدل زبانی ساخته می‌شود؛ ابزارها و حلقه کاری آن را عامل می‌کنند.",
+        en: "An agent usually runs on the same kind of language model; tools and the work loop make it an agent.",
+      },
+      why: [
+        {
+          fa: "مغز هر دو معمولاً یک مدل زبانی است؛ تفاوت در لایه دور آن است.",
+          en: "Both usually have a language model as the brain; the difference is the layer around it.",
+        },
+        {
+          fa: "درست است: ابزار برای اجرا و حلقه برای بررسی نتیجه و ادامه دادن.",
+          en: "Right: tools to act, and a loop to check the result and keep going.",
+        },
+        {
+          fa: "Agentها هم اشتباه می‌کنند؛ به همین دلیل بازبینی شما لازم است.",
+          en: "Agents make mistakes too; that's why your review matters.",
+        },
+      ],
     },
     sections: [
       {
-        id: 'codex',
-        title: { fa: "OpenAI Codex", en: "OpenAI Codex" },
+        id: 'two-paths',
+        title: { fa: "دو مسیر برای ساختن", en: "Two ways to build" },
         blocks: [
           {
             type: 'p',
             text: {
-              fa: "**Codex** Agent برنامه‌نویسی شرکت OpenAI است و روی مدل‌های همین شرکت کار می‌کند. اگر حساب ChatGPT دارید، به احتمال زیاد به Codex هم دسترسی دارید؛ میزان استفاده به پلن شما بستگی دارد و پلن‌های پولی سقف بالاتر و امکانات بیشتری دارند. Codex در چند جا در دسترس است:",
-              en: "**Codex** is OpenAI's coding agent, running on OpenAI's models. If you have a ChatGPT account you very likely have access to Codex too; how much you can use depends on your plan, and paid plans get higher limits and more features. Codex is available in several places:",
+              fa: "برای ساختن یک وب‌سایت با هوش مصنوعی دو مسیر اصلی وجود دارد. در مسیر اول یک **Agent کدنویس** مثل **Codex** داخل Repository شما کار می‌کند: کد می‌نویسد، تست می‌گیرد و Pull Request باز می‌کند، و شما سایت را روی میزبانی که خودتان انتخاب کرده‌اید (در این دوره Cloudflare) منتشر می‌کنید. در مسیر دوم یک **سازنده اپ** مثل **Lovable** از یک گفت‌وگو، یک اپ زنده با پیش‌نمایش می‌سازد و میزبانی، Database و انتشار را هم خودش فراهم می‌کند.",
+              en: "There are two main ways to build a website with AI. In the first, a **coding agent** such as **Codex** works inside your repository: it writes code, runs tests and opens pull requests, and you publish the site on a host you choose (Cloudflare in this course). In the second, an **app builder** such as **Lovable** turns a conversation into a live app with a preview, and also provides hosting, a database and publishing.",
+            },
+          },
+          {
+            type: 'callout',
+            tone: 'why',
+            title: { fa: "چرا هر دو را یاد می‌گیریم؟", en: "Why learn both?" },
+            text: {
+              fa: "چون هر کدام جایی می‌درخشد. Lovable سریع‌ترین راه از ایده تا یک اپ قابل‌دیدن است؛ Codex بیشترین کنترل و کمترین وابستگی را می‌دهد. خیلی از پروژه‌های واقعی هر دو را ترکیب می‌کنند: نمونه اولیه در Lovable، انتقال به GitHub، ادامه با Codex و انتشار روی Cloudflare. در فصل‌های بعد هر جا قدم‌ها فرق کنند، هر دو مسیر را کنار هم می‌بینید.",
+              en: "Because each shines somewhere. Lovable is the fastest way from an idea to an app you can see; Codex gives the most control and the least lock-in. Many real projects combine them: prototype in Lovable, move to GitHub, continue with Codex and deploy on Cloudflare. In later chapters, wherever the steps differ, you'll see both paths side by side.",
+            },
+          },
+        ],
+      },
+      {
+        id: 'codex',
+        title: { fa: "OpenAI Codex: Agent داخل کد شما", en: "OpenAI Codex: an agent inside your code" },
+        blocks: [
+          {
+            type: 'p',
+            text: {
+              fa: "**Codex** Agent برنامه‌نویسی شرکت OpenAI است و روی مدل‌های همین شرکت کار می‌کند. طبق راهنمای رسمی OpenAI، Codex در همه پلن‌های ChatGPT، حتی Free و Go، در دسترس است و سقف استفاده به پلن بستگی دارد. **Codex Cloud** (اجرای کارها روی کامپیوترهای OpenAI) برای Plus و پلن‌های بالاتر است. Codex را در این جاها پیدا می‌کنید:",
+              en: "**Codex** is OpenAI's coding agent, running on OpenAI's models. According to OpenAI's help center, Codex is included in all ChatGPT plans, Free and Go too, with usage limits that depend on the plan. **Codex Cloud** (running tasks on OpenAI's machines) is for Plus and higher plans. You'll find Codex in these places:",
             },
           },
           {
             type: 'list',
             items: [
               {
-                fa: "**Codex در ChatGPT (Cloud):** کار را از داخل ChatGPT به Codex می‌سپارید و روی کامپیوترهای OpenAI اجرا می‌شود، حتی وقتی کامپیوتر شما خاموش است. به Repoهای GitHub شما وصل می‌شود و نتیجه را به شکل Pull Request تحویل می‌دهد.",
-                en: "**Codex in ChatGPT (cloud):** you hand a task to Codex from ChatGPT and it runs on OpenAI's computers, even while yours is off. It connects to your GitHub repos and delivers results as pull requests.",
+                fa: "**Codex در وب و ابر:** کار را می‌سپارید و روی کامپیوترهای OpenAI اجرا می‌شود، حتی وقتی کامپیوتر شما خاموش است. به Repositoryهای GitHub وصل می‌شود و نتیجه را به شکل Pull Request تحویل می‌دهد.",
+                en: "**Codex on the web and in the cloud:** you hand off a task and it runs on OpenAI's machines, even while yours is off. It connects to your GitHub repositories and delivers results as pull requests.",
               },
               {
-                fa: "**Codex CLI:** نسخه خط فرمان که روی کامپیوتر خودتان، داخل پوشه پروژه اجرا می‌شود.",
-                en: "**Codex CLI:** the command-line version that runs on your own computer, inside your project folder.",
+                fa: "**اپ دسکتاپ ChatGPT (حالت Codex):** کار با Codex کنار بقیه گفت‌وگوهای ChatGPT.",
+                en: "**The ChatGPT desktop app (Codex mode):** work with Codex alongside your other ChatGPT conversations.",
               },
               {
-                fa: "**افزونه IDE:** داخل VS Code و ویرایشگرهای مشابه، کنار کدتان.",
-                en: "**IDE extension:** inside VS Code and similar editors, right next to your code.",
+                fa: "**Codex CLI و افزونه IDE:** روی کامپیوتر خودتان، در ترمینال یا داخل VS Code و ویرایشگرهای مشابه.",
+                en: "**Codex CLI and the IDE extension:** on your own computer, in a terminal or inside VS Code and similar editors.",
               },
             ],
           },
           {
             type: 'p',
             text: {
-              fa: "Codex دستورالعمل‌های دائمی پروژه را از فایلی به نام `AGENTS.md` در ریشه Repo می‌خواند: اینکه پروژه چیست، چطور تست می‌شود و چه قانون‌هایی دارد.",
-              en: "Codex reads standing project instructions from a file called `AGENTS.md` at the root of the repo: what the project is, how to test it, and its rules.",
+              fa: "Codex دستورالعمل‌های دائمی پروژه را از فایل `AGENTS.md` در ریشه Repository می‌خواند و Skillها را از پوشه `.agents/skills`. **میزبانی جزو Codex نیست:** کد در GitHub شما می‌ماند و خودتان آن را روی Cloudflare منتشر می‌کنید؛ همان مسیری که این دوره قدم‌به‌قدم می‌سازد.",
+              en: "Codex reads standing project instructions from `AGENTS.md` at the root of the repository, and skills from the `.agents/skills` folder. **Hosting isn't part of Codex:** the code stays in your GitHub and you publish it on Cloudflare yourself, which is exactly the path this course builds step by step.",
+            },
+          },
+        ],
+      },
+      {
+        id: 'lovable',
+        title: { fa: "Lovable: از گفت‌وگو تا اپ زنده", en: "Lovable: from a conversation to a live app" },
+        blocks: [
+          {
+            type: 'p',
+            text: {
+              fa: "**Lovable** یک سازنده اپ با هوش مصنوعی است: در چت توضیح می‌دهید چه می‌خواهید و Lovable Frontend و در صورت نیاز Backend را می‌سازد، با یک پیش‌نمایش زنده که همان لحظه می‌بینید. هر تغییر به شکل یک نسخه ذخیره می‌شود و می‌توانید به هر نسخه قبلی برگردید.",
+              en: "**Lovable** is an AI app builder: you describe what you want in chat, and Lovable builds the frontend and, when needed, the backend, with a live preview you see right away. Every change is saved as a version you can roll back to.",
+            },
+          },
+          {
+            type: 'list',
+            items: [
+              {
+                fa: "**سه حالت گفت‌وگو:** **Chat** برای مشورت بدون تغییر کد، **Plan** که برنامه‌ای قابل‌ویرایش می‌نویسد تا تأییدش کنید، و **Build** که تغییر را از اول تا آخر پیاده و بررسی می‌کند.",
+                en: "**Three chat modes:** **Chat** to discuss without changing code, **Plan** to write an editable plan for you to approve, and **Build** to implement and verify a change end to end.",
+              },
+              {
+                fa: "**ویرایش دیداری:** با نوار ابزار پیش‌نمایش، یک بخش از صفحه را انتخاب می‌کنید و تغییرش را توضیح می‌دهید یا متن را همان‌جا ویرایش می‌کنید.",
+                en: "**Visual editing:** with the preview toolbar you select part of the page and describe the change, or edit text in place.",
+              },
+              {
+                fa: "**Instructions:** معادل `AGENTS.md`؛ متن دستورالعملی که در سطح Workspace، پروژه یا شخص همیشه در نظر گرفته می‌شود.",
+                en: "**Instructions:** the equivalent of `AGENTS.md`: instruction text kept at workspace, project or personal level and always taken into account.",
+              },
+              {
+                fa: "**Backend داخلی:** Database، ورود کاربران، فایل و توابع سمت سرور، بر پایه Supabase. می‌توانید Supabase خودتان را هم وصل کنید.",
+                en: "**Built-in backend:** database, sign-in, file storage and server functions, built on Supabase. You can also connect your own Supabase.",
+              },
+              {
+                fa: "**GitHub دوطرفه:** تغییرات Lovable به GitHub می‌رود و تغییراتی که در GitHub روی Branch فعال Push شود، به Lovable برمی‌گردد. پس کد مال شماست.",
+                en: "**Two-way GitHub sync:** changes in Lovable go to GitHub, and changes pushed to the active branch in GitHub come back into Lovable. The code is yours.",
+              },
+              {
+                fa: "**انتشار:** با دکمه Publish روی آدرسی مثل `cafe-sahar.lovable.app` منتشر می‌شود و قبلش بررسی امنیتی خودکار اجرا می‌شود. دامنه اختصاصی مثل `cafe-sahar.ir` در پلن‌های پولی ممکن است.",
+                en: "**Publishing:** the Publish button puts it on an address like `cafe-sahar.lovable.app`, after automatic security checks. A custom domain such as `cafe-sahar.ir` needs a paid plan.",
+              },
+            ],
+          },
+          {
+            type: 'callout',
+            tone: 'warn',
+            title: { fa: "هزینه با «Credit» حساب می‌شود", en: "Costs are counted in credits" },
+            text: {
+              fa: "Lovable یک پلن رایگان با Credit روزانه دارد و پلن‌های پولی Credit ماهانه می‌دهند. نکته مهم: همان Credit هم برای **ساختن** خرج می‌شود و هم برای **اجرای** اپ (میزبانی Backend و امکانات هوش مصنوعی داخل اپ). قبل از شروع پروژه جدی، صفحه قیمت رسمی را بخوانید و مصرف Credit را زیر نظر بگیرید.",
+              en: "Lovable has a free plan with daily credits, and paid plans give monthly credits. The key point: the same credits pay for **building** and for **running** the app (backend hosting and in-app AI features). Before a serious project, read the official pricing page and keep an eye on credit use.",
+            },
+          },
+          {
+            type: 'callout',
+            tone: 'fix',
+            title: { fa: "Lovable یعنی قفل شدن؟ نه لزوماً", en: "Does Lovable lock you in? Not necessarily" },
+            text: {
+              fa: "خیلی‌ها فکر می‌کنند هر چه در Lovable بسازید همان‌جا گیر می‌افتد. مستندات رسمی Lovable می‌گوید می‌توانید کد را صادر کنید و روی میزبان دیگری، از جمله Cloudflare، منتشر کنید. فقط یادتان باشد بعد از رفتن، مسئولیت استقرار، امنیت و پشتیبان‌گیری با خودتان است، و قبل از جابه‌جایی کامل یک انتشار آزمایشی بگیرید.",
+              en: "Many people assume whatever you build in Lovable is stuck there. Lovable's official docs say you can export the code and host it elsewhere, including on Cloudflare. Just remember that once you leave, deployment, security and backups become your job, and do a test deploy before moving for good.",
             },
           },
         ],
       },
       {
         id: 'claude-code',
-        title: { fa: "Claude Code", en: "Claude Code" },
+        title: { fa: "Claude Code و دیگر دوستان", en: "Claude Code and other friends" },
         blocks: [
           {
             type: 'callout',
@@ -894,15 +1292,8 @@ dist
           {
             type: 'p',
             text: {
-              fa: "**Claude Code** کد شما را می‌خواند، فایل‌ها را ویرایش می‌کند، دستور اجرا می‌کند و با ابزارهای توسعه شما کار می‌کند. آن را در **ترمینال**، داخل **IDE** (افزونه‌های VS Code و JetBrains)، در **اپ دسکتاپ** و در **مرورگر** (claude.ai/code) که روی کامپیوترهای ابری Anthropic اجرا می‌شود، پیدا می‌کنید. Claude Code در اشتراک‌های Pro و Max شرکت Anthropic گنجانده شده و سقف استفاده‌اش با استفاده از Claude در همان حساب مشترک است.",
-              en: "**Claude Code** reads your codebase, edits files, runs commands and works with your development tools. You'll find it in the **terminal**, inside your **IDE** (VS Code and JetBrains extensions), in a **desktop app**, and in the **browser** (claude.ai/code), where it runs on Anthropic's cloud machines. Claude Code is included in Anthropic's Pro and Max subscriptions, with usage limits shared with your Claude usage on the same account.",
-            },
-          },
-          {
-            type: 'p',
-            text: {
-              fa: "Claude Code دستورالعمل‌های پروژه را از فایل `CLAUDE.md` می‌خواند، و از **Agent Skills** پشتیبانی می‌کند: پوشه‌هایی با یک فایل `SKILL.md` که دانش و روش کار تکرارشونده را به Agent یاد می‌دهند. در پرده سوم سراغ Skillها می‌رویم.",
-              en: "Claude Code reads project instructions from `CLAUDE.md`, and supports **Agent Skills**: folders with a `SKILL.md` file that teach the agent reusable know-how and workflows. We cover skills in Act III.",
+              fa: "**Claude Code** یک Agent کدنویس قوی است، هم‌خانواده Codex: کد شما را می‌خواند، فایل‌ها را ویرایش می‌کند و دستور اجرا می‌کند. آن را در **ترمینال**، داخل **IDE** (VS Code و JetBrains)، در **اپ دسکتاپ** و در **وب** پیدا می‌کنید. Claude Code در اشتراک‌های **Pro، Max و Ultra** و پلن‌های **Team و Enterprise** هست و سقف استفاده‌اش با استفاده از Claude در همان حساب مشترک است. دستورالعمل‌ها را از `CLAUDE.md` می‌خواند، `AGENTS.md` را هم می‌تواند بخواند و از Skillها پشتیبانی می‌کند.",
+              en: "**Claude Code** is a strong coding agent in the same family as Codex: it reads your code, edits files and runs commands. You'll find it in the **terminal**, inside your **IDE** (VS Code and JetBrains), in a **desktop app** and on the **web**. Claude Code comes with **Pro, Max and Ultra** subscriptions and **Team and Enterprise** plans, with usage limits shared with your Claude usage on the same account. It reads instructions from `CLAUDE.md`, can also read `AGENTS.md`, and supports skills.",
             },
           },
           {
@@ -910,8 +1301,8 @@ dist
             tone: 'tip',
             title: { fa: "و دیگران", en: "And others" },
             text: {
-              fa: "Agentهای خوب دیگری هم هستند؛ مثلاً **GitHub Copilot coding agent** که مستقیم داخل GitHub روی Issueها کار می‌کند، **Cursor** که یک ویرایشگر کد با Agent داخلی است، و **Gemini CLI** از Google. مفاهیم این دوره روی همه آن‌ها صدق می‌کند.",
-              en: "There are other good agents too, such as **GitHub Copilot coding agent**, which works on issues directly inside GitHub, **Cursor**, a code editor with a built-in agent, and Google's **Gemini CLI**. The concepts in this course apply to all of them.",
+              fa: "**Grok Build** از xAI یک Agent ترمینالی است که فعلاً می‌شود رایگان امتحانش کرد. **DeepSeek** مدل‌های خیلی ارزانی دارد که داخل Agentهای متن‌باز مثل OpenCode، Cline و Aider، و حتی خود Claude Code، استفاده می‌شوند. GitHub Copilot و Cursor هم گزینه‌های رایج‌اند. در فصل بعد هر پنج پلتفرم را کنار هم مقایسه می‌کنیم.",
+              en: "**Grok Build** from xAI is a terminal agent you can try for free for now. **DeepSeek** has very low-cost models used inside open-source agents such as OpenCode, Cline and Aider, and even inside Claude Code. GitHub Copilot and Cursor are common options too. Next chapter compares all five platforms side by side.",
             },
           },
         ],
@@ -924,49 +1315,68 @@ dist
             type: 'compare',
             headers: [
               { fa: "", en: "" },
-              { fa: "OpenAI Codex", en: "OpenAI Codex" },
+              { fa: "Codex", en: "Codex" },
+              { fa: "Lovable", en: "Lovable" },
               { fa: "Claude Code", en: "Claude Code" },
             ],
             rows: [
               [
-                { fa: "سازنده و مدل", en: "Maker and model" },
-                { fa: "OpenAI، مدل‌های GPT", en: "OpenAI, GPT models" },
-                { fa: "Anthropic، مدل‌های Claude", en: "Anthropic, Claude models" },
+                { fa: "نوع", en: "Kind" },
+                { fa: "Agent کدنویس", en: "Coding agent" },
+                { fa: "سازنده اپ", en: "App builder" },
+                { fa: "Agent کدنویس", en: "Coding agent" },
               ],
               [
-                { fa: "کجا اجرا می‌شود", en: "Where it runs" },
-                { fa: "ChatGPT (ابری)، CLI، افزونه IDE", en: "ChatGPT (cloud), CLI, IDE extension" },
-                { fa: "ترمینال، IDE، اپ دسکتاپ، وب (ابری)", en: "Terminal, IDE, desktop app, web (cloud)" },
+                { fa: "کجا کار می‌کنید", en: "Where you work" },
+                { fa: "وب، اپ دسکتاپ، CLI، IDE", en: "Web, desktop app, CLI, IDE" },
+                { fa: "چت و پیش‌نمایش زنده در مرورگر", en: "Chat and live preview in the browser" },
+                { fa: "ترمینال، IDE، دسکتاپ، وب", en: "Terminal, IDE, desktop, web" },
               ],
               [
-                { fa: "اتصال به GitHub", en: "GitHub connection" },
-                { fa: "اتصال حساب GitHub در ChatGPT؛ نتیجه به شکل Pull Request", en: "Connect GitHub in ChatGPT; results as pull requests" },
-                { fa: "Git و GitHub روی کامپیوتر شما، یا اتصال GitHub در نسخه وب؛ Branch و Pull Request", en: "Git and GitHub on your machine, or connect GitHub in the web version; branches and pull requests" },
+                { fa: "کد کجا می‌ماند", en: "Where the code lives" },
+                { fa: "Repository شما در GitHub", en: "Your GitHub repository" },
+                { fa: "در Lovable، با همگام‌سازی دوطرفه GitHub", en: "In Lovable, with two-way GitHub sync" },
+                { fa: "Repository شما در GitHub", en: "Your GitHub repository" },
+              ],
+              [
+                { fa: "Backend و Database", en: "Backend and database" },
+                { fa: "خودتان انتخاب می‌کنید (مثلاً D1)", en: "You choose (for example D1)" },
+                { fa: "داخلی، بر پایه Supabase", en: "Built in, based on Supabase" },
+                { fa: "خودتان انتخاب می‌کنید", en: "You choose" },
+              ],
+              [
+                { fa: "میزبانی", en: "Hosting" },
+                { fa: "ندارد؛ Cloudflare یا هر میزبان دیگر", en: "Not included: Cloudflare or any host" },
+                { fa: "دارد: lovable.app، دامنه اختصاصی با پلن پولی", en: "Included: lovable.app, custom domain on paid plans" },
+                { fa: "ندارد؛ Cloudflare یا هر میزبان دیگر", en: "Not included: Cloudflare or any host" },
               ],
               [
                 { fa: "فایل دستورالعمل", en: "Instruction file" },
                 { fa: "AGENTS.md", en: "AGENTS.md" },
-                { fa: "CLAUDE.md", en: "CLAUDE.md" },
+                { fa: "Instructions در تنظیمات پروژه", en: "Instructions in project settings" },
+                { fa: "CLAUDE.md (و AGENTS.md)", en: "CLAUDE.md (and AGENTS.md)" },
               ],
               [
-                { fa: "دسترسی", en: "Access" },
-                { fa: "همراه حساب ChatGPT؛ سقف بسته به پلن", en: "With a ChatGPT account; limits depend on plan" },
-                { fa: "همراه اشتراک Pro یا Max، یا با API", en: "With a Pro or Max subscription, or via the API" },
+                { fa: "هزینه", en: "Cost" },
+                { fa: "همراه پلن ChatGPT؛ سقف بسته به پلن", en: "With a ChatGPT plan; limits depend on plan" },
+                { fa: "Credit؛ هم برای ساختن، هم برای اجرا", en: "Credits, for building and for running" },
+                { fa: "همراه پلن‌های Claude", en: "With Claude plans" },
               ],
               [
                 { fa: "مناسب برای", en: "Good for" },
-                { fa: "سپردن چند کار موازی در ابر و گرفتن Pull Request", en: "Handing off parallel tasks in the cloud and getting pull requests back" },
-                { fa: "کار تعاملی و عمیق روی پروژه، کنار شما در ترمینال یا IDE", en: "Interactive, in-depth work on a project, alongside you in the terminal or IDE" },
+                { fa: "کنترل کامل و انتشار روی زیرساخت خودتان", en: "Full control and your own infrastructure" },
+                { fa: "سریع‌ترین راه از ایده تا اپ قابل‌دیدن", en: "The fastest way from idea to a visible app" },
+                { fa: "کار تعاملی و عمیق روی کد", en: "Interactive, in-depth work on code" },
               ],
             ],
           },
           {
             type: 'callout',
             tone: 'warn',
-            title: { fa: "دسترسی منطقه‌ای", en: "Regional availability" },
+            title: { fa: "دسترسی منطقه‌ای و قوانین", en: "Regional access and terms" },
             text: {
-              fa: "هر دو شرکت فهرستی از کشورهای پشتیبانی‌شده دارند و این فهرست ممکن است تغییر کند. به تجربه نویسنده دوره، دسترسی به Claude از ایران سخت‌تر است و ChatGPT و Codex راحت‌تر در دسترس‌اند. قبل از خرید اشتراک، فهرست کشورهای پشتیبانی‌شده هر سرویس را چک کنید و از قوانین آن پیروی کنید. هر کدام که برای شما در دسترس است را انتخاب کنید؛ تقریباً همه مفاهیم این دوره برای هر دو یکسان است.",
-              en: "Both companies publish a list of supported countries, and it can change. In the course author's experience, Claude is harder to reach from Iran while ChatGPT and Codex are easier. Before you buy a subscription, check each service's supported-countries list and follow its terms. Use whichever one is available to you; almost every concept in this course works the same for both.",
+              fa: "طبق صفحه‌های رسمی، ایران در فهرست کشورهای پشتیبانی‌شده OpenAI و Anthropic نیست، و قوانین Lovable استفاده از کشورهای تحت تحریم جامع را مجاز نمی‌داند. این فهرست‌ها ممکن است تغییر کنند؛ قبل از ساختن حساب یا خرید اشتراک، شرایط و فهرست کشورهای هر سرویس را خودتان بخوانید و از آن پیروی کنید. مفاهیم این دوره برای همه این ابزارها یکسان است، و در فصل بعد گزینه‌هایی مثل DeepSeek را هم می‌بینید که شرایط متفاوتی دارند.",
+              en: "According to their official pages, Iran is not on OpenAI's or Anthropic's supported-countries lists, and Lovable's terms don't allow use from countries under comprehensive sanctions. These lists can change; before creating an account or buying a plan, read each service's terms and country list yourself and follow them. The ideas in this course are the same for all these tools, and next chapter also covers options such as DeepSeek that have different conditions.",
             },
           },
         ],
@@ -978,17 +1388,91 @@ dist
           {
             type: 'p',
             text: {
-              fa: "جواب کوتاه: هر کدام که به آن دسترسی دارید و راحت‌ترید. تفاوت این دو در مفهوم و ساختار زیاد نیست؛ هر دو هدف می‌گیرند، برنامه می‌ریزند، کد می‌نویسند، تست می‌گیرند و با GitHub کار می‌کنند. چیزی که واقعاً فرق ایجاد می‌کند، این است که **یکی را عمیق یاد بگیرید**: دستورهایش، فایل دستورالعملش، روش دادن دسترسی و محدودیت‌هایش.",
-              en: "Short answer: whichever one you can access and feel comfortable with. The two don't differ much in concept or structure; both take goals, plan, write code, run tests and work with GitHub. What really makes the difference is **learning one deeply**: its commands, its instruction file, how to grant it access, and its limits.",
+              fa: "جواب کوتاه: اگر می‌خواهید زود یک چیز زنده ببینید و از ترمینال و میزبانی فرار می‌کنید، Lovable. اگر کنترل کامل، کد در Repository خودتان و انتشار روی Cloudflare را می‌خواهید، Codex. دو سؤال زیر و ابزار انتخاب کمکتان می‌کند. هر کدام را که انتخاب کنید، در فصل‌های بعد هر جا قدم‌ها فرق کند، مسیر خودتان را می‌بینید.",
+              en: "Short answer: if you want to see something live quickly and would rather avoid terminals and hosting, Lovable. If you want full control, the code in your own repository and deployment on Cloudflare, Codex. The picker below helps. Whichever you choose, later chapters show your path wherever the steps differ.",
             },
           },
+          {
+            type: 'path',
+            codex: [
+              {
+                type: 'steps',
+                items: [
+                  {
+                    title: { fa: "وارد ChatGPT شوید و Codex را باز کنید", en: "Sign in to ChatGPT and open Codex" },
+                    text: {
+                      fa: "Codex را در وب یا اپ دسکتاپ باز کنید. برای کارهای ابری، پلن Plus یا بالاتر لازم است.",
+                      en: "Open Codex on the web or in the desktop app. Cloud tasks need Plus or higher.",
+                    },
+                  },
+                  {
+                    title: { fa: "GitHub را وصل کنید", en: "Connect GitHub" },
+                    text: {
+                      fa: "دسترسی را فقط به Repository `cafe-sahar` بدهید، نه به همه Repositoryها.",
+                      en: "Grant access only to the `cafe-sahar` repository, not to all of them.",
+                    },
+                  },
+                  {
+                    title: { fa: "یک AGENTS.md بگذارید", en: "Add an AGENTS.md" },
+                    text: {
+                      fa: "پروژه، زبان فارسی و راست‌به‌چپ و قانون «اول برنامه، بعد کد» را در آن بنویسید.",
+                      en: "Describe the project, Persian right-to-left text and the rule 'plan first, then code'.",
+                    },
+                  },
+                  {
+                    title: { fa: "اولین کار را با درخواست برنامه شروع کنید", en: "Start the first task by asking for a plan" },
+                    text: {
+                      fa: "برنامه را بخوانید و تأیید کنید، بعد Pull Request را بازبینی و Merge کنید.",
+                      en: "Read and approve the plan, then review and merge the pull request.",
+                    },
+                  },
+                ],
+              },
+            ],
+            lovable: [
+              {
+                type: 'steps',
+                items: [
+                  {
+                    title: { fa: "در lovable.dev حساب بسازید", en: "Sign up at lovable.dev" },
+                    text: {
+                      fa: "قبلش شرایط استفاده و کشورهای مجاز را بخوانید. پلن رایگان برای امتحان کافی است.",
+                      en: "Read the terms and allowed countries first. The free plan is enough to try it.",
+                    },
+                  },
+                  {
+                    title: { fa: "پروژه را با Plan شروع کنید", en: "Start the project in Plan mode" },
+                    text: {
+                      fa: "کافه سحر را توضیح دهید: منو، ساعت کاری، رزرو میز، فارسی و راست‌به‌چپ. برنامه را بخوانید و تأیید کنید.",
+                      en: "Describe Café Sahar: menu, opening hours, table booking, Persian right-to-left. Read and approve the plan.",
+                    },
+                  },
+                  {
+                    title: { fa: "Instructions پروژه را بنویسید", en: "Write the project Instructions" },
+                    text: {
+                      fa: "همان چیزهایی که در AGENTS.md می‌نوشتید: لحن، زبان، رنگ‌ها و قانون‌ها.",
+                      en: "The same things you'd put in AGENTS.md: tone, language, colours and rules.",
+                    },
+                  },
+                  {
+                    title: { fa: "GitHub را وصل کنید، بعد Publish", en: "Connect GitHub, then publish" },
+                    text: {
+                      fa: "با همگام‌سازی GitHub یک نسخه از کد در حساب خودتان دارید؛ بعد روی `lovable.app` منتشر کنید.",
+                      en: "GitHub sync keeps a copy of the code in your own account; then publish to `lovable.app`.",
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+          { type: 'widget', id: 'agent-picker' },
           {
             type: 'callout',
             tone: 'why',
             title: { fa: "چرا یکی و عمیق؟", en: "Why one, and deeply?" },
             text: {
-              fa: "پرش بین ابزارها حس پیشرفت می‌دهد ولی مهارت نمی‌سازد. وقتی یک Agent را خوب بشناسید، می‌دانید کجا قوی است، کجا اشتباه می‌کند و چطور باید با آن حرف زد. این مهارت بعداً به هر Agent دیگری هم منتقل می‌شود.",
-              en: "Hopping between tools feels like progress but doesn't build skill. Once you know one agent well, you know where it's strong, where it slips, and how to talk to it. That skill then carries over to any other agent.",
+              fa: "پرش بین ابزارها حس پیشرفت می‌دهد ولی مهارت نمی‌سازد. وقتی یک ابزار را خوب بشناسید، می‌دانید کجا قوی است، کجا اشتباه می‌کند و چطور باید با آن حرف زد. این مهارت بعداً به هر ابزار دیگری هم منتقل می‌شود.",
+              en: "Hopping between tools feels like progress but doesn't build skill. Once you know one tool well, you know where it's strong, where it slips, and how to talk to it. That skill then carries over to any other tool.",
             },
           },
           {
@@ -1010,60 +1494,90 @@ dist
                 term: 'Cloud task',
                 def: { fa: "کاری که Agent روی کامپیوتر ابری شرکت سازنده انجام می‌دهد، نه روی سیستم شما.", en: "A task the agent runs on the vendor's cloud machines instead of your computer." },
               },
+              {
+                term: 'App builder',
+                def: { fa: "ابزاری مثل Lovable که از گفت‌وگو یک اپ کامل با پیش‌نمایش، Backend و انتشار می‌سازد.", en: "A tool such as Lovable that turns a conversation into a full app with preview, backend and publishing." },
+              },
+              {
+                term: 'Credits',
+                def: { fa: "واحد مصرف در Lovable؛ برای ساختن و اجرای اپ خرج می‌شود.", en: "Lovable's usage unit, spent on building and on running the app." },
+              },
             ],
           },
           {
             type: 'prompt',
-            title: { fa: "اولین گفت‌وگو با Agent", en: "Your first conversation with an agent" },
+            title: { fa: "اولین گفت‌وگو، در هر کدام از دو مسیر", en: "Your first conversation, on either path" },
             text: {
-              fa: "سلام. من برنامه‌نویس نیستم و می‌خواهم با کمک تو وب‌سایت بسازم. قبل از شروع کار: ۱) به زبان ساده بگو چه کارهایی می‌توانی در این محیط انجام بدهی (فایل نوشتن، اجرای دستور، کار با Git و GitHub، اینترنت) و چه کارهایی نه. ۲) بگو دستورالعمل‌های دائمی پروژه را از چه فایلی می‌خوانی. ۳) یک فایل دستورالعمل اولیه برای پروژه‌ام پیشنهاد بده که در آن نوشته باشد قبل از هر تغییر بزرگ برنامه‌ات را به من نشان بدهی.",
-              en: "Hi. I'm not a programmer and I want to build websites with your help. Before we start: 1) explain in plain words what you can and can't do in this environment (write files, run commands, use Git and GitHub, access the internet). 2) Tell me which file you read standing project instructions from. 3) Suggest a starter instructions file for my project that says you must show me your plan before any big change.",
+              fa: "سلام. من برنامه‌نویس نیستم و می‌خواهم با کمک تو وب‌سایت کافه سحر (cafe-sahar.ir) را بسازم: منو، ساعت کاری و فرم رزرو میز، فارسی و راست‌به‌چپ. قبل از شروع کار: ۱) به زبان ساده بگو چه کارهایی در این محیط می‌توانی انجام بدهی و چه کارهایی نه. ۲) بگو دستورالعمل‌های دائمی پروژه را کجا بنویسم که همیشه بخوانی. ۳) یک برنامه کوتاه برای نسخه اول پیشنهاد بده و تا تأیید نکرده‌ام چیزی نساز.",
+              en: "Hi. I'm not a programmer and I want to build the Café Sahar website (cafe-sahar.ir) with your help: menu, opening hours and a table-booking form, in Persian, right to left. Before we start: 1) explain in plain words what you can and can't do in this environment. 2) Tell me where to write standing project instructions so you always read them. 3) Suggest a short plan for the first version and don't build anything until I approve it.",
             },
           },
           {
             type: 'quiz',
             q: {
-              fa: "در متن ویس‌ها «Cloud Code» آمده است. منظور کدام محصول است؟",
-              en: "The voice transcripts say 'Cloud Code'. Which product is meant?",
+              fa: "سحر می‌خواهد همین هفته صفحه رزرو آنلاین داشته باشد، با ترمینال کار نکرده و می‌خواهد میزبانی هم برایش انجام شود. شروع مناسب‌تر کدام است؟",
+              en: "Sahar wants online booking this week, has never used a terminal, and wants hosting handled for her. Which start fits best?",
             },
             options: [
-              { fa: "Cloudflare Workers", en: "Cloudflare Workers" },
-              { fa: "Claude Code از Anthropic", en: "Claude Code by Anthropic" },
-              { fa: "Google Cloud", en: "Google Cloud" },
-              { fa: "OpenAI Codex", en: "OpenAI Codex" },
+              { fa: "نصب Codex CLI و کار در ترمینال", en: "Install the Codex CLI and use a terminal" },
+              { fa: "گرفتن کلید API و اسکریپت با DeepSeek", en: "Get an API key and script it with DeepSeek" },
+              { fa: "Lovable: توضیح، پیش‌نمایش و Publish", en: "Lovable: describe, preview and publish" },
+              { fa: "Claude Code در ترمینال و میزبانی دستی", en: "Claude Code in a terminal, then self-host" },
             ],
-            answer: 1,
+            answer: 2,
             explain: {
-              fa: "نرم‌افزار تبدیل گفتار به متن «Claude» را «Cloud» شنیده است. منظور Claude Code، Agent برنامه‌نویسی Anthropic است.",
-              en: "The speech-to-text software heard 'Claude' as 'Cloud'. It means Claude Code, Anthropic's coding agent.",
+              fa: "با این شرایط، Lovable همه چیز را در مرورگر نگه می‌دارد و میزبانی هم دارد. بعدها اگر کنترل بیشتری خواست، کد از طریق GitHub قابل انتقال است.",
+              en: "Given these constraints, Lovable keeps everything in the browser and includes hosting. Later, if she wants more control, the code can move out through GitHub.",
             },
+            why: [
+              {
+                fa: "Codex قوی است، ولی ترمینال و میزبانی جداگانه برای این هفته و این تجربه سنگین است.",
+                en: "Codex is strong, but a terminal plus separate hosting is a lot for this week and this experience level.",
+              },
+              {
+                fa: "DeepSeek مدل است، نه سازنده اپ؛ هنوز یک ابزار Agent و میزبانی لازم است.",
+                en: "DeepSeek is a model, not an app builder; you'd still need an agent tool and hosting.",
+              },
+              {
+                fa: "درست است: همه چیز در مرورگر، با پیش‌نمایش زنده و انتشار داخلی.",
+                en: "Right: everything in the browser, with a live preview and built-in publishing.",
+              },
+              {
+                fa: "Claude Code هم مثل Codex به ترمینال و میزبانی جدا نیاز دارد.",
+                en: "Like Codex, Claude Code needs a terminal and separate hosting.",
+              },
+            ],
           },
           {
             type: 'links',
             items: [
-              { label: 'OpenAI Codex', url: 'https://openai.com/codex/' },
+              { label: 'OpenAI Codex', url: 'https://developers.openai.com/codex' },
               { label: 'Using Codex with your ChatGPT plan', url: 'https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan' },
               { label: 'Codex docs: AGENTS.md', url: 'https://developers.openai.com/codex/guides/agents-md' },
+              { label: 'Lovable docs: getting started', url: 'https://docs.lovable.dev/introduction/getting-started' },
+              { label: 'Lovable pricing', url: 'https://lovable.dev/pricing' },
+              { label: 'Lovable docs: GitHub sync', url: 'https://docs.lovable.dev/integrations/github' },
+              { label: 'Lovable docs: publish', url: 'https://docs.lovable.dev/features/publish' },
               { label: 'Claude Code overview', url: 'https://code.claude.com/docs/en/overview' },
-              { label: 'Claude Code: memory and CLAUDE.md', url: 'https://code.claude.com/docs/en/memory' },
-              { label: 'Using Claude Code with your Pro or Max plan', url: 'https://support.claude.com/en/articles/11145838-using-claude-code-with-your-pro-or-max-plan' },
+              { label: 'Using Claude Code with your Pro, Max or Ultra plan', url: 'https://support.claude.com/en/articles/11145838-using-claude-code-with-your-pro-or-max-plan' },
               { label: 'OpenAI supported countries', url: 'https://help.openai.com/en/articles/7947663-chatgpt-supported-countries' },
               { label: 'Anthropic supported countries', url: 'https://www.anthropic.com/supported-countries' },
+              { label: 'Lovable terms', url: 'https://lovable.dev/terms' },
             ],
           },
         ],
       },
     ],
     connects: {
-      fa: "حالا می‌دانیم Agent چیست و کدام Agentها در دسترس‌اند. پرده اول اینجا تمام می‌شود. در پرده دوم حساب‌ها و ابزارها را آماده می‌کنیم و Agent انتخابی‌تان را با دسترسی محدود و امن به GitHub و Cloudflare وصل می‌کنیم، و در پرده سوم فایل AGENTS.md یا CLAUDE.md پروژه را می‌نویسیم.",
-      en: "Now we know what an agent is and which ones are available. Act I ends here. In Act II we prepare accounts and tools and connect your chosen agent to GitHub and Cloudflare with limited, safe access, and in Act III we write the project's AGENTS.md or CLAUDE.md.",
+      fa: "حالا می‌دانیم Agent چیست و دو مسیر اصلی ساخت کدام‌اند. در فصل بعد هر پنج پلتفرم (Claude Code، Codex، Lovable، Grok و DeepSeek) را کنار هم می‌سنجیم. بعد در پرده دوم حساب‌ها را آماده می‌کنیم و ابزار انتخابی‌تان را با دسترسی محدود و امن به GitHub و Cloudflare وصل می‌کنیم.",
+      en: "Now we know what an agent is and the two main ways to build. Next chapter weighs all five platforms (Claude Code, Codex, Lovable, Grok and DeepSeek) side by side. Then in Act II we prepare accounts and connect your chosen tool to GitHub and Cloudflare with limited, safe access.",
     },
     takeaways: [
-      { fa: "Codex از OpenAI است؛ در ChatGPT (ابری)، CLI و IDE کار می‌کند و AGENTS.md را می‌خواند.", en: "Codex is OpenAI's: it runs in ChatGPT (cloud), the CLI and IDEs, and reads AGENTS.md." },
-      { fa: "Claude Code از Anthropic است؛ در ترمینال، IDE، دسکتاپ و وب کار می‌کند و CLAUDE.md را می‌خواند.", en: "Claude Code is Anthropic's: it runs in the terminal, IDEs, desktop and web, and reads CLAUDE.md." },
-      { fa: "«Cloud Code» در متن ویس‌ها همان Claude Code است.", en: "'Cloud Code' in the transcripts means Claude Code." },
-      { fa: "فهرست کشورهای پشتیبانی‌شده را چک کنید و از هر کدام که در دسترس است استفاده کنید.", en: "Check the supported-countries lists and use whichever is available to you." },
-      { fa: "یکی را انتخاب کنید و عمیق یاد بگیرید؛ مهارت به بقیه منتقل می‌شود.", en: "Pick one and learn it deeply; the skill transfers." },
+      { fa: "Codex یک Agent کدنویس است: داخل Repository شما کار می‌کند و میزبانی با خودتان است.", en: "Codex is a coding agent: it works inside your repository, and hosting is up to you." },
+      { fa: "Lovable یک سازنده اپ است: از گفت‌وگو اپ زنده می‌سازد و میزبانی و Backend دارد.", en: "Lovable is an app builder: it turns a conversation into a live app, with hosting and a backend." },
+      { fa: "کد Lovable با GitHub همگام می‌شود، پس بعداً می‌توانید با Codex ادامه دهید و روی Cloudflare منتشر کنید.", en: "Lovable syncs code to GitHub, so you can later continue with Codex and deploy on Cloudflare." },
+      { fa: "«Cloud Code» در متن ویس‌ها همان Claude Code است، یک Agent کدنویس قوی دیگر.", en: "'Cloud Code' in the transcripts means Claude Code, another strong coding agent." },
+      { fa: "قبل از ساختن حساب، شرایط و فهرست کشورهای هر سرویس را خودتان بخوانید.", en: "Before you sign up, read each service's terms and country list yourself." },
     ],
   },
 ];

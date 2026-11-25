@@ -11,15 +11,7 @@
     <meta name="theme-color" content="#fbf6ee" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#1b1612" media="(prefers-color-scheme: dark)" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <script>
-      // Apply saved language and theme before first paint to avoid a flash.
-      try {
-        var l = JSON.parse(localStorage.getItem('act:lang') || 'null');
-        if (l === 'en') { document.documentElement.lang = 'en'; document.documentElement.dir = 'ltr'; }
-        var t = JSON.parse(localStorage.getItem('act:theme') || 'null');
-        if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
-      } catch (e) {}
-    </script>
+    <script src="/boot.js"></script>
   </head>
   <body>
     <div id="root"></div>

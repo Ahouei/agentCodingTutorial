@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { useApp, useTx } from '../../lib/app';
+import { isRecord } from '../../lib/storage';
 import { CopyButton } from '../blocks/CopyButton';
-import { Frame } from './Frame';
+import { Frame, useLab } from './Frame';
 import './set2.css';
 
 type Brief = {
@@ -55,21 +56,46 @@ const EMPTY: Brief = {
 };
 
 const EXAMPLE: Brief = {
-  name: 'Nan-e Shirin Bakery',
-  type: 'landing',
-  audience: 'Neighbours and local customers, mostly on their phones',
-  goal: 'Show our menu and hours and get more cake orders by phone and WhatsApp',
-  features: ['Menu with prices', 'Opening hours', 'Map and address', 'WhatsApp order button'],
-  pages: 'Home, Menu, Contact',
+  name: 'Café Sahar (cafe-sahar.ir)',
+  type: 'webapp',
+  audience: 'Neighbours and visitors looking for a cosy café, mostly on their phones',
+  goal: 'Show the menu and opening hours, and let guests book a table online',
+  features: ['Menu with prices', 'Opening hours and map', 'Table booking form saved in D1', 'Booking form protected with Turnstile'],
+  pages: 'Home, Menu, Book a table, Contact',
   fa: true,
-  en: false,
-  style: 'warm, cosy, handmade; cream and caramel colours; large photos',
+  en: true,
+  style: 'warm and friendly; cream, coffee and coral colours; large food photos',
   constraints: ['cf-free', 'github', 'workers', 'mobile'],
-  extra: '',
-  success: 'Looks great on a 360px phone\nLoads fast on mobile data\nOwner can update prices by asking the agent',
+  extra: 'Domain: cafe-sahar.ir',
+  success: 'Looks great on a 360px phone\nLoads fast on mobile data\nA booking appears in the database and Sahar gets an email',
 };
 
-function toMarkdown(b: Brief, file: string): string {
+type FileKind = 'AGENTS.md' | 'CLAUDE.md' | 'Lovable';
+
+const str = (v: unknown, d: string) => (typeof v === 'string' ? v : d);
+const bool = (v: unknown, d: boolean) => (typeof v === 'boolean' ? v : d);
+const strs = (v: unknown, d: string[]) => (Array.isArray(v) && v.every((x) => typeof x === 'string') ? (v as string[]) : d);
+
+/** QA-01: validate every stored field; a wrong type falls back to the default instead of crashing. */
+function restore(stored: unknown): Brief {
+  if (!isRecord(stored)) return { ...EXAMPLE };
+  return {
+    name: str(stored.name, EXAMPLE.name),
+    type: TYPES.some((t) => t.id === stored.type) ? (stored.type as string) : EXAMPLE.type,
+    audience: str(stored.audience, EXAMPLE.audience),
+    goal: str(stored.goal, EXAMPLE.goal),
+    features: strs(stored.features, EXAMPLE.features),
+    pages: str(stored.pages, EXAMPLE.pages),
+    fa: bool(stored.fa, EXAMPLE.fa),
+    en: bool(stored.en, EXAMPLE.en),
+    style: str(stored.style, EXAMPLE.style),
+    constraints: strs(stored.constraints, EXAMPLE.constraints).filter((c) => PRESETS.some((p) => p.id === c)),
+    extra: str(stored.extra, EXAMPLE.extra),
+    success: str(stored.success, EXAMPLE.success),
+  };
+}
+
+function toMarkdown(b: Brief, file: FileKind): string {
   const lines: string[] = [];
   const list = (items: string[]) => items.filter(Boolean).map((i) => `- ${i}`);
   const split = (s: string) =>
@@ -80,7 +106,11 @@ function toMarkdown(b: Brief, file: string): string {
 
   lines.push(`# ${b.name.trim() || 'My project'}`);
   lines.push('');
-  lines.push(`> ${file}: instructions for the AI agent working in this repository.`);
+  lines.push(
+    file === 'Lovable'
+      ? '> Lovable project Instructions: paste into Project settings → Instructions.'
+      : `> ${file}: instructions for the AI agent working in this repository.`,
+  );
   lines.push('');
   lines.push('## Project summary');
   const summary = [
@@ -148,8 +178,13 @@ function Highlighted({ md }: { md: string }) {
 export default function BriefBuilder() {
   const { saved, save, lang } = useApp();
   const tx = useTx();
-  const [b, setB] = useState<Brief>(() => ({ ...EMPTY, ...saved<Partial<Brief>>('brief-builder', EXAMPLE) }));
-  const [file, setFile] = useState<'AGENTS.md' | 'CLAUDE.md'>('AGENTS.md');
+  const [b, setB] = useState<Brief>(() => restore(saved<Record<string, unknown>>('brief-builder', { ...EXAMPLE })));
+  const [file, setFile] = useState<FileKind>('AGENTS.md');
+  const { complete } = useLab();
+  const filled = b.name.trim() !== '' && b.goal.trim() !== '' && b.features.length >= 3 && b.pages.trim() !== '';
+  useEffect(() => {
+    if (filled) complete();
+  }, [filled, complete]);
   const [feature, setFeature] = useState('');
 
   useEffect(() => {
@@ -203,26 +238,27 @@ export default function BriefBuilder() {
   return (
     <Frame
       title={tx('برگه تعریف پروژه (Brief) بسازید', 'Build your project brief')}
+      goal={tx('نام، هدف، دست‌کم ۳ امکان و صفحه‌ها', 'Name, goal, at least 3 features and the pages')}
       hint={tx(
-        'فرم را پر کنید؛ همزمان یک فایل دستورالعمل آماده برای Repository شما ساخته می‌شود. نمونه نانوایی را عوض کنید و مال خودتان کنید.',
-        'Fill in the form and a ready instruction file for your repository is written as you type. Replace the bakery example with your own idea.',
+        'هم‌زمان با پر کردن فرم، فایل دستورالعمل Agent ساخته می‌شود. نمونه کافه سحر را با ایده خودتان عوض کنید.',
+        "The agent's instruction file is written as you type. Swap the Café Sahar example for your own idea.",
       )}
-      mood="happy"
+      mood={filled ? 'happy' : 'think'}
       tint="var(--butter-soft)"
       footer={
         <>
           <button type="button" className="btn btn--small btn--ghost" onClick={() => setB({ ...EMPTY })}>
-            {tx('فرم خالی', 'Blank form')}
+            {tx('خالی کردن فرم', 'Clear the form')}
           </button>
-          <button type="button" className="btn btn--small btn--ghost" onClick={() => setB({ ...EXAMPLE })}>
-            {tx('نمونه نانوایی', 'Bakery example')}
+          <button type="button" className="btn btn--small btn--butter" onClick={() => setB({ ...EXAMPLE })}>
+            {tx('پر کردن با نمونه کافه سحر', 'Fill with the Café Sahar example')}
           </button>
         </>
       }
     >
       <div className="bb-grid">
         <div className="bb-form">
-          {field('name', tx('نام پروژه', 'Project name'), tx('مثلاً: کافه نارنج', 'e.g. Narenj Cafe'))}
+          {field('name', tx('نام پروژه', 'Project name'), tx('مثلاً: کافه سحر', 'e.g. Café Sahar'))}
           <div>
             <label className="w-label" htmlFor="bb-type">
               {tx('نوع پروژه', 'Kind of project')}
@@ -270,7 +306,7 @@ export default function BriefBuilder() {
             </div>
           </div>
 
-          {field('pages', tx('صفحه‌ها (با ویرگول جدا کنید)', 'Pages (comma separated)'), tx('خانه، منو، تماس', 'Home, Menu, Contact'))}
+          {field('pages', tx('صفحه‌ها (با ویرگول جدا کنید)', 'Pages (comma separated)'), tx('خانه، منو، رزرو میز، تماس', 'Home, Menu, Book a table, Contact'))}
 
           <div>
             <span className="w-label">{tx('زبان‌ها', 'Languages')}</span>
@@ -327,17 +363,22 @@ export default function BriefBuilder() {
               <button type="button" aria-pressed={file === 'CLAUDE.md'} onClick={() => setFile('CLAUDE.md')}>
                 CLAUDE.md
               </button>
+              <button type="button" aria-pressed={file === 'Lovable'} onClick={() => setFile('Lovable')}>
+                {tx('Lovable Instructions', 'Lovable Instructions')}
+              </button>
             </div>
             <span style={{ flex: 1 }} />
             <CopyButton text={md} className="btn btn--small btn--butter" />
           </div>
-          <pre aria-live="polite" aria-label={file}>
+          <pre tabIndex={0} aria-label={file === 'Lovable' ? 'Lovable Instructions' : file}>
             <Highlighted md={md} />
           </pre>
           <p style={{ margin: 0, padding: '0 16px 14px', fontSize: 13, opacity: 0.75, lineHeight: 1.7 }}>
             {file === 'AGENTS.md'
-              ? tx('AGENTS.md را Codex و بسیاری از Agentهای دیگر می‌خوانند.', 'AGENTS.md is read by Codex and many other agents.')
-              : tx('CLAUDE.md را Claude Code در شروع هر جلسه می‌خواند.', 'Claude Code reads CLAUDE.md at the start of every session.')}{' '}
+              ? tx('AGENTS.md را در ریشه Repository بگذارید؛ Codex و بسیاری از Agentهای دیگر آن را می‌خوانند.', 'Put AGENTS.md in the repository root; Codex and many other agents read it.')
+              : file === 'CLAUDE.md'
+                ? tx('CLAUDE.md را در ریشه Repository بگذارید؛ Claude Code در شروع هر جلسه آن را می‌خواند.', 'Put CLAUDE.md in the repository root; Claude Code reads it at the start of every session.')
+                : tx('در Lovable این متن را در تنظیمات پروژه، بخش Instructions بچسبانید (حداکثر ۱۰٬۰۰۰ نویسه).', 'In Lovable, paste this into Project settings → Instructions (up to 10,000 characters).')}{' '}
             {tx(
               'عنوان‌ها انگلیسی‌اند تا برای هر Agent واضح باشند، ولی متن را می‌توانید فارسی هم بنویسید؛ هر دو کار می‌کند.',
               '',

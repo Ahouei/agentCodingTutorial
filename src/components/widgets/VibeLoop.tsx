@@ -1,16 +1,15 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 import { num, useApp, useTx } from '../../lib/app';
+import { EASE_IN_OUT as EASE_MOVE, EASE_OUT } from '../../lib/motion';
 import { Mascot } from '../Mascot';
-import { Frame } from './Frame';
+import { Frame, useLab } from './Frame';
 import './set3.css';
 
-const EASE_OUT = [0.23, 1, 0.32, 1] as const;
-const EASE_MOVE = [0.77, 0, 0.175, 1] as const;
 
 type Feature = 'hero' | 'menu' | 'hours' | 'mobile' | 'form';
 type Kind = 'good' | 'vague' | 'rewrite';
-type Phase = 'choose' | 'running' | 'review' | 'finished';
+type Phase = 'choose' | 'running' | 'review' | 'committing' | 'finished';
 type Bi = { fa: string; en: string };
 
 const ROUNDS: { feature: Feature; goal: Bi; good: Bi; vague: Bi; commit: string }[] = [
@@ -21,8 +20,8 @@ const ROUNDS: { feature: Feature; goal: Bi; good: Bi; vague: Bi; commit: string 
       en: 'Right now the page is one plain line of text. First we need a warm, inviting hero.',
     },
     good: {
-      fa: 'بالای صفحه یک Hero بساز: اسم کافه «Bean & Bit» درشت، زیرش «قهوه، کیک، گوشه‌های دنج»، پس‌زمینه کرم و یک دکمه «دیدن منو».',
-      en: 'Add a hero at the top: the café name "Bean & Bit" large, the line "Coffee, cake, cozy corners" under it, a cream background and one "See the menu" button.',
+      fa: 'بالای صفحه یک Hero بساز: اسم «کافه سحر» درشت، زیرش «قهوه، کیک، گوشه‌های دنج»، پس‌زمینه کرم و یک دکمه «دیدن منو».',
+      en: 'Add a hero at the top: the name "Café Sahar" large, the line "Coffee, cake, cozy corners" under it, a cream background and one "See the menu" button.',
     },
     vague: { fa: 'قشنگ‌ترش کن.', en: 'Make it look nicer.' },
     commit: 'feat: add warm hero section',
@@ -131,6 +130,9 @@ export default function VibeLoop() {
   };
 
   const commit = () => {
+    // QA-07: commit exactly once. The button disappears as soon as the phase leaves 'review'.
+    if (phase !== 'review' || result !== 'good') return;
+    setPhase('committing');
     setStep(4);
     setCommitted((c) => [...c, r.feature]);
     setCommits((c) => [{ sha: SHAS[round], msg: r.commit }, ...c]);
@@ -168,6 +170,10 @@ export default function VibeLoop() {
 
   // What the preview shows right now.
   const showReview = phase === 'review' || (phase === 'running' && step >= 2);
+  const { complete } = useLab();
+  useEffect(() => {
+    if (phase === 'finished') complete();
+  }, [phase, complete]);
   const pending = showReview && result === 'good' ? [r.feature] : [];
   const features = new Set<Feature>([...committed, ...pending]);
   const guess = showReview && result === 'vague';
@@ -182,6 +188,7 @@ export default function VibeLoop() {
         'Done! The café page was built in five small laps, and every good step has a commit you can return to.',
       );
     if (phase === 'running') return tx('Agent دارد کار می‌کند…', 'The agent is working…');
+    if (phase === 'committing') return tx('Commit شد! یک نقطه امن تازه در تاریخچه.', 'Committed! A fresh safe point in the history.');
     if (phase === 'review' && result === 'good')
       return tx(
         'دقیقاً همان چیزی شد که خواستید، چون گفتید چه چیزی، کجا و چه شکلی. پیش‌نمایش را چک کنید و Commit کنید.',
@@ -205,22 +212,21 @@ export default function VibeLoop() {
   return (
     <Frame
       title={tx('حلقه Vibe Coding: صفحه یک کافه دنج', 'The vibe coding loop: a cozy café page')}
-      hint={tx(
-        'در هر دور یک پیام برای Agent انتخاب کنید و نتیجه را ببینید. هدف: پنج دور کوچک تا یک صفحه کامل.',
-        'Each lap, pick one message for the agent and watch what happens. Goal: five small laps to a finished page.',
-      )}
+      goal={tx('صفحه کافه سحر را در پنج دور کوچک بسازید', "Build Café Sahar's page in five small laps")}
       tint="var(--butter-soft)"
       footer={
         <>
-          <span className="w-pill">
-            {tx('دور', 'Lap')} {num(Math.min(round + 1, ROUNDS.length), lang)} / {num(ROUNDS.length, lang)}
-          </span>
-          <span className="w-muted">
-            {tx('Commitها', 'Commits')}: {num(commits.length, lang)}
-          </span>
-          <button type="button" className="btn btn--small btn--ghost" onClick={restart} style={{ marginInlineStart: 'auto' }}>
+          <button type="button" className="btn btn--small btn--ghost" onClick={restart}>
             {tx('از اول', 'Start over')}
           </button>
+          <div className="w-row">
+            <span className="w-muted">
+              {tx('Commitها', 'Commits')}: {num(commits.length, lang)}
+            </span>
+            <span className="w-pill">
+              {tx('دور', 'Lap')} {num(Math.min(round + 1, ROUNDS.length), lang)} / {num(ROUNDS.length, lang)}
+            </span>
+          </div>
         </>
       }
     >
@@ -229,16 +235,15 @@ export default function VibeLoop() {
         <Preview features={features} guess={guess} broken={broken} phoneIssue={phoneIssue} />
       </div>
 
-      <div className={`s3-bubble ${result === 'good' || phase === 'finished' ? 'is-good' : result === 'vague' ? 'is-warn' : result === 'rewrite' ? 'is-bad' : ''}`}>
+      <div aria-live="polite" className={`s3-bubble ${result === 'good' || phase === 'finished' ? 'is-good' : result === 'vague' ? 'is-warn' : result === 'rewrite' ? 'is-bad' : ''}`}>
         <Mascot size={44} mood={mood} follow={false} />
         <AnimatePresence mode="popLayout" initial={false}>
           <motion.p
             key={message}
-            initial={{ opacity: 0, filter: 'blur(3px)' }}
-            animate={{ opacity: 1, filter: 'blur(0px)' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2, ease: EASE_OUT }}
-            aria-live="polite"
           >
             {message}
           </motion.p>
@@ -396,10 +401,10 @@ function Preview({
         <i />
         <i />
         <i />
-        <span>preview.bean-and-bit.example</span>
+        <span>preview.cafe-sahar.ir</span>
       </div>
       <div className={`vl-page ${guess ? 'is-guess' : ''}`}>
-        {!features.has('hero') && !guess && <p className="vl-plain" style={{ margin: 0 }}>{tx('کافه Bean & Bit', 'Bean & Bit café')}</p>}
+        {!features.has('hero') && !guess && <p className="vl-plain" style={{ margin: 0 }}>{tx('کافه سحر', 'Café Sahar')}</p>}
         {guess && (
           <motion.div {...enter} style={{ textAlign: 'center', padding: '20px 6px' }}>
             <b style={{ fontSize: 20, display: 'block' }}>Welcome!!!</b>
@@ -409,7 +414,7 @@ function Preview({
         <AnimatePresence initial={false}>
           {features.has('hero') && !guess && (
             <motion.div key="hero" className="vl-hero" {...enter}>
-              <b>Bean & Bit</b>
+              <b>{tx('کافه سحر', 'Café Sahar')}</b>
               <small>{tx('قهوه، کیک، گوشه‌های دنج', 'Coffee, cake, cozy corners')}</small>
               <em>{tx('دیدن منو', 'See the menu')}</em>
             </motion.div>

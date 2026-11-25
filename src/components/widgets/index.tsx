@@ -20,4 +20,9 @@ export const WIDGETS: Record<WidgetId, LazyExoticComponent<ComponentType>> = {
   pipeline: lazy(() => import('./Pipeline')),
   'nameserver-switch': lazy(() => import('./NameserverSwitch')),
   'hero-finale': lazy(() => import('./HeroFinale')),
+  'agent-picker': lazy(() => import('./AgentPicker')),
+  'design-flaws': lazy(() => import('./DesignFlaws')),
+  'secret-hunt': lazy(() => import('./SecretHunt')),
+  'platform-compare': lazy(() => import('./PlatformCompare')),
+  'other-businesses': lazy(() => import('./OtherBusinesses')),
 };

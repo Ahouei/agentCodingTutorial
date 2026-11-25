@@ -1,18 +1,19 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 import { useTx } from '../../lib/app';
+import { DUR, EASE_OUT } from '../../lib/motion';
 import { Mascot } from '../Mascot';
-import { Frame } from './Frame';
+import { Frame, useLab } from './Frame';
 import './set2.css';
 
-const EASE = [0.23, 1, 0.32, 1] as const;
+const EASE = EASE_OUT;
 
 const SNIPPET = `<!doctype html>
-<html lang="en">
-  <head><title>My Bakery</title></head>
+<html lang="fa" dir="rtl">
+  <head><title>Café Sahar</title></head>
   <body>
-    <h1>Fresh bread every morning</h1>
-    <p>Open 7am–7pm</p>
+    <h1>کافه سحر</h1>
+    <p>هر روز ۸ صبح تا ۱۱ شب</p>
   </body>
 </html>`;
 
@@ -30,24 +31,24 @@ export default function ChatVsAgent() {
   const timers = useRef<number[]>([]);
 
   const chatIntro = tx(
-    'حتماً! این یک صفحه ساده برای نانوایی شماست:',
-    'Sure! Here is a simple page for your bakery:',
+    'حتماً! این یک صفحه ساده برای کافه سحر است:',
+    'Sure! Here is a simple page for Café Sahar:',
   );
   const chatOutro = tx(
-    'حالا این کد را در یک فایل index.html ذخیره کنید، یک Hosting بخرید، فایل را آپلود کنید و دامنه را تنظیم کنید. موفق باشید!',
-    'Now save this as index.html, buy some hosting, upload the file and point your domain at it. Good luck!',
+    'برای رزرو میز به یک Backend و Database هم نیاز دارید. حالا این کد را در index.html ذخیره کنید، یک Hosting بخرید، فایل را آپلود کنید و دامنه را تنظیم کنید. موفق باشید!',
+    'For table booking you will also need a backend and a database. Now save this as index.html, buy some hosting, upload the file and point your domain at it. Good luck!',
   );
   const fullChat = chatIntro.length + SNIPPET.length + chatOutro.length;
 
   const ASK_AT = 3;
   const steps = [
     { tool: 'read', text: tx('Repository را می‌خواند: خالی است، از صفر شروع می‌کند.', 'Reads the repository: it is empty, so it starts fresh.') },
-    { tool: 'plan', text: tx('برنامه می‌چیند: صفحه اصلی، منو، ساعت کار، نقشه؛ سایت ثابت روی Worker.', 'Makes a plan: home, menu, hours, map; a static site on a Worker.') },
+    { tool: 'plan', text: tx('برنامه می‌چیند: صفحه اصلی، منو، ساعت کار، فرم رزرو؛ سایت روی یک Worker و رزروها در D1.', 'Makes a plan: home, menu, hours, booking form; the site on a Worker, bookings in D1.') },
     { tool: 'ask', text: tx('یک سؤال از شما می‌پرسد…', 'Asks you one question…') },
-    { tool: 'write', text: tx('فایل‌ها را می‌سازد: index.html، styles.css، wrangler.jsonc', 'Creates files: index.html, styles.css, wrangler.jsonc') },
+    { tool: 'write', text: tx('فایل‌ها را می‌سازد: صفحه‌ها، فرم رزرو، Worker و جدول bookings در D1', 'Creates files: the pages, the booking form, the Worker and a bookings table in D1') },
     { tool: 'test', text: tx('Build و تست را اجرا می‌کند؛ یک لینک شکسته پیدا و درستش می‌کند.', 'Runs the build and tests; finds a broken link and fixes it.') },
     { tool: 'git push', text: tx('Commit می‌کند و روی GitHub می‌فرستد.', 'Commits and pushes to GitHub.') },
-    { tool: 'deploy', text: tx('Worker را روی Cloudflare منتشر می‌کند.', 'Deploys the Worker to Cloudflare.') },
+    { tool: 'deploy', text: tx('Worker را روی Cloudflare منتشر می‌کند و cafe-sahar.ir را وصل می‌کند.', 'Deploys the Worker to Cloudflare and connects cafe-sahar.ir.') },
   ];
 
   const clear = () => {
@@ -70,7 +71,6 @@ export default function ChatVsAgent() {
     if (phase === 'idle' || reduce) return;
     if (typed >= fullChat) return;
     const t = window.setTimeout(() => setTyped((n) => Math.min(fullChat, n + 4)), 22);
-    timers.current.push(t);
     return () => window.clearTimeout(t);
   }, [typed, phase, run, fullChat, reduce]);
 
@@ -108,28 +108,40 @@ export default function ChatVsAgent() {
   })();
   const chatDone = typed >= fullChat;
 
+  const { complete } = useLab();
+  useEffect(() => {
+    if (phase === 'done') complete();
+  }, [phase, complete]);
+
   const mood = phase === 'idle' ? 'calm' : phase === 'asking' ? 'think' : phase === 'done' ? 'happy' : 'wink';
 
   return (
     <Frame
       title={tx('یک درخواست، دو جواب: چت در برابر Agent', 'One request, two answers: chat vs agent')}
-      hint={tx(
-        'درخواست را برای هر دو بفرستید و ببینید آخر کار «چه کسی» باید بقیه را انجام دهد.',
-        'Send the request to both and notice who has to do the rest at the end.',
-      )}
+      goal={tx('یک درخواست را برای هر دو بفرستید', 'Send one request to both')}
+      hint={tx('به آخر کار دقت کنید: «چه کسی» باید بقیه را انجام دهد؟', 'Watch the end: who has to do the rest?')}
       mood={mood}
       tint="var(--blush-soft)"
       footer={
-        <button type="button" className={phase === 'idle' ? 'btn btn--primary' : 'btn btn--small'} onClick={start}>
-          {phase === 'idle' ? tx('ارسال برای هر دو', 'Send to both') : tx('از اول', 'Replay')}
-        </button>
+        phase === 'idle' ? (
+          <>
+            <span />
+            <button type="button" className="btn btn--primary" onClick={start}>
+              {tx('ارسال برای هر دو', 'Send to both')}
+            </button>
+          </>
+        ) : (
+          <button type="button" className="btn btn--small btn--ghost" onClick={start}>
+            {tx('پخش دوباره', 'Replay')}
+          </button>
+        )
       }
     >
       <div className="cva-request">
         <div className="cva-bubble-user">
           {tx(
-            '«یک وب‌سایت ساده برای نانوایی‌ام بساز و آنلاینش کن.»',
-            '"Make me a simple website for my bakery and put it online."',
+            '«برای کافه‌ام، کافه سحر، یک وب‌سایت با منو و رزرو میز بساز و روی cafe-sahar.ir آنلاینش کن.»',
+            '"Build a website for my café, Café Sahar, with a menu and table booking, and put it online at cafe-sahar.ir."',
           )}
         </div>
       </div>
@@ -161,7 +173,7 @@ export default function ChatVsAgent() {
               <motion.div
                 initial={{ opacity: 0, transform: 'translateY(6px)' }}
                 animate={{ opacity: 1, transform: 'translateY(0px)' }}
-                transition={{ duration: 0.3, ease: EASE }}
+                transition={{ duration: DUR.reveal, ease: EASE }}
               >
                 <p className="w-muted" style={{ margin: '4px 0 6px', fontWeight: 800 }}>
                   {tx('کارهایی که حالا با خود شماست:', 'Now it is all on you:')}
@@ -171,6 +183,7 @@ export default function ChatVsAgent() {
                   <span>{tx('خرید Hosting', 'buy hosting')}</span>
                   <span>{tx('آپلود', 'upload')}</span>
                   <span>{tx('تنظیم DNS', 'set up DNS')}</span>
+                  <span>{tx('ساختن Backend رزرو', 'build the booking backend')}</span>
                   <span>{tx('پیدا کردن خطاها', 'find the bugs')}</span>
                 </div>
               </motion.div>
@@ -201,7 +214,7 @@ export default function ChatVsAgent() {
                       key={`${run}-${i}`}
                       initial={{ opacity: 0, transform: 'translateY(6px)' }}
                       animate={{ opacity: 1, transform: 'translateY(0px)' }}
-                      transition={{ duration: 0.25, ease: EASE }}
+                      transition={{ duration: DUR.ui, ease: EASE }}
                     >
                       <span className={`cva-tick ${isCurrent ? 'is-run' : waiting ? 'is-ask' : ''}`} aria-hidden>
                         {isCurrent ? (
@@ -239,7 +252,7 @@ export default function ChatVsAgent() {
                 initial={{ opacity: 0, transform: 'scale(0.96)' }}
                 animate={{ opacity: 1, transform: 'scale(1)' }}
                 exit={{ opacity: 0, transform: 'scale(0.98)' }}
-                transition={{ duration: 0.22, ease: EASE }}
+                transition={{ duration: DUR.ui, ease: EASE }}
                 style={{ transformOrigin: 'top center' }}
               >
                 <p style={{ margin: '0 0 8px', fontWeight: 800 }}>
@@ -262,12 +275,12 @@ export default function ChatVsAgent() {
               <motion.div
                 initial={{ opacity: 0, transform: 'translateY(6px)' }}
                 animate={{ opacity: 1, transform: 'translateY(0px)' }}
-                transition={{ duration: 0.3, ease: EASE }}
+                transition={{ duration: DUR.reveal, ease: EASE }}
                 style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}
               >
                 <Mascot size={40} mood="happy" follow={false} />
                 <div>
-                  <span className="cva-url">https://bakery.example.com</span>
+                  <span className="cva-url">https://cafe-sahar.ir</span>
                   <p className="w-muted" style={{ margin: '4px 0 0' }}>
                     {tx('«سایت آنلاین است. لطفاً نگاهی بیندازید و بگویید چه چیزی را عوض کنم.»', '"The site is live. Please take a look and tell me what to change."')}
                   </p>
@@ -285,7 +298,7 @@ export default function ChatVsAgent() {
             style={{ margin: '14px 0 0' }}
             initial={{ opacity: 0, filter: 'blur(4px)' }}
             animate={{ opacity: 1, filter: 'blur(0px)' }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: DUR.reveal, ease: EASE }}
             aria-live="polite"
           >
             {tx(

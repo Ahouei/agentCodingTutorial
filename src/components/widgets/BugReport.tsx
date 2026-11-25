@@ -1,9 +1,10 @@
 import { motion } from 'motion/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { num, useApp, useTx } from '../../lib/app';
+import { EASE_OUT } from '../../lib/motion';
 import { CopyButton } from '../blocks/CopyButton';
 import { Mascot } from '../Mascot';
-import { Frame } from './Frame';
+import { Frame, useLab } from './Frame';
 import './set3.css';
 
 type Form = {
@@ -37,15 +38,15 @@ const EMPTY: Form = {
 };
 
 const SAMPLE: Form = {
-  where: 'https://my-cafe.example/contact',
-  steps: ['Open /contact on a phone', 'Fill in name, email and message', 'Tap "Send"'],
-  expected: 'A "Thanks, we will get back to you" message appears and the message is saved in D1.',
-  actual: 'The button spins for a few seconds, then nothing happens. No thank-you message.',
+  where: 'https://cafe-sahar.ir/book',
+  steps: ['Open /book on a phone', 'Pick a date, a time and 2 people', 'Tap "Book a table"'],
+  expected: 'A "Your table is booked" message appears and the booking is saved in the D1 bookings table.',
+  actual: 'The button spins for a few seconds, then nothing happens. No confirmation.',
   screenshot: true,
   consoleOn: true,
-  consoleText: 'POST https://my-cafe.example/api/contact 500 (Internal Server Error)',
+  consoleText: 'POST https://cafe-sahar.ir/api/bookings 500 (Internal Server Error)',
   networkOn: true,
-  networkText: 'POST /api/contact → 500, response body: {"error":"D1_ERROR: no such table: messages"}',
+  networkText: 'POST /api/bookings → 500, response body: {"error":"D1_ERROR: no such table: bookings"}',
   workerLogs: true,
   device: 'iPhone 13, Safari 17 (also happens in Chrome on desktop)',
   rootCause: true,
@@ -111,23 +112,25 @@ export default function BugReport() {
         : { label: tx('مبهم؛ Agent باید حدس بزند', 'Vague: the agent would have to guess'), color: 'var(--coral)', mood: 'wow' as const };
 
   const report = buildReport(f);
+  const { complete } = useLab();
+  useEffect(() => {
+    if (s >= 80) complete(); // a report an agent can act on
+  }, [s, complete]);
 
   return (
     <Frame
       title={tx('گزارش باگی بسازید که Agent بتواند با آن کار کند', 'Build a bug report an agent can act on')}
-      hint={tx(
-        '«کار نمی‌کنه!» برای Agent کافی نیست. فرم را پر کنید و ببینید گزارش چطور قوی‌تر می‌شود. می‌توانید نمونه را هم ببینید.',
-        '"It doesn\'t work!" is not enough for an agent. Fill in the form and watch the report get stronger, or load the example.',
-      )}
+      goal={tx('گزارشی با کیفیت ۸۰٪ یا بیشتر بسازید', 'Reach a report quality of 80% or more')}
+      hint={tx('«کار نمی‌کنه!» برای Agent کافی نیست.', '"It doesn\'t work!" is not enough for an agent.')}
       mood="think"
       tint="var(--blush-soft)"
       footer={
         <>
+          <button type="button" className="btn btn--small btn--ghost" onClick={() => setF(EMPTY)}>
+            {tx('پاک کردن فرم', 'Clear the form')}
+          </button>
           <button type="button" className="btn btn--small btn--butter" onClick={() => setF(SAMPLE)}>
             {tx('پر کردن با نمونه', 'Fill with an example')}
-          </button>
-          <button type="button" className="btn btn--small btn--ghost" onClick={() => setF(EMPTY)}>
-            {tx('پاک کردن', 'Clear')}
           </button>
         </>
       }
@@ -138,7 +141,7 @@ export default function BugReport() {
             <label className="w-label" htmlFor="br-where">
               {tx('کجا؟ (صفحه یا URL)', 'Where? (page or URL)')}
             </label>
-            <input id="br-where" className="w-input" dir="ltr" value={f.where} onChange={(e) => set('where', e.target.value)} placeholder="https://my-site.example/contact" />
+            <input id="br-where" className="w-input" dir="ltr" value={f.where} onChange={(e) => set('where', e.target.value)} placeholder="https://cafe-sahar.ir/book" />
           </div>
 
           <div>
@@ -240,7 +243,7 @@ export default function BugReport() {
               <motion.div
                 className="br-meter-fill"
                 animate={{ transform: `scaleX(${s / 100})`, backgroundColor: level.color }}
-                transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+                transition={{ duration: 0.3, ease: EASE_OUT }}
               />
             </div>
             <div className="s3-bubble" style={{ marginTop: 10 }}>
@@ -255,7 +258,9 @@ export default function BugReport() {
               </span>
               <CopyButton text={report} />
             </div>
-            <pre className="br-report">{report}</pre>
+            <pre className="br-report" tabIndex={0} aria-label={tx('متن گزارش', 'Report text')}>
+              {report}
+            </pre>
           </div>
         </div>
       </div>

@@ -1,8 +1,9 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useEffect, useLayoutEffect, useRef, useState, type JSX } from 'react';
 import { num, useApp, useTx } from '../../lib/app';
+import { EASE_IN_OUT, EASE_OUT } from '../../lib/motion';
 import { Mascot } from '../Mascot';
-import { Frame } from './Frame';
+import { Frame, useLab } from './Frame';
 import './set1.css';
 
 type NodeId = 'browser' | 'dns' | 'edge' | 'worker' | 'db';
@@ -144,6 +145,12 @@ export default function RequestJourney() {
   const steps = buildSteps(url, dynamic);
   const cur = step >= 0 ? steps[step] : null;
   const last = step === steps.length - 1;
+  const { complete } = useLab();
+
+  // Done when a request has made the full round trip back to the browser.
+  useEffect(() => {
+    if (last) complete();
+  }, [last, complete]);
 
   // Measure node centres so the packet travels in pixels (transform only), in both LTR and RTL.
   useLayoutEffect(() => {
@@ -188,28 +195,32 @@ export default function RequestJourney() {
   return (
     <Frame
       title={tx('سفر یک Request: از تایپ آدرس تا دیدن صفحه', 'The journey of a request: from typing a URL to seeing the page')}
-      hint={tx('یک آدرس بنویسید و «برو» را بزنید. من بسته را دنبال می‌کنم!', "Type an address and press Go. I'll follow the packet!")}
+      goal={tx('یک Request را تا صفحه کامل دنبال کنید', 'Follow one request all the way to the page')}
       mood={last ? 'happy' : step >= 0 ? 'wow' : 'happy'}
       tint="var(--sky-soft)"
       footer={
         <>
-          <button type="button" className="btn btn--small" onClick={() => { setPlaying(false); setStep((v) => Math.max(0, v - 1)); }} disabled={step <= 0}>
-            {tx('قدم قبل', 'Back')}
-          </button>
-          <button
-            type="button"
-            className="btn btn--small btn--butter"
-            onClick={() => { setPlaying(false); setStep((v) => Math.min(steps.length - 1, v + 1)); }}
-            disabled={last}
-          >
-            {tx('قدم بعد', 'Next step')}
-          </button>
-          <button type="button" className="btn btn--small btn--ghost" onClick={() => setPlaying((p) => !p)} disabled={last && !playing}>
-            {playing ? tx('مکث', 'Pause') : tx('پخش خودکار', 'Auto-play')}
-          </button>
-          <span className="w-muted" style={{ marginInlineStart: 'auto' }}>
-            {step >= 0 ? `${tx('قدم', 'Step')} ${num(step + 1, lang)} / ${num(steps.length, lang)}` : ''}
-          </span>
+          <div className="w-row">
+            <button type="button" className="btn btn--small" onClick={() => { setPlaying(false); setStep((v) => Math.max(0, v - 1)); }} disabled={step <= 0}>
+              {tx('قدم قبل', 'Back')}
+            </button>
+            <button type="button" className="btn btn--small btn--ghost" onClick={() => setPlaying((p) => !p)} disabled={last && !playing}>
+              {playing ? tx('مکث', 'Pause') : tx('پخش خودکار', 'Auto-play')}
+            </button>
+          </div>
+          <div className="w-row">
+            <span className="w-muted">
+              {step >= 0 ? `${tx('قدم', 'Step')} ${num(step + 1, lang)} / ${num(steps.length, lang)}` : ''}
+            </span>
+            <button
+              type="button"
+              className="btn btn--small btn--butter"
+              onClick={() => { setPlaying(false); setStep((v) => Math.min(steps.length - 1, v + 1)); }}
+              disabled={last}
+            >
+              {tx('قدم بعد', 'Next step')}
+            </button>
+          </div>
         </>
       }
     >
@@ -253,15 +264,15 @@ export default function RequestJourney() {
             style={{ position: 'absolute', top: 0, left: 0, width: 0 }}
             initial={false}
             animate={{ transform: `translateX(${xs[cur.node]}px)` }}
-            transition={reduce ? { duration: 0 } : { duration: 0.7, ease: [0.77, 0, 0.175, 1] }}
+            transition={reduce ? { duration: 0 } : { duration: 0.7, ease: EASE_IN_OUT }}
           >
             <span className="rj-packet" style={{ transform: 'translateX(-50%)' }}>
               <AnimatePresence mode="popLayout" initial={false}>
                 <motion.span
                   key={cur.carry}
-                  initial={{ opacity: 0, filter: 'blur(3px)' }}
-                  animate={{ opacity: 1, filter: 'blur(0px)' }}
-                  exit={{ opacity: 0, filter: 'blur(3px)' }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
                 >
                   {cur.carry}
@@ -280,7 +291,7 @@ export default function RequestJourney() {
                   className="rj-dot"
                   style={{ background: here ? n.tint : undefined }}
                   animate={{ transform: here ? 'translateY(-3px)' : 'translateY(0px)' }}
-                  transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+                  transition={{ duration: 0.25, ease: EASE_OUT }}
                 >
                   <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden>
                     {n.icon}
@@ -302,7 +313,7 @@ export default function RequestJourney() {
             initial={{ opacity: 0, transform: 'translateY(6px)' }}
             animate={{ opacity: 1, transform: 'translateY(0px)' }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+            transition={{ duration: 0.22, ease: EASE_OUT }}
           >
             {cur
               ? tx(cur.fa, cur.en)
@@ -321,7 +332,7 @@ export default function RequestJourney() {
             initial={{ opacity: 0, transform: 'scale(0.96) translateY(8px)' }}
             animate={{ opacity: 1, transform: 'scale(1) translateY(0px)' }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+            transition={{ duration: 0.4, ease: EASE_OUT }}
           >
             <div className="rj-mock-bar">
               <i />

@@ -15,7 +15,26 @@ export const building: Chapter[] = [
       fa: 'قبل از اولین پیام به Agent، بدانید دقیقاً چه می‌خواهید',
       en: 'Know exactly what you want before your first message to the agent',
     },
-    minutes: 14,
+    minutes: 15,
+    mission: {
+      outcome: { fa: "می‌توانید برای هر پروژه یک Brief یک‌صفحه‌ای بنویسید و آن را به دستورالعمل دائمی Agent تبدیل کنید.", en: "You can write a one-page brief for any project and turn it into the agent's standing instructions." },
+      cafe: { fa: "Brief کافه سحر و فایل AGENTS.md آن نوشته می‌شود.", en: "Café Sahar's brief and its AGENTS.md get written." },
+    },
+    warmup: {
+      q: { fa: "از فصل قبل: Cloudflare API Token را کجا باید نگه دارید؟", en: "From the last chapter: where should your Cloudflare API token live?" },
+      options: [
+        { fa: "در Secrets یا متغیرهای محیطی Agent", en: "In the agent environment's secrets" },
+        { fa: "داخل کد پروژه در Repository", en: "Inside the project code in the repo" },
+        { fa: "در متن چت تا Agent آن را مستقیم ببیند", en: "Pasted into the chat for the agent" },
+      ],
+      answer: 0,
+      explain: { fa: "Token فقط یک بار نشان داده می‌شود؛ مستقیم در Secrets محیط Agent بگذاریدش.", en: "The token is shown only once; put it straight into the agent environment's secrets." },
+      why: [
+        { fa: "درست. آنجا از چت و تاریخچه Git بیرون می‌ماند.", en: "Right. It stays out of the chat and out of Git history." },
+        { fa: "هر چیزی که Commit شود برای همیشه در تاریخچه Git می‌ماند.", en: "Anything committed stays in Git history forever." },
+        { fa: "متن چت ذخیره می‌شود و Token لو می‌رود؛ هرگز Paste نکنید.", en: "Chats are stored, so the token leaks; never paste it." },
+      ],
+    },
     mascotLine: {
       fa: 'من خیلی سریع می‌سازم، ولی فقط وقتی بدانم «چه چیزی» را. بیایید اول با هم نقشه را بکشیم!',
       en: 'I build really fast, but only once I know what to build. Let’s draw the map together first!',
@@ -28,8 +47,8 @@ export const building: Chapter[] = [
           {
             type: 'p',
             text: {
-              fa: "Agent مثل یک پیمانکار خیلی سریع و خیلی باهوش است که شما را نمی‌شناسد. اگر فقط بگویید «یک وبسایت قشنگ برای کافه‌ام بساز»، او مجبور است صدها تصمیم را خودش حدس بزند: چند صفحه؟ منو آنلاین؟ رزرو میز؟ فارسی یا انگلیسی؟ رنگ‌ها؟ هر حدس اشتباه یعنی یک دور اصلاح، و هر دور اصلاح یعنی وقت، اعتبار مصرفی و حوصله.",
-              en: "An agent is like a very fast, very smart contractor who has never met you. If you only say “build a nice website for my cafe,” it has to guess hundreds of decisions on its own: how many pages? an online menu? table booking? Persian or English? which colors? Every wrong guess costs a round of fixes, and every round costs time, usage credits and patience.",
+              fa: "Agent مثل یک پیمانکار خیلی سریع و خیلی باهوش است که شما را نمی‌شناسد. اگر فقط بگویید «یک وب‌سایت قشنگ برای کافه‌ام بساز»، او مجبور است صدها تصمیم را خودش حدس بزند: چند صفحه؟ منو آنلاین؟ رزرو میز؟ فارسی یا انگلیسی؟ رنگ‌ها؟ هر حدس اشتباه یعنی یک دور اصلاح، و هر دور اصلاح یعنی وقت، اعتبار مصرفی و حوصله.",
+              en: "An agent is like a very fast, very smart contractor who has never met you. If you only say “build a nice website for my café,” it has to guess hundreds of decisions on its own: how many pages? an online menu? table booking? Persian or English? which colors? Every wrong guess costs a round of fixes, and every round costs time, usage credits and patience.",
             },
           },
           {
@@ -69,8 +88,8 @@ export const building: Chapter[] = [
               {
                 title: { fa: 'هدف (Goal)', en: 'Goal' },
                 text: {
-                  fa: "این سایت قرار است چه مشکلی را حل کند؟ در یک جمله. مثلاً: «مشتری‌ها منوی روز و ساعت کاری کافه را ببینند و میز رزرو کنند.»",
-                  en: "What problem does this site solve? One sentence. For example: “Customers can see today's menu and opening hours, and book a table.”",
+                  fa: "این سایت قرار است چه مشکلی را حل کند؟ در یک جمله. مثلاً: «مشتری‌های کافه سحر منوی روز و ساعت کاری کافه را ببینند و میز رزرو کنند.»",
+                  en: "What problem does this site solve? One sentence. For example: “Café Sahar's customers can see today's menu and opening hours, and book a table.”",
                 },
               },
               {
@@ -179,13 +198,42 @@ export const building: Chapter[] = [
             ],
           },
           {
+            type: 'path',
+            codex: [
+              {
+                type: 'p',
+                text: {
+                  fa: "در مسیر Codex، دستورالعمل‌ها در فایل **AGENTS.md** در ریشه Repository می‌نشینند. Codex قبل از هر کار آن را می‌خواند، و چون فایل در Git است، هر تغییرش هم تاریخچه دارد.",
+                  en: "On the Codex path, instructions live in **AGENTS.md** at the repository root. Codex reads it before any work, and because it's in Git, every change to it has a history.",
+                },
+              },
+            ],
+            lovable: [
+              {
+                type: 'p',
+                text: {
+                  fa: "در Lovable همین نقش را **Instructions** (نام قبلی: Knowledge) بازی می‌کند: متن ساده در سه سطح Workspace، Project و Personal، هر کدام تا ۱۰٬۰۰۰ کاراکتر، که همیشه در زمینه کار Agent قرار می‌گیرد. اگر بین سطح‌ها تداخل باشد، اولویت با Personal، بعد Project و بعد Workspace است.",
+                  en: "In Lovable, **Instructions** (formerly Knowledge) play the same role: plain text at three levels, workspace, project and personal, up to 10,000 characters each, always included in the agent's context. On conflict, personal wins, then project, then workspace.",
+                },
+              },
+              {
+                type: 'callout',
+                tone: 'tip',
+                text: {
+                  fa: "Brief کافه سحر را در Instructions پروژه بچسبانید. طبق مستندات Lovable، در گفتگوهای خیلی طولانی ممکن است دستورالعمل‌ها همیشه رعایت نشوند؛ پس نکته‌های حیاتی (مثل RTL و فونت فارسی) را در Prompt همان کار هم تکرار کنید.",
+                  en: "Paste Café Sahar's brief into the project Instructions. Lovable's docs note that instructions may not be followed consistently in very long conversations, so repeat critical points (like RTL and the Persian font) in the task's prompt too.",
+                },
+              },
+            ],
+          },
+          {
             type: 'code',
             lang: 'markdown',
-            caption: { fa: 'یک نمونه AGENTS.md کوتاه برای سایت کافه', en: 'A short AGENTS.md example for a cafe site' },
-            code: `# Cafe Nilou website
+            caption: { fa: 'یک نمونه AGENTS.md کوتاه برای سایت کافه سحر', en: 'A short AGENTS.md example for the Café Sahar site' },
+            code: `# Café Sahar website
 
 ## Project
-Bilingual (Persian first, RTL) website for a small cafe.
+Bilingual (Persian first, RTL) website for Café Sahar, a small neighbourhood café (domain: cafe-sahar.ir).
 Goal: show today's menu and opening hours, and let people book a table.
 
 ## Stack
@@ -247,20 +295,21 @@ Goal: show today's menu and opening hours, and let people book a table.
           },
           {
             type: 'quiz',
-            q: {
-              fa: 'شما می‌خواهید یک فروشگاه آنلاین بسازید ولی وقت و بودجه کمی دارید. بهترین شروع کدام است؟',
-              en: 'You want to build an online shop but have little time and budget. What is the best start?',
-            },
+            q: { fa: "شما می‌خواهید یک فروشگاه آنلاین بسازید ولی وقت و بودجه کمی دارید. بهترین شروع کدام است؟", en: "You want to build an online shop but have little time and budget. What is the best start?" },
             options: [
-              { fa: 'همه قابلیت‌ها را در یک پیام بزرگ از Agent بخواهیم تا یکجا ساخته شود.', en: 'Ask the agent for every feature in one big message so it’s built in one go.' },
-              { fa: 'یک MVP با Mustها تعریف کنیم: فهرست محصول، صفحه محصول و راه تماس برای سفارش؛ بقیه برای بعد.', en: 'Define an MVP with the Musts: product list, product page and a way to order; everything else later.' },
-              { fa: 'بدون Brief شروع کنیم و ببینیم Agent چه پیشنهادی می‌دهد.', en: 'Start without a brief and see what the agent suggests.' },
+              { fa: "یک MVP فقط با Mustها تعریف کنیم و بقیه را برای نسخه‌های بعد بگذاریم.", en: "Define an MVP with only the Musts and leave the rest for later versions." },
+              { fa: "همه قابلیت‌ها را در یک پیام بلند بخواهیم تا Agent همه را یکجا بسازد.", en: "Ask for every feature in one long message so the agent builds it all at once." },
+              { fa: "بدون Brief شروع کنیم و بگذاریم Agent قابلیت‌های لازم را حدس بزند.", en: "Start without a brief and let the agent guess which features you need." },
+              { fa: "اول ظاهر همه صفحه‌ها را کامل کنیم و قابلیت‌ها را آخر کار بگذاریم.", en: "Perfect the look of every page first and add features at the very end." },
             ],
-            answer: 1,
-            explain: {
-              fa: 'MVP یعنی زودتر منتشر کردن چیزی که واقعاً کار می‌کند، و بعد رشد دادن آن. پیام‌های غول‌پیکر و شروع بدون Brief هر دو به دورهای اصلاح بی‌پایان می‌رسند.',
-              en: 'An MVP gets something that really works out the door sooner, then grows it. Giant messages and no-brief starts both lead to endless rounds of fixes.',
-            },
+            answer: 0,
+            explain: { fa: "MVP یعنی زودتر منتشر کردن چیزی که واقعاً کار می‌کند، و بعد رشد دادن آن.", en: "An MVP gets something that really works out the door sooner, then grows it." },
+            why: [
+              { fa: "درست. اول Mustها منتشر می‌شوند و بقیه یکی‌یکی اضافه می‌شوند.", en: "Right. The Musts ship first and the rest is added one by one." },
+              { fa: "پیام غول‌پیکر یعنی حدس‌های زیاد، تغییرات بزرگ و بررسی سخت.", en: "A giant message means many guesses, huge changes and hard reviews." },
+              { fa: "بدون Brief، Agent صدها تصمیم را حدس می‌زند و اصلاح‌ها تمام نمی‌شوند.", en: "Without a brief the agent guesses hundreds of decisions and fixes never end." },
+              { fa: "ظاهر بدون قابلیت اصلی به کار مشتری نمی‌آید؛ اول Mustها، بعد ظرافت.", en: "A polished look without core features doesn't help customers; Musts first." },
+            ],
           },
           {
             type: 'links',
@@ -268,6 +317,7 @@ Goal: show today's menu and opening hours, and let people book a table.
               { label: 'AGENTS.md: open format for coding agents', url: 'https://agents.md' },
               { label: 'OpenAI Codex: Custom instructions with AGENTS.md', url: 'https://developers.openai.com/codex/guides/agents-md' },
               { label: 'Claude Code: How Claude remembers your project (CLAUDE.md)', url: 'https://code.claude.com/docs/en/memory' },
+              { label: 'Lovable docs: Instructions (formerly Knowledge)', url: 'https://docs.lovable.dev/features/knowledge' },
             ],
           },
         ],
@@ -296,6 +346,25 @@ Goal: show today's menu and opening hours, and let people book a table.
       en: 'Learn to talk so the agent does exactly the right job',
     },
     minutes: 16,
+    mission: {
+      outcome: { fa: "می‌توانید Promptی بنویسید که Agent دقیقاً همان کار درست را انجام دهد، و Skill مناسب را با خیال راحت نصب کنید.", en: "You can write prompts that get exactly the right job done, and install the right skills safely." },
+      cafe: { fa: "اولین Prompt خوب نوشته می‌شود: صفحه منوی کافه.", en: "The first good prompt gets written: the café's menu page." },
+    },
+    warmup: {
+      q: { fa: "از فصل قبل: Codex قبل از شروع کار کدام فایل را می‌خواند؟", en: "From the last chapter: which file does Codex read before it starts?" },
+      options: [
+        { fa: "فایل README.md در ریشه پروژه", en: "README.md at the project root" },
+        { fa: "فایل CLAUDE.md داخل پوشه .claude پروژه", en: "CLAUDE.md in the project's .claude folder" },
+        { fa: "فایل AGENTS.md در ریشه Repository", en: "AGENTS.md at the repository root" },
+      ],
+      answer: 2,
+      explain: { fa: "AGENTS.md را کوتاه نگه دارید؛ در هر جلسه خوانده می‌شود.", en: "Keep AGENTS.md short; it's read in every session." },
+      why: [
+        { fa: "README برای انسان‌هاست؛ Agent دستورالعمل اختصاصی خودش را می‌خواهد.", en: "README is for humans; the agent wants its own instruction file." },
+        { fa: "CLAUDE.md مخصوص Claude Code است، نه Codex.", en: "CLAUDE.md belongs to Claude Code, not to Codex." },
+        { fa: "درست. AGENTS.md قالب باز است و Codex اول آن را می‌خواند.", en: "Right. AGENTS.md is the open format Codex reads first." },
+      ],
+    },
     mascotLine: {
       fa: 'من عاشق دستورهای روشنم! بگویید چه، چرا و کِی تمام است، تا من هم بدانم کجا بایستم.',
       en: 'I love clear instructions! Tell me what, why and when it’s done, so I know where to stop.',
@@ -415,11 +484,47 @@ Goal: show today's menu and opening hours, and let people book a table.
             ],
           },
           {
+            type: 'path',
+            codex: [
+              {
+                type: 'p',
+                text: {
+                  fa: "در Codex، «اول برنامه» را با خود Prompt می‌خواهید: «برنامه‌ات را بگو و منتظر تأیید من بمان». Skillها هم در پوشه `.agents/skills/` پروژه قرار می‌گیرند (یا `~/.agents/skills/` برای همه پروژه‌ها).",
+                  en: "In Codex you ask for “plan first” in the prompt itself: “tell me your plan and wait for my approval.” Skills go in the project's `.agents/skills/` folder (or `~/.agents/skills/` for every project).",
+                },
+              },
+            ],
+            lovable: [
+              {
+                type: 'p',
+                text: {
+                  fa: "در Lovable، چت پروژه سه حالت دارد و انتخاب حالت درست، خودش نیمی از یک Prompt خوب است:",
+                  en: "In Lovable, the project chat has three modes, and picking the right one is half of a good prompt:",
+                },
+              },
+              {
+                type: 'list',
+                items: [
+                  { fa: "**Chat**: گفتگو و پرسیدن، بدون هیچ تغییری در کد.", en: "**Chat**: discuss and ask, with no code changes." },
+                  { fa: "**Plan**: Lovable بررسی می‌کند و یک برنامه قابل‌ویرایش می‌نویسد که شما تأییدش می‌کنید؛ در این حالت کد هرگز تغییر نمی‌کند. برنامه‌های تأییدشده در `.lovable/plan/` ذخیره می‌شوند و هر پیام ۱ اعتبار (Credit) مصرف می‌کند.", en: "**Plan**: Lovable investigates and writes an editable plan that you approve; in this mode code is never changed. Approved plans are stored in `.lovable/plan/`, and each message costs 1 credit." },
+                  { fa: "**Build** (نام قبلی: Agent mode): تغییرات را از اول تا آخر پیاده و بررسی می‌کند.", en: "**Build** (formerly Agent mode): implements and verifies changes end to end." },
+                ],
+              },
+              {
+                type: 'p',
+                text: {
+                  fa: "طبق مستندات Lovable، کنار Instructions که همیشه حاضرند، **Skills** هم وجود دارند که فقط وقتی لازم است بارگذاری می‌شوند؛ همان ایده Progressive Disclosure.",
+                  en: "According to Lovable's docs, next to Instructions, which are always present, there are also **Skills**, which load only when needed: the same progressive-disclosure idea.",
+                },
+              },
+            ],
+          },
+          {
             type: 'prompt',
             title: { fa: 'قالب یک Prompt کامل برای یک قابلیت جدید', en: 'A full prompt template for a new feature' },
             text: {
-              fa: "زمینه: در پروژه سایت کافه (AGENTS.md را بخوان) صفحه منو آماده است.\nهدف: یک بخش «پیشنهاد امروز» بالای صفحه منو اضافه کن تا مشتری‌ها آیتم ویژه هر روز را ببینند.\nمحدودیت‌ها: کتابخانه جدید اضافه نکن. طراحی بقیه صفحه را عوض نکن. متن‌ها فارسی و RTL باشند.\nتعریف تمام‌شدن:\n- روی موبایل و دسکتاپ درست نمایش داده شود.\n- اگر پیشنهاد امروز تعریف نشده باشد، بخش اصلاً نمایش داده نشود.\n- تست‌های فعلی پاس شوند.\nروش: اول برنامه‌ات را در چند خط بگو و اگر سؤالی داری بپرس. تا تأیید من کد ننویس. بعد روی یک Branch جدید کار کن.",
-              en: "Context: in the cafe site project (read AGENTS.md) the menu page is done.\nGoal: add a “Today's special” section at the top of the menu page so customers see each day's featured item.\nConstraints: don't add new libraries. Don't change the rest of the page design. Texts in Persian and RTL.\nDefinition of done:\n- Displays correctly on mobile and desktop.\n- If no special is set for today, the section doesn't render at all.\n- Existing tests still pass.\nProcess: first tell me your plan in a few lines and ask any questions. Don't write code until I approve. Then work on a new branch.",
+              fa: "زمینه: در پروژه سایت کافه سحر (AGENTS.md را بخوان) صفحه منو آماده است.\nهدف: یک بخش «پیشنهاد امروز» بالای صفحه منو اضافه کن تا مشتری‌ها آیتم ویژه هر روز را ببینند.\nمحدودیت‌ها: کتابخانه جدید اضافه نکن. طراحی بقیه صفحه را عوض نکن. متن‌ها فارسی و RTL باشند.\nتعریف تمام‌شدن:\n- روی موبایل و دسکتاپ درست نمایش داده شود.\n- اگر پیشنهاد امروز تعریف نشده باشد، بخش اصلاً نمایش داده نشود.\n- تست‌های فعلی پاس شوند.\nروش: اول برنامه‌ات را در چند خط بگو و اگر سؤالی داری بپرس. تا تأیید من کد ننویس. بعد روی یک Branch جدید کار کن.",
+              en: "Context: in the Café Sahar site project (read AGENTS.md) the menu page is done.\nGoal: add a “Today's special” section at the top of the menu page so customers see each day's featured item.\nConstraints: don't add new libraries. Don't change the rest of the page design. Texts in Persian and RTL.\nDefinition of done:\n- Displays correctly on mobile and desktop.\n- If no special is set for today, the section doesn't render at all.\n- Existing tests still pass.\nProcess: first tell me your plan in a few lines and ask any questions. Don't write code until I approve. Then work on a new branch.",
             },
           },
         ],
@@ -482,8 +587,8 @@ description: Reviews a web page for Persian and RTL quality. Use when the user a
               {
                 title: { fa: 'جلسه تازه باز کنید و امتحان کنید', en: 'Start a fresh session and try it' },
                 text: {
-                  fa: "کاری بخواهید که با توضیح Skill جور باشد، یا مستقیم صدایش کنید: در Claude Code با `/نام-skill` و در Codex با `$نام-skill`.",
-                  en: "Ask for something that matches the skill's description, or call it directly: `/skill-name` in Claude Code and `$skill-name` in Codex.",
+                  fa: "کاری بخواهید که با توضیح Skill جور باشد، یا مستقیم صدایش کنید: در Claude Code با `/skill-name` و در Codex با `$skill-name`؛ به جای `skill-name` نام همان Skill را بنویسید (مثلاً `/frontend-design`).",
+                  en: "Ask for something that matches the skill's description, or call it directly: `/skill-name` in Claude Code and `$skill-name` in Codex, replacing `skill-name` with the skill's own name (for example `/frontend-design`).",
                 },
               },
             ],
@@ -524,20 +629,21 @@ cp -R Ahouei-GetheredInOne-AIAgentSkills/skills/frontend-design .claude/skills/`
           },
           {
             type: 'quiz',
-            q: {
-              fa: 'کدام Prompt برای یک Agent بهتر است؟',
-              en: 'Which prompt is better for an agent?',
-            },
+            q: { fa: "کدام Prompt برای یک Agent بهتر است؟", en: "Which prompt is better for an agent?" },
             options: [
-              { fa: '«سایت را قشنگ‌تر کن.»', en: '“Make the site prettier.”' },
-              { fa: '«دکمه‌های صفحه خانه را با رنگ اصلی برند (#E8603C) و گوشه گرد ۱۲ پیکسل یکسان کن، به صفحه‌های دیگر دست نزن، و قبل از تغییر برنامه‌ات را بگو.»', en: '“Make the home page buttons use the brand color (#E8603C) and a 12px radius, don’t touch other pages, and tell me your plan before changing anything.”' },
-              { fa: '«تو یک طراح حرفه‌ای در سطح جهانی هستی، بهترین سایت دنیا را بساز.»', en: '“You are a world-class designer. Build the best website in the world.”' },
+              { fa: "«سایت را قشنگ‌تر و حرفه‌ای‌تر کن تا مشتری‌ها بیشتر خوششان بیاید.»", en: "“Make the site prettier and more professional so customers like it more.”" },
+              { fa: "«تو بهترین طراح دنیا هستی؛ بهترین سایت ممکن را برای کافه بساز.»", en: "“You are the world's best designer; build the best possible café site.”" },
+              { fa: "«دکمه‌های خانه را با رنگ برند (#E8603C) یکدست کن و اول برنامه‌ات را بگو.»", en: "“Give the home buttons the brand color (#E8603C); tell me your plan first.”" },
+              { fa: "«همه صفحه‌های سایت را از نو طراحی کن و هر چیزی را که خودت لازم دانستی عوض کن.»", en: "“Redesign every page from scratch and change anything you personally think is needed.”" },
             ],
-            answer: 1,
-            explain: {
-              fa: 'گزینه دوم زمینه، هدف دقیق، محدودیت و روش کار دارد و نتیجه‌اش قابل‌بررسی است. «قشنگ‌تر» و «بهترین سایت دنیا» قابل‌سنجش نیستند.',
-              en: 'The second option has context, a precise goal, a limit and a process, and its result can be checked. “Prettier” and “the best website in the world” can’t be measured.',
-            },
+            answer: 2,
+            explain: { fa: "Prompt خوب هدف دقیق، مقدار مشخص و روش کار دارد و نتیجه‌اش قابل‌بررسی است.", en: "A good prompt has a precise goal, a concrete value and a process, so its result can be checked." },
+            why: [
+              { fa: "«قشنگ‌تر» قابل‌سنجش نیست؛ Agent باید حدس بزند منظورتان چیست.", en: "“Prettier” can't be checked; the agent has to guess what you mean." },
+              { fa: "تعیین نقش بدون هدف و محدودیت، نتیجه را دقیق‌تر نمی‌کند.", en: "A role with no goal or limits doesn't make the result more precise." },
+              { fa: "درست. هدف دقیق، رنگ مشخص و «اول برنامه» یعنی تغییر کوچک و قابل‌بررسی.", en: "Right. A precise goal, a set color and “plan first” mean a small, checkable change." },
+              { fa: "اجازه بی‌حد یعنی تغییرات بزرگ و غیرقابل‌پیش‌بینی در کل سایت.", en: "Unlimited licence means big, unpredictable changes across the whole site." },
+            ],
           },
           {
             type: 'links',
@@ -545,6 +651,7 @@ cp -R Ahouei-GetheredInOne-AIAgentSkills/skills/frontend-design .claude/skills/`
               { label: 'Agent Skills specification (agentskills.io)', url: 'https://agentskills.io/specification' },
               { label: 'Claude Code: Extend Claude with skills', url: 'https://code.claude.com/docs/en/skills' },
               { label: 'OpenAI Codex: Build skills', url: 'https://developers.openai.com/codex/skills' },
+              { label: 'Lovable docs: Plan mode', url: 'https://docs.lovable.dev/features/plan-mode' },
               { label: 'Anthropic: Skill authoring best practices', url: 'https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices' },
               { label: 'Course skills collection on GitHub', url: 'https://github.com/Ahouei/Ahouei-GetheredInOne-AIAgentSkills' },
             ],
@@ -575,6 +682,25 @@ cp -R Ahouei-GetheredInOne-AIAgentSkills/skills/frontend-design .claude/skills/`
       en: 'See, critique and approve the design before any code is written',
     },
     minutes: 15,
+    mission: {
+      outcome: { fa: "می‌توانید قبل از اینکه کدی نوشته شود، یک طرح را بررسی، نقد و صریح تأیید کنید.", en: "You can review, critique and explicitly approve a design before any code exists." },
+      cafe: { fa: "طراحی کافه سحر تأیید می‌شود: رنگ‌ها، هدر و Mobile-first.", en: "Café Sahar's design is approved: colors, header and mobile-first." },
+    },
+    warmup: {
+      q: { fa: "از فصل قبل: Agent Skill دقیقاً چیست؟", en: "From the last chapter: what exactly is an Agent Skill?" },
+      options: [
+        { fa: "یک افزونه پولی که باید آن را خرید", en: "A paid add-on you have to buy first" },
+        { fa: "پوشه‌ای با SKILL.md از دانش یک کار", en: "A folder with a SKILL.md of know-how" },
+        { fa: "یک مدل زبانی تازه و قوی‌تر از قبلی", en: "A newer language model that codes better" },
+      ],
+      answer: 1,
+      explain: { fa: "Skill یعنی دستورالعمل به‌علاوه کد؛ قبل از نصب، کاملش را بخوانید.", en: "A skill is instructions plus code; read all of it before installing." },
+      why: [
+        { fa: "Skill فقط یک پوشه است و بسیاری از آن‌ها رایگان و متن‌باز هستند.", en: "A skill is just a folder, and many are free and open." },
+        { fa: "درست. Agent فقط وقتی لازم باشد متن کاملش را می‌خواند.", en: "Right. The agent reads it in full only when needed." },
+        { fa: "Skill مدل را عوض نمی‌کند؛ فقط روش انجام یک کار را یاد می‌دهد.", en: "A skill doesn't change the model; it teaches a method." },
+      ],
+    },
     mascotLine: {
       fa: 'عوض کردن یک طرح روی کاغذ پنج دقیقه است؛ عوض کردنش بعد از کدنویسی یک روز. بیایید اول نقاشی کنیم!',
       en: 'Changing a design on paper takes five minutes; changing it after the code is written takes a day. Let’s sketch first!',
@@ -595,7 +721,7 @@ cp -R Ahouei-GetheredInOne-AIAgentSkills/skills/frontend-design .claude/skills/`
             type: 'callout',
             tone: 'why',
             text: {
-              fa: "معماران قبل از ساختن خانه نقشه می‌کشند، نه اینکه دیوار بچینند و بعد بپرسند «خوب است؟». همین منطق برای وبسایت هم درست است. طرح اولیه همچنین قراردادی بین شما و Agent است: بعداً می‌توانید بگویید «طبق طرح تأییدشده جلو برو».",
+              fa: "معماران قبل از ساختن خانه نقشه می‌کشند، نه اینکه دیوار بچینند و بعد بپرسند «خوب است؟». همین منطق برای وب‌سایت هم درست است. طرح اولیه همچنین قراردادی بین شما و Agent است: بعداً می‌توانید بگویید «طبق طرح تأییدشده جلو برو».",
               en: "Architects draw plans before building a house; they don't stack walls and then ask “is this OK?” The same logic applies to websites. The design is also a contract between you and the agent: later you can say “follow the approved design.”",
             },
           },
@@ -617,8 +743,8 @@ cp -R Ahouei-GetheredInOne-AIAgentSkills/skills/frontend-design .claude/skills/`
             type: 'prompt',
             title: { fa: 'درخواست طرح اولیه (هنوز کد نه)', en: 'Ask for a design proposal (no code yet)' },
             text: {
-              fa: "AGENTS.md و Brief پروژه را بخوان. هنوز هیچ کد اصلی ننویس.\nیک پیشنهاد طراحی آماده کن شامل:\n۱. Sitemap همه صفحه‌ها.\n۲. Wireframe متنی برای صفحه خانه و صفحه منو (بالا به پایین، بخش به بخش).\n۳. Style direction: دو فونت (یکی فارسی)، پالت ۴ تا ۵ رنگ با کد، و حس کلی در سه کلمه، با دلیل هر انتخاب.\n۴. فهرست Componentهای مشترک.\n۵. یک Mockup ساده از صفحه خانه به شکل یک فایل HTML جدا در پوشه design/ تا در مرورگر ببینم.\nطراحی Mobile-first و RTL باشد. از گرادیان بنفش و چیدمان کلیشه‌ای سه کارت کنار هم دوری کن.\nبعد صبر کن تا نظر من را بشنوی.",
-              en: "Read AGENTS.md and the project brief. Don't write any production code yet.\nPrepare a design proposal with:\n1. A sitemap of all pages.\n2. A text wireframe for the home page and the menu page (top to bottom, section by section).\n3. Style direction: two fonts (one Persian), a 4–5 color palette with hex codes, and the mood in three words, with a reason for each choice.\n4. A list of shared components.\n5. A simple mockup of the home page as a separate HTML file in a design/ folder so I can open it in a browser.\nDesign mobile-first and RTL. Avoid purple gradients and the cliché row of three identical cards.\nThen wait for my feedback.",
+              fa: "AGENTS.md و Brief پروژه کافه سحر را بخوان. هنوز هیچ کد اصلی ننویس.\nیک پیشنهاد طراحی آماده کن شامل:\n۱. Sitemap همه صفحه‌ها.\n۲. Wireframe متنی برای صفحه خانه و صفحه منو (بالا به پایین، بخش به بخش).\n۳. Style direction: دو فونت (یکی فارسی)، پالت ۴ تا ۵ رنگ با کد، و حس کلی در سه کلمه، با دلیل هر انتخاب.\n۴. فهرست Componentهای مشترک.\n۵. یک Mockup ساده از صفحه خانه به شکل یک فایل HTML جدا در پوشه design/ تا در مرورگر ببینم.\nطراحی Mobile-first و RTL باشد. از گرادیان بنفش و چیدمان کلیشه‌ای سه کارت کنار هم دوری کن.\nبعد صبر کن تا نظر من را بشنوی.",
+              en: "Read AGENTS.md and the Café Sahar project brief. Don't write any production code yet.\nPrepare a design proposal with:\n1. A sitemap of all pages.\n2. A text wireframe for the home page and the menu page (top to bottom, section by section).\n3. Style direction: two fonts (one Persian), a 4–5 color palette with hex codes, and the mood in three words, with a reason for each choice.\n4. A list of shared components.\n5. A simple mockup of the home page as a separate HTML file in a design/ folder so I can open it in a browser.\nDesign mobile-first and RTL. Avoid purple gradients and the cliché row of three identical cards.\nThen wait for my feedback.",
             },
           },
         ],
@@ -648,6 +774,7 @@ cp -R Ahouei-GetheredInOne-AIAgentSkills/skills/frontend-design .claude/skills/`
               { fa: "**شخصیت:** شبیه هزار سایت دیگر است یا حس برند شما را دارد؟", en: "**Personality:** does it look like a thousand other sites, or does it feel like your brand?" },
             ],
           },
+          { type: 'widget', id: 'design-flaws' },
           {
             type: 'callout',
             tone: 'warn',
@@ -706,6 +833,35 @@ cp -R Ahouei-GetheredInOne-AIAgentSkills/skills/frontend-design .claude/skills/`
             ],
           },
           {
+            type: 'path',
+            codex: [
+              {
+                type: 'p',
+                text: {
+                  fa: "با Codex، Mockup را به شکل یک فایل HTML در پوشه `design/` بخواهید، در مرورگر بازش کنید و با اسکرین‌شات و توضیح دقیق بازخورد بدهید. تأیید هم در همان گفتگو انجام می‌شود، با جمله صریح «تأیید شد».",
+                  en: "With Codex, ask for the mockup as an HTML file in a `design/` folder, open it in a browser, and give feedback with screenshots and precise notes. Approval happens in the same chat, with an explicit “approved.”",
+                },
+              },
+            ],
+            lovable: [
+              {
+                type: 'p',
+                text: {
+                  fa: "در Lovable طرح از همان اول یک پیش‌نمایش زنده است. با **Preview toolbar** می‌توانید یک جزء را انتخاب کنید و تغییرش را توضیح دهید، متن را همان‌جا ویرایش کنید، روی صفحه یادداشت بکشید یا نظر بگذارید. درخواست‌های «انتخاب جزء» اعتبار مصرف می‌کنند.",
+                  en: "In Lovable the design is a live preview from the start. With the **preview toolbar** you can select an element and describe the change, edit text in place, draw annotations or leave comments. Select-element requests consume credits.",
+                },
+              },
+              {
+                type: 'callout',
+                tone: 'tip',
+                text: {
+                  fa: "برای اینکه طراحی از ساخت جدا بماند، اول در **Plan mode** درباره ساختار و سبک کافه سحر حرف بزنید و برنامه را تأیید کنید؛ بعد به Build بروید.",
+                  en: "To keep design separate from building, first discuss Café Sahar's structure and style in **Plan mode** and approve the plan; then switch to Build.",
+                },
+              },
+            ],
+          },
+          {
             type: 'prompt',
             title: { fa: 'تأیید با تغییرات', en: 'Approve with changes' },
             text: {
@@ -740,20 +896,21 @@ cp -R Ahouei-GetheredInOne-AIAgentSkills/skills/frontend-design .claude/skills/`
           },
           {
             type: 'quiz',
-            q: {
-              fa: 'Agent یک Mockup زیبا با متن Lorem ipsum به شما نشان داده. بهترین قدم بعدی چیست؟',
-              en: 'The agent shows you a beautiful mockup filled with lorem ipsum. What is the best next step?',
-            },
+            q: { fa: "Agent یک Mockup زیبا با متن Lorem ipsum به شما نشان داده. بهترین قدم بعدی چیست؟", en: "The agent shows you a beautiful mockup filled with lorem ipsum. What is the best next step?" },
             options: [
-              { fa: 'فوراً تأیید کنیم چون قشنگ است.', en: 'Approve right away because it looks nice.' },
-              { fa: 'بخواهیم با متن و عکس واقعی و در عرض موبایل دوباره نشان دهد، بعد تصمیم بگیریم.', en: 'Ask to see it again with real text and photos at mobile width, then decide.' },
-              { fa: 'مستقیم بگوییم کل سایت را بسازد؛ متن‌ها را بعداً عوض می‌کنیم.', en: 'Tell it to build the whole site; we’ll swap the text later.' },
+              { fa: "فوراً تأیید کنیم، چون Mockup زیباست و وقت را هدر نمی‌دهیم.", en: "Approve right away, because it looks lovely and it saves time." },
+              { fa: "بگوییم کل سایت را بسازد و متن‌های واقعی را بعداً جایگزین کنیم.", en: "Have it build the whole site and swap in the real text later." },
+              { fa: "فقط رنگ‌ها را عوض کنیم، چون متن در مرحله طراحی مهم نیست.", en: "Only change the colors, since text doesn't matter at this stage." },
+              { fa: "بخواهیم با متن و عکس واقعی و در عرض موبایل دوباره نشانش دهد.", en: "Ask to see it again with real text and photos at phone width." },
             ],
-            answer: 1,
-            explain: {
-              fa: 'متن واقعی (مخصوصاً فارسی) طول و شکل متفاوتی با متن نمونه دارد و ممکن است طرح را به‌هم بریزد. بررسی در عرض موبایل هم ضروری است چون بیشتر کاربران آنجا هستند.',
-              en: 'Real text (especially Persian) has a different length and shape than filler and can break the layout. Checking at mobile width matters too, since most visitors are there.',
-            },
+            answer: 3,
+            explain: { fa: "متن واقعی (مخصوصاً فارسی) طول و شکل دیگری دارد و ممکن است طرح را به‌هم بریزد؛ موبایل هم جایی است که بیشتر مشتری‌ها هستند.", en: "Real text (especially Persian) has a different length and shape and can break the layout; and mobile is where most visitors are." },
+            why: [
+              { fa: "Lorem ipsum شکل واقعی متن فارسی را نشان نمی‌دهد؛ تأیید زودهنگام است.", en: "Lorem ipsum hides the real shape of Persian text; approving now is premature." },
+              { fa: "متن واقعی بعداً ممکن است طرح را به‌هم بریزد و کد دور ریخته شود.", en: "Real text can break the layout later, and the code gets thrown away." },
+              { fa: "طول و شکل متن روی چیدمان اثر دارد؛ رنگ تنها کافی نیست.", en: "Text length and shape shape the layout; colors alone aren't enough." },
+              { fa: "درست. محتوای واقعی در عرض موبایل همان چیزی است که مشتری می‌بیند.", en: "Right. Real content at phone width is what customers will actually see." },
+            ],
           },
           {
             type: 'links',
@@ -762,6 +919,7 @@ cp -R Ahouei-GetheredInOne-AIAgentSkills/skills/frontend-design .claude/skills/`
               { label: 'web.dev: Learn Accessibility', url: 'https://web.dev/learn/accessibility' },
               { label: 'W3C: Understanding contrast (WCAG 2.2)', url: 'https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html' },
               { label: 'MDN: CSS logical properties (for RTL)', url: 'https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_logical_properties_and_values' },
+              { label: 'Lovable docs: Preview toolbar', url: 'https://docs.lovable.dev/features/preview-toolbar' },
             ],
           },
         ],
@@ -789,7 +947,26 @@ cp -R Ahouei-GetheredInOne-AIAgentSkills/skills/frontend-design .claude/skills/`
       fa: 'قدم‌های کوچک، بازبینی مداوم، ذخیره مکرر',
       en: 'Small steps, constant review, frequent saves',
     },
-    minutes: 15,
+    minutes: 21,
+    mission: {
+      outcome: { fa: "می‌توانید در دورهای کوچک بسازید، ببینید، بازبینی کنید و آگاهانه ذخیره کنید.", en: "You can work in small laps: build, look, review and save on purpose." },
+      cafe: { fa: "منو و رزرو میز کافه ساخته می‌شوند، Commit به Commit.", en: "The café's menu and table booking get built, commit by commit." },
+    },
+    warmup: {
+      q: { fa: "از فصل قبل: چرا اول طرح را تأیید می‌کنیم؟", en: "From the last chapter: why approve a design first?" },
+      options: [
+        { fa: "چون Agent بدون طرح اصلاً کد نمی‌نویسد", en: "Because agents can't code without one" },
+        { fa: "چون طرح همیشه از کد نهایی زیباتر است", en: "Because designs always look better than the final code" },
+        { fa: "چون عوض کردن طرح ارزان‌تر از کد است", en: "Because changing a design costs less than code" },
+      ],
+      answer: 2,
+      explain: { fa: "طرح تأییدشده قرارداد شما با Agent است: «طبق طرح جلو برو».", en: "The approved design is your contract with the agent: “follow the design.”" },
+      why: [
+        { fa: "Agent بدون طرح هم کد می‌نویسد، فقط با حدس‌های بیشتر.", en: "Agents code without one too, just with more guessing." },
+        { fa: "زیبایی معیار نیست؛ هدف، اصلاح ارزان‌تر است.", en: "Looks aren't the point; cheaper fixes are." },
+        { fa: "درست. بحث روی طرح تقریباً مجانی است؛ دور ریختن کد نه.", en: "Right. Debating a design is nearly free; scrapping code isn't." },
+      ],
+    },
     mascotLine: {
       fa: 'بیایید بچرخیم! شما می‌گویید، من می‌سازم، با هم نگاه می‌کنیم، ذخیره می‌کنیم، و دوباره از اول. هر دور یک قدم جلوتر.',
       en: 'Let’s go round! You ask, I build, we look together, we save, and again. Each lap is one step forward.',
@@ -898,6 +1075,35 @@ cp -R Ahouei-GetheredInOne-AIAgentSkills/skills/frontend-design .claude/skills/`
           feature/todays-special
            ●── build ──● fix ──●   → pull request → review → merge`,
           },
+          {
+            type: 'path',
+            codex: [
+              {
+                type: 'p',
+                text: {
+                  fa: "در مسیر Codex، ذخیره یعنی Commit، و هر قابلیت روی یک Branch با یک Pull Request جلو می‌رود. نقطه امن شما آخرین Merge روی `main` است.",
+                  en: "On the Codex path, saving means a commit, and each feature moves forward on its own branch with a pull request. Your safe point is the last merge into `main`.",
+                },
+              },
+            ],
+            lovable: [
+              {
+                type: 'p',
+                text: {
+                  fa: "در Lovable هر تغییر خودکار در **Version history** ذخیره می‌شود. نسخه‌های سالم را **Bookmark** کنید و هر وقت لازم شد از چت یا تاریخچه به آن‌ها برگردید. با **GitHub sync** دوطرفه، تغییرات Lovable به GitHub می‌رود و Push روی Branch فعال هم به Lovable برمی‌گردد؛ پس هر دو مسیر در GitHub به هم می‌رسند.",
+                  en: "In Lovable every change is saved automatically to **version history**. **Bookmark** known-good versions and revert to them from the chat or the history whenever needed. With two-way **GitHub sync**, Lovable's changes go to GitHub and pushes to the active branch come back into Lovable, so both paths meet in GitHub.",
+                },
+              },
+              {
+                type: 'callout',
+                tone: 'warn',
+                text: {
+                  fa: "Git sync در Lovable در هر لحظه فقط با یک Branch کار می‌کند، و پاک کردن Repository همگام‌سازی را قطع می‌کند.",
+                  en: "Lovable's Git sync works with one branch at a time, and deleting the repository stops the sync.",
+                },
+              },
+            ],
+          },
         ],
       },
       {
@@ -934,7 +1140,7 @@ cp -R Ahouei-GetheredInOne-AIAgentSkills/skills/frontend-design .claude/skills/`
             tone: 'warn',
             title: { fa: 'حواستان به دسترسی‌ها باشد', en: 'Mind the permissions' },
             text: {
-              fa: "Agent با دسترسی‌هایی که شما داده‌اید کار می‌کند. هر وقت خواست کاری خارج از حلقه عادی انجام دهد، مثلاً حذف دیتابیس، تغییر DNS یا Push مستقیم روی `main`، قبل از تأیید دلیلش را بپرسید.",
+              fa: "Agent با دسترسی‌هایی که شما داده‌اید کار می‌کند. هر وقت خواست کاری خارج از حلقه عادی انجام دهد، مثلاً حذف Database، تغییر DNS یا Push مستقیم روی `main`، قبل از تأیید دلیلش را بپرسید.",
               en: "The agent works with the permissions you gave it. Whenever it wants to do something outside the normal loop, such as deleting a database, changing DNS or pushing straight to `main`, ask why before you approve.",
             },
           },
@@ -973,20 +1179,21 @@ cp -R Ahouei-GetheredInOne-AIAgentSkills/skills/frontend-design .claude/skills/`
           },
           {
             type: 'quiz',
-            q: {
-              fa: 'Agent برای حل یک باگ کوچک در فرم تماس پیشنهاد می‌دهد کل پروژه را با یک Framework جدید بازنویسی کند. شما چه می‌کنید؟',
-              en: 'To fix a small bug in the contact form, the agent proposes rewriting the whole project in a new framework. What do you do?',
-            },
+            q: { fa: "Agent برای حل یک باگ کوچک در فرم تماس پیشنهاد می‌دهد کل پروژه را با یک Framework جدید بازنویسی کند. شما چه می‌کنید؟", en: "To fix a small bug in the contact form, the agent proposes rewriting the whole project in a new framework. What do you do?" },
             options: [
-              { fa: 'قبول می‌کنیم؛ Agent بهتر می‌داند.', en: 'Accept; the agent knows best.' },
-              { fa: 'متوقفش می‌کنیم و می‌خواهیم علت باگ را توضیح دهد و فقط همان را با کمترین تغییر حل کند.', en: 'Stop it, ask it to explain the cause, and fix only that bug with the smallest change.' },
-              { fa: 'کل Repository را پاک می‌کنیم و از اول شروع می‌کنیم.', en: 'Delete the whole repository and start over.' },
+              { fa: "قبول کنیم، چون Agent حتماً بهتر از ما می‌داند چه چیزی لازم است.", en: "Accept, since the agent surely knows better than us what's needed." },
+              { fa: "متوقفش کنیم و بخواهیم فقط همان باگ را با کمترین تغییر حل کند.", en: "Stop it and ask it to fix only that bug with the smallest change." },
+              { fa: "کل Repository را پاک کنیم و پروژه را از صفر دوباره شروع کنیم.", en: "Delete the whole repository and restart the project from zero." },
+              { fa: "بازنویسی را قبول کنیم ولی بخواهیم این بار سریع‌تر تمامش کند.", en: "Accept the rewrite, but ask it to finish faster this time." },
             ],
             answer: 1,
-            explain: {
-              fa: 'این همان مارپیچ «همه چیز را از نو بنویس» است. تغییر کوچک و هدفمند ریسک کمتری دارد، قابل بررسی است، و مشکلات تازه نمی‌سازد.',
-              en: 'That’s the “rewrite everything” spiral. A small, targeted change is less risky, easy to review, and doesn’t create new problems.',
-            },
+            explain: { fa: "این همان مارپیچ «همه چیز را از نو بنویس» است. تغییر کوچک و هدفمند ریسک کمتری دارد و قابل بررسی است.", en: "That’s the “rewrite everything” spiral. A small, targeted change is less risky and easy to review." },
+            why: [
+              { fa: "این همان مارپیچ «همه چیز را از نو بنویس» است؛ ریسک بزرگ برای باگ کوچک.", en: "That's the “rewrite everything” spiral: a huge risk for a small bug." },
+              { fa: "درست. تغییر کوچک و هدفمند قابل بررسی است و مشکل تازه نمی‌سازد.", en: "Right. A small, targeted change is reviewable and creates no new problems." },
+              { fa: "پاک کردن Repository یعنی از دست دادن همه نقطه‌های امن و تاریخچه.", en: "Deleting the repository throws away every safe point and all history." },
+              { fa: "سرعت مشکل نیست؛ اندازه تغییر است که ریسک می‌سازد.", en: "Speed isn't the problem; the size of the change is the risk." },
+            ],
           },
           {
             type: 'links',
@@ -994,7 +1201,112 @@ cp -R Ahouei-GetheredInOne-AIAgentSkills/skills/frontend-design .claude/skills/`
               { label: 'Andrej Karpathy: the original “vibe coding” post (Feb 2025)', url: 'https://x.com/karpathy/status/1886192184808149383' },
               { label: 'Claude Code: Common workflows', url: 'https://code.claude.com/docs/en/common-workflows' },
               { label: 'OpenAI Codex documentation', url: 'https://developers.openai.com/codex' },
+              { label: 'Lovable docs: GitHub integration', url: 'https://docs.lovable.dev/integrations/github' },
               { label: 'GitHub Docs: About pull requests', url: 'https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests' },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'act-3-review',
+        title: { fa: 'مرور پرده سوم', en: 'Act III review' },
+        blocks: [
+          {
+            type: 'p',
+            text: {
+              fa: "پنج سؤال از چهار فصل پرده سوم، قاطی با هم. جواب دادن (حتی اشتباه) بهتر از دوباره خواندن به یادتان می‌ماند.",
+              en: "Five questions from the four chapters of Act III, mixed together. Answering (even wrongly) sticks better than re-reading.",
+            },
+          },
+          {
+            type: 'review',
+            title: { fa: 'مرور پرده سوم: بساز', en: 'Act III review: Build' },
+            items: [
+              {
+                q: { fa: "در Brief کافه سحر، «فرم رزرو باید ایمیل تأیید بفرستد» کدام بخش است؟", en: "In Café Sahar’s brief, “the booking form must send a confirmation email” is which part?" },
+                options: [
+                  { fa: "مخاطب (Audience) پروژه", en: "The project's audience" },
+                  { fa: "حس و ظاهر (Look & Feel)", en: "The look and feel" },
+                  { fa: "محدودیت بودجه پروژه", en: "The project's budget limit" },
+                  { fa: "معیار موفقیت پروژه", en: "A success criterion" },
+                ],
+                answer: 3,
+                explain: { fa: "معیار موفقیت را از قبل بنویسید تا بعداً بتوانید قضاوت کنید کار تمام شده یا نه.", en: "Write success criteria in advance so you can judge later whether the work is done." },
+                why: [
+                  { fa: "مخاطب می‌گوید چه کسی استفاده می‌کند، نه چه چیزی باید کار کند.", en: "Audience says who uses it, not what must work." },
+                  { fa: "حس و ظاهر درباره رنگ و فضاست، نه رفتار فرم.", en: "Look and feel is about mood and color, not form behavior." },
+                  { fa: "بودجه درباره هزینه است؛ این جمله یک رفتار قابل‌سنجش است.", en: "Budget is about cost; this is a checkable behavior." },
+                  { fa: "درست. شرطی قابل‌سنجش که می‌گوید کار تمام شده یا نه.", en: "Right. A checkable condition that says whether it's done." },
+                ],
+              },
+              {
+                q: { fa: "برای یک قابلیت بزرگ مثل رزرو میز، بهترین شروع کدام است؟", en: "For a big feature like table booking, what is the best start?" },
+                options: [
+                  { fa: "اول Plan بخواهیم و بعد از تأیید بسازد", en: "Ask for a plan, then build after approval" },
+                  { fa: "همه جزئیات را در یک پیام بلند بنویسیم", en: "Write every detail into one long message" },
+                  { fa: "به Agent بگوییم هر طور خواست بسازد", en: "Tell the agent to build it however it likes" },
+                  { fa: "صبر کنیم تا Agent خودش پیشنهاد دهد", en: "Wait for the agent to suggest it on its own" },
+                ],
+                answer: 0,
+                explain: { fa: "در Codex با جمله «اول برنامه‌ات را بگو» و در Lovable با Plan mode.", en: "In Codex say “plan first”; in Lovable use Plan mode." },
+                why: [
+                  { fa: "درست. Plan را می‌خوانید، اصلاح می‌کنید و بعد «اجرا کن».", en: "Right. You read the plan, adjust it, then say “go.”" },
+                  { fa: "پیام بلند جای Plan را نمی‌گیرد؛ هنوز حدس زیادی باقی است.", en: "A long message isn't a plan; lots of guessing remains." },
+                  { fa: "بدون محدودیت، نتیجه نه قابل پیش‌بینی است و نه قابل بررسی.", en: "Without limits the result is neither predictable nor reviewable." },
+                  { fa: "Agent کار را با درخواست شما شروع می‌کند، نه خودبه‌خود.", en: "The agent starts from your request, not on its own." },
+                ],
+              },
+              {
+                q: { fa: "قبل از نصب یک Skill از اینترنت، چه کاری لازم است؟", en: "Before installing a skill from the internet, what is needed?" },
+                options: [
+                  { fa: "فقط نام و ستاره‌های Repository را ببینیم", en: "Just check its name and the repo's stars" },
+                  { fa: "همه Skillهای مجموعه را یکجا نصب کنیم", en: "Install every skill in the collection at once" },
+                  { fa: "SKILL.md و همه اسکریپت‌هایش را بخوانیم", en: "Read its SKILL.md and every script inside" },
+                  { fa: "از Agent بخواهیم بدون بررسی اجرایش کند", en: "Have the agent run it without any review" },
+                ],
+                answer: 2,
+                explain: { fa: "Skill یعنی دستورالعمل به‌علاوه کد؛ فقط چیزی را نصب کنید که خوانده‌اید.", en: "A skill is instructions plus code; install only what you have read." },
+                why: [
+                  { fa: "ستاره امنیت را تضمین نمی‌کند؛ محتوای Skill مهم است.", en: "Stars don't guarantee safety; the content does." },
+                  { fa: "Skill اضافه یعنی ریسک و شلوغی بی‌دلیل.", en: "Extra skills mean needless risk and clutter." },
+                  { fa: "درست. Skill با دسترسی‌های شما اجرا می‌شود.", en: "Right. A skill runs with your permissions." },
+                  { fa: "اجرای بدون بررسی ممکن است فایل پاک کند یا رمز بفرستد.", en: "Running it unreviewed could delete files or leak secrets." },
+                ],
+              },
+              {
+                q: { fa: "Agent برای کافه سحر گرادیان بنفش و سه کارت مساوی پیشنهاد داده. چه کنیم؟", en: "For Café Sahar the agent proposes a purple gradient and three equal cards. What now?" },
+                options: [
+                  { fa: "تأیید کنیم چون این ظاهر حرفه‌ای است", en: "Approve it, since that look is professional" },
+                  { fa: "بخواهیم از شخصیت کافه دوباره فکر کند", en: "Ask it to rethink from the café's personality" },
+                  { fa: "فقط رنگ گرادیان را کمی تیره‌تر کنیم", en: "Just make the gradient a little darker" },
+                  { fa: "طراحی را کنار بگذاریم و مستقیم کد بنویسیم", en: "Skip the design entirely and start writing code" },
+                ],
+                answer: 1,
+                explain: { fa: "یک Skill طراحی مثل `frontend-design` هم در این مرحله کمک می‌کند.", en: "A design skill such as `frontend-design` helps at this stage too." },
+                why: [
+                  { fa: "این همان «ظاهر AI» است و شبیه هزار سایت دیگر.", en: "That's the “AI look,” like a thousand other sites." },
+                  { fa: "درست. چیدمان و رنگ باید از برند شما بیایند.", en: "Right. Layout and color should come from your brand." },
+                  { fa: "تیره کردن گرادیان مشکل کلیشه را حل نمی‌کند.", en: "A darker gradient doesn't fix the cliché." },
+                  { fa: "بدون طرح تأییدشده، اصلاحات گران‌تر می‌شوند.", en: "Without an approved design, fixes get more expensive." },
+                ],
+              },
+              {
+                q: { fa: "چه زمانی بهتر است یک جلسه تازه با Agent باز کنیم؟", en: "When is it best to start a fresh session with the agent?" },
+                options: [
+                  { fa: "بعد از هر پیام، فقط برای اطمینان بیشتر", en: "After every single message, to be safe" },
+                  { fa: "هیچ‌وقت؛ یک گفتگو برای کل پروژه", en: "Never; one chat for the whole project" },
+                  { fa: "فقط وقتی Agent خطای امنیتی داد", en: "Only after the agent shows a security error" },
+                  { fa: "برای هر قابلیت جدید یا گفتگوی طولانی", en: "For each new feature or a very long chat" },
+                ],
+                answer: 3,
+                explain: { fa: "جلسه تازه، ذهن تازه؛ زمینه در AGENTS.md و تاریخچه Git می‌ماند.", en: "Fresh session, fresh mind; the context lives in AGENTS.md and Git history." },
+                why: [
+                  { fa: "پیام‌به‌پیام، زمینه همان قابلیت از بین می‌رود.", en: "Per message, you lose the context of the current feature." },
+                  { fa: "گفتگوی خیلی طولانی از Context Window بیرون می‌زند.", en: "A very long chat overflows the context window." },
+                  { fa: "خطای امنیتی یک مورد خاص است، نه قاعده کلی.", en: "A security error is a special case, not the rule." },
+                  { fa: "درست. AGENTS.md و Git زمینه را به Agent برمی‌گردانند.", en: "Right. AGENTS.md and Git bring the context back." },
+                ],
+              },
             ],
           },
         ],

@@ -10,6 +10,11 @@ type Props = {
   follow?: boolean;
   /** Gentle idle float. Use for hero-sized Bit only. */
   float?: boolean;
+  /**
+   * Antenna wiggle + blinking. Off by default: small Bits seen many times per
+   * session stay still and only change mood (RD-08). Turn on for the hero/finale Bit.
+   */
+  ambient?: boolean;
   className?: string;
   label?: string;
 };
@@ -18,7 +23,7 @@ type Props = {
  * Bit, the course mascot: a small round robot with a screen face.
  * Decorative motion only; everything is still with prefers-reduced-motion.
  */
-export function Mascot({ size = 120, mood = 'happy', follow = true, float = false, className, label }: Props) {
+export function Mascot({ size = 120, mood = 'happy', follow = true, float = false, ambient = false, className, label }: Props) {
   const reduce = useReducedMotion();
   const ref = useRef<SVGSVGElement>(null);
   const uid = useId().replace(/:/g, '');
@@ -46,7 +51,7 @@ export function Mascot({ size = 120, mood = 'happy', follow = true, float = fals
   }, [follow, reduce, lookX, lookY]);
 
   useEffect(() => {
-    if (reduce) return;
+    if (reduce || !ambient) return;
     let t: number;
     const loop = () => {
       t = window.setTimeout(
@@ -60,7 +65,7 @@ export function Mascot({ size = 120, mood = 'happy', follow = true, float = fals
     };
     loop();
     return () => window.clearTimeout(t);
-  }, [reduce]);
+  }, [reduce, ambient]);
 
   const eyeColor = '#9ff0cf';
 
@@ -132,8 +137,8 @@ export function Mascot({ size = 120, mood = 'happy', follow = true, float = fals
       {/* antenna */}
       <motion.g
         style={{ originX: '60px', originY: '22px' }}
-        animate={reduce ? undefined : { rotate: [0, 8, -6, 0] }}
-        transition={reduce ? undefined : { duration: 3.6, repeat: Infinity, ease: 'easeInOut', repeatDelay: 1.2 }}
+        animate={reduce || !ambient ? undefined : { rotate: [0, 8, -6, 0] }}
+        transition={reduce || !ambient ? undefined : { duration: 3.6, repeat: Infinity, ease: 'easeInOut', repeatDelay: 1.2 }}
       >
         <line x1="60" y1="22" x2="60" y2="9" stroke="#2a211b" strokeWidth="3" strokeLinecap="round" />
         <circle cx="60" cy="8" r="6" fill="#ef6a4c" stroke="#2a211b" strokeWidth="2.5" />

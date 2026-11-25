@@ -1,13 +1,13 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 import { num, useApp, useTx } from '../../lib/app';
+import { EASE_OUT } from '../../lib/motion';
 import { Mascot } from '../Mascot';
-import { Frame } from './Frame';
+import { Frame, useLab } from './Frame';
 import './set3.css';
 
-const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 
-const DOMAIN = 'my-cafe.com';
+const DOMAIN = 'cafe-sahar.ir';
 const OLD_NS = ['ns1.registrar-example.com', 'ns2.registrar-example.com'];
 const CF_NS = ['ada.ns.cloudflare.com', 'bob.ns.cloudflare.com'];
 const DOTS = 40;
@@ -37,6 +37,17 @@ export default function NameserverSwitch() {
   const [fresh, setFresh] = useState<boolean[]>(() => Array(DOTS).fill(false));
   const order = useRef<number[]>([]);
   const timer = useRef<number | undefined>(undefined);
+  // QA-15: every pending timeout is tracked, so Start over / Skip / unmount cancel it.
+  const later = useRef<number | undefined>(undefined);
+  const clearAll = () => {
+    window.clearInterval(timer.current);
+    window.clearTimeout(later.current);
+  };
+  useEffect(() => clearAll, []);
+  const { complete } = useLab();
+  useEffect(() => {
+    if (step >= 6) complete(); // domain active and attached with HTTPS
+  }, [step, complete]);
 
   // Propagation: resolvers around the world pick up the new nameservers gradually.
   useEffect(() => {
@@ -52,20 +63,21 @@ export default function NameserverSwitch() {
       });
       if (k >= DOTS) {
         window.clearInterval(timer.current);
-        window.setTimeout(() => setStep(4), 500);
+        window.clearTimeout(later.current);
+        later.current = window.setTimeout(() => setStep(4), 500);
       }
     }, 260);
     return () => window.clearInterval(timer.current);
   }, [step]);
 
   const skip = () => {
-    window.clearInterval(timer.current);
+    clearAll();
     setFresh(Array(DOTS).fill(true));
     setStep(4);
   };
 
   const reset = () => {
-    window.clearInterval(timer.current);
+    clearAll();
     setStep(0);
     setChecked({});
     setNs(OLD_NS);
@@ -117,6 +129,7 @@ export default function NameserverSwitch() {
   return (
     <Frame
       title={tx('انتقال دامنه به Cloudflare، قدم به قدم', 'Moving your domain to Cloudflare, step by step')}
+      goal={tx('cafe-sahar.ir را با HTTPS روی Worker بیاورید', 'Bring cafe-sahar.ir up on the Worker with HTTPS')}
       hint={tx('مقادیر Nameserver این‌جا فقط نمونه‌اند؛ Cloudflare به هر حساب دو Nameserver مخصوص می‌دهد.', 'The nameserver values here are examples only; Cloudflare assigns each account its own pair.')}
       tint="var(--sky-soft)"
       footer={
@@ -150,8 +163,8 @@ export default function NameserverSwitch() {
                   <motion.span
                     key={n}
                     className="s3-host"
-                    initial={{ opacity: 0, filter: 'blur(3px)' }}
-                    animate={{ opacity: 1, filter: 'blur(0px)' }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.2, ease: EASE_OUT }}
                     style={{ color: n === CF_NS[i] ? 'var(--mint-ink)' : undefined }}
@@ -198,7 +211,7 @@ export default function NameserverSwitch() {
                       {tx('رکوردهای DNS اسکن‌شده', 'Scanned DNS records')}
                     </span>
                     {RECORDS.map((r) => (
-                      <label key={r.id} className="br-check" style={{ minHeight: 40, padding: '4px 10px', fontSize: 13 }}>
+                      <label key={r.id} className="br-check" style={{ minHeight: 44, padding: '4px 10px', fontSize: 13 }}>
                         <input
                           type="checkbox"
                           checked={!!checked[r.id] || step > 1}
@@ -218,7 +231,7 @@ export default function NameserverSwitch() {
                 {step >= 6 && (
                   <div className="ns-row" style={{ background: 'var(--mint-soft)' }}>
                     <span style={{ fontSize: 12.5, fontWeight: 800 }}>Custom Domain</span>
-                    <span className="s3-host">{DOMAIN} → my-cafe (Worker)</span>
+                    <span className="s3-host">{DOMAIN} → cafe-sahar (Worker)</span>
                   </div>
                 )}
               </>
@@ -275,16 +288,15 @@ export default function NameserverSwitch() {
         </div>
       </div>
 
-      <div className={`s3-bubble ${step >= 4 ? 'is-good' : step === 1 ? 'is-warn' : ''}`}>
+      <div aria-live="polite" className={`s3-bubble ${step >= 4 ? 'is-good' : step === 1 ? 'is-warn' : ''}`}>
         <Mascot size={44} mood={step >= 6 ? 'happy' : step === 3 ? 'think' : step === 4 ? 'wow' : 'calm'} follow={false} />
         <AnimatePresence mode="popLayout" initial={false}>
           <motion.p
             key={step}
-            initial={{ opacity: 0, filter: 'blur(3px)' }}
-            animate={{ opacity: 1, filter: 'blur(0px)' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2, ease: EASE_OUT }}
-            aria-live="polite"
           >
             {say}
           </motion.p>

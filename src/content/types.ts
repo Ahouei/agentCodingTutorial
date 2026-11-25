@@ -29,7 +29,12 @@ export type WidgetId =
   | 'bug-report' // build a bug report an agent can act on
   | 'pipeline' // push → build → test → deploy → live
   | 'nameserver-switch' // registrar → Cloudflare nameservers → active
-  | 'hero-finale'; // final celebration + the full journey recap
+  | 'hero-finale' // final celebration + the full journey recap
+  | 'agent-picker' // which agent/builder fits me (RD-07A)
+  | 'design-flaws' // find 5 flaws in a mock page (RD-07B)
+  | 'secret-hunt' // find the leaked secret in a diff, rotate it (RD-07C)
+  | 'platform-compare' // radar + scenario comparison of 5 platforms (CMP)
+  | 'other-businesses'; // apply the course to one of six other demo businesses (RD-01 extra)
 
 export type Tone = 'why' | 'tip' | 'warn' | 'fix';
 
@@ -59,10 +64,23 @@ export type Block =
   | { type: 'code'; lang: string; code: string; caption?: L }
   /** Interactive widget. */
   | { type: 'widget'; id: WidgetId }
-  /** One multiple-choice check-your-understanding question. */
-  | { type: 'quiz'; q: L; options: L[]; answer: number; explain: L }
+  /**
+   * One multiple-choice question. Options should be of similar length and the
+   * answer position varied across the course (the validator checks both).
+   * `why[i]` explains option i after answering; `explain` is the summary.
+   */
+  | { type: 'quiz'; q: L; options: L[]; answer: number; explain: L; why?: L[] }
+  /**
+   * Instructions that differ by build path. The learner picks Codex or Lovable once
+   * (remembered); every `path` block shows that path, with a switch to see the other.
+   */
+  | { type: 'path'; codex: Block[]; lovable: Block[] }
+  /** End-of-act review: several quiz questions mixing the act's chapters. */
+  | { type: 'review'; title: L; items: QuizItem[] }
   /** Official documentation links. */
   | { type: 'links'; items: { label: string; url: string }[] };
+
+export type QuizItem = { q: L; options: L[]; answer: number; explain: L; why?: L[] };
 
 export type Section = {
   /** Stable kebab-case id, unique inside the chapter (used for anchors). */
@@ -105,8 +123,12 @@ export type Chapter = {
   minutes: number;
   /** What Bit (the mascot) says when the chapter opens. Friendly, one or two sentences. */
   mascotLine: L;
-  /** Optional original voice note of the course author for this chapter. */
-  voice?: string;
+  /** Optional original voice note of the course author: file plus the seconds (from/to) that belong to this chapter. */
+  voice?: { src: string; from?: number; to?: number; transcript?: string };
+  /** Mission brief shown under the title (RD-04). */
+  mission?: { outcome: L; cafe: L };
+  /** One warm-up question about the previous chapter (spaced recall, RD-04). */
+  warmup?: QuizItem;
   sections: Section[];
   /** "How this connects": how this chapter links to the ones before and after. */
   connects: L;

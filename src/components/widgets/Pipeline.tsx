@@ -1,11 +1,11 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 import { num, useApp, useTx } from '../../lib/app';
+import { EASE_OUT } from '../../lib/motion';
 import { Mascot } from '../Mascot';
-import { Frame } from './Frame';
+import { Frame, useLab } from './Frame';
 import './set3.css';
 
-const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 
 type Status = 'idle' | 'running' | 'done' | 'failed' | 'skipped';
 type Branch = 'main' | 'feature';
@@ -21,6 +21,7 @@ const STAGES = [
 ] as const;
 
 const STEP_MS = 650;
+const PROD = 'cafe-sahar.ir';
 
 export default function Pipeline() {
   const { lang } = useApp();
@@ -34,6 +35,13 @@ export default function Pipeline() {
   const [liveId, setLiveId] = useState(1);
   const [previews, setPreviews] = useState<string[]>([]);
   const timers = useRef<number[]>([]);
+  const lastVersion = useRef(1);
+  const { complete } = useLab();
+
+  // Done after a green run reaches production.
+  useEffect(() => {
+    if (outcome === 'prod') complete();
+  }, [outcome, complete]);
 
   useEffect(() => () => timers.current.forEach((id) => window.clearTimeout(id)), []);
 
@@ -72,14 +80,14 @@ export default function Pipeline() {
               setRunning(false);
               if (failAt >= 0) setOutcome('failed');
               else if (branch === 'main') {
-                setVersions((v) => {
-                  const id = v[0].id + 1;
-                  setLiveId(id);
-                  return [{ id, note: 'update from main' }, ...v];
-                });
+                // No side effects inside the updater: compute the id first.
+                lastVersion.current += 1;
+                const id = lastVersion.current;
+                setVersions((v) => [{ id, note: 'update from main' }, ...v]);
+                setLiveId(id);
                 setOutcome('prod');
               } else {
-                setPreviews((p) => [`${['a1b2c3d4', '9f8e7d6c', '5e4d3c2b', '0a9b8c7d'][p.length % 4]}-my-cafe.example.workers.dev`, ...p].slice(0, 3));
+                setPreviews((p) => [`${['a1b2c3d4', '9f8e7d6c', '5e4d3c2b', '0a9b8c7d'][p.length % 4]}-cafe-sahar.example.workers.dev`, ...p].slice(0, 3));
                 setOutcome('preview');
               }
             }
@@ -123,7 +131,7 @@ export default function Pipeline() {
   return (
     <Frame
       title={tx('یک Push، یک Pipeline کامل', 'One push, one full pipeline')}
-      hint={tx('هر Push همین مسیر ثابت را طی می‌کند: نصب، Build، تست، انتشار.', 'Every push takes the same fixed path: install, build, test, deploy.')}
+      goal={tx('یک انتشار سبز روی Production بگیرید', 'Get one green deploy to production')}
       tint="var(--mint-soft)"
     >
       <div className="w-row">
@@ -151,7 +159,7 @@ export default function Pipeline() {
                 : 'preview upload'
               : s.id === 'live'
                 ? branch === 'main'
-                  ? 'my-cafe.example'
+                  ? PROD
                   : 'preview URL'
                 : s.cmd;
           return (
@@ -187,16 +195,15 @@ export default function Pipeline() {
         )}
       </div>
 
-      <div className={`s3-bubble ${outcome === 'failed' ? 'is-bad' : outcome ? 'is-good' : ''}`}>
+      <div aria-live="polite" className={`s3-bubble ${outcome === 'failed' ? 'is-bad' : outcome ? 'is-good' : ''}`}>
         <Mascot size={44} mood={mood} follow={false} />
         <AnimatePresence mode="popLayout" initial={false}>
           <motion.p
             key={msg}
-            initial={{ opacity: 0, filter: 'blur(3px)' }}
-            animate={{ opacity: 1, filter: 'blur(0px)' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2, ease: EASE_OUT }}
-            aria-live="polite"
           >
             {msg}
           </motion.p>
@@ -206,7 +213,7 @@ export default function Pipeline() {
       <div className="pl-live">
         <div className="w-card">
           <p className="w-label">
-            Production · <span className="s3-host">my-cafe.example</span>
+            Production · <span className="s3-host">{PROD}</span>
           </p>
           <ul className="pl-versions">
             {versions.map((v) => (
