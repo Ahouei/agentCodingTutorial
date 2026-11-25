@@ -29,9 +29,12 @@ export function SettingsPanel() {
       label: tx('ورود برای یادگیرنده‌ها', 'Sign-in for learners'),
       help: tx('کلید اضطراری. وقتی خاموش است فقط مدیرها پیوند ورود می‌گیرند؛ دوره بدون ورود کامل کار می‌کند.', 'Emergency switch. When off, only staff get sign-in links; the course works fully without signing in.'),
     },
-    new_accounts_enabled: {
-      label: tx('ساخت حساب تازه', 'New accounts'),
-      help: tx('وقتی خاموش است، کسانی که حساب دارند وارد می‌شوند ولی حساب تازه ساخته نمی‌شود.', 'When off, existing learners can sign in but no new account is created.'),
+    registration_mode: {
+      label: tx('ثبت‌نام', 'Registration'),
+      help: tx(
+        'باز: هر کسی. فقط با دعوت: با کد ۱۲ حرفی از بخش «دعوت‌ها». بسته: هیچ حساب تازه‌ای. کسانی که حساب دارند همیشه وارد می‌شوند، و هر حساب فقط وقتی ساخته می‌شود که ایمیلش با پیوند تأیید شود.',
+        'Open: anyone. Invite only: with a 12-character code from the Invites tab. Closed: no new accounts. Existing accounts can always sign in, and every account is created only once its email is confirmed through the link.',
+      ),
     },
     start_ip_per_min: {
       label: tx('درخواست ورود از هر IP', 'Sign-in requests per IP'),
@@ -85,7 +88,15 @@ export function SettingsPanel() {
                   {!isDefault && def.type === 'int' && tx(` · پیش‌فرض ${f.n(def.def)}`, ` · default ${def.def}`)}
                 </small>
               </div>
-              {def.type === 'bool' ? (
+              {def.type === 'enum' ? (
+                <div className="adm-seg" role="group" aria-label={info[k].label}>
+                  {def.values.map((val) => (
+                    <button key={val} type="button" aria-pressed={v[k] === val} onClick={() => setV({ ...v, [k]: val })}>
+                      {val === 'open' ? tx('باز', 'Open') : val === 'invite' ? tx('فقط با دعوت', 'Invite only') : val === 'closed' ? tx('بسته', 'Closed') : val}
+                    </button>
+                  ))}
+                </div>
+              ) : def.type === 'bool' ? (
                 <button
                   id={`set-${k}`}
                   type="button"
@@ -104,13 +115,13 @@ export function SettingsPanel() {
                     type="number"
                     inputMode="numeric"
                     dir="ltr"
-                    min={def.min}
-                    max={def.max}
+                    min={def.type === 'int' ? def.min : 0}
+                    max={def.type === 'int' ? def.max : 0}
                     step={1}
                     value={String(v[k])}
                     onChange={(e) => {
                       const n = Math.round(Number(e.target.value));
-                      if (Number.isFinite(n)) setV({ ...v, [k]: Math.min(def.max, Math.max(def.min, n)) });
+                      if (Number.isFinite(n) && def.type === 'int') setV({ ...v, [k]: Math.min(def.max, Math.max(def.min, n)) });
                     }}
                   />
                   <small className="muted">{info[k].unit}</small>

@@ -42,10 +42,11 @@ export function OverviewPanel() {
         />
       </div>
 
-      {(!data.settings.signin_enabled || !data.settings.new_accounts_enabled) && (
+      {(!data.settings.signin_enabled || data.settings.registration_mode !== 'open') && (
         <p className="adm-warn" role="status">
           {!data.settings.signin_enabled && tx('ورود برای یادگیرنده‌ها متوقف است. ', 'Sign-in is paused for learners. ')}
-          {!data.settings.new_accounts_enabled && tx('ساخت حساب تازه متوقف است. ', 'New accounts are paused. ')}
+          {data.settings.registration_mode === 'closed' && tx('ثبت‌نام بسته است. ', 'Registration is closed. ')}
+          {data.settings.registration_mode === 'invite' && tx('ثبت‌نام فقط با کد دعوت. ', 'Registration is invite-only. ')}
           <a href={href.admin('settings')}>{tx('تنظیمات', 'Settings')}</a>
         </p>
       )}

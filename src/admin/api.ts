@@ -77,12 +77,12 @@ export type UserDetail = {
 
 export type SettingsValues = {
   signin_enabled: boolean;
-  new_accounts_enabled: boolean;
+  registration_mode: 'open' | 'invite' | 'closed';
   start_ip_per_min: number;
   start_email_per_10min: number;
   emails_per_day: number;
 };
-export type SettingDef = { type: 'bool'; def: boolean } | { type: 'int'; def: number; min: number; max: number };
+export type SettingDef = { type: 'bool'; def: boolean } | { type: 'int'; def: number; min: number; max: number } | { type: 'enum'; def: string; values: string[] };
 export type SettingsResponse = {
   values: SettingsValues;
   defaults: SettingsValues;

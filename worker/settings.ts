@@ -6,12 +6,19 @@
  */
 type BoolDef = { type: 'bool'; def: boolean };
 type IntDef = { type: 'int'; def: number; min: number; max: number };
+type EnumDef<T extends string> = { type: 'enum'; def: T; values: readonly T[] };
+export const REGISTRATION_MODES = ['open', 'invite', 'closed'] as const;
+export type RegistrationMode = (typeof REGISTRATION_MODES)[number];
 
 export const SETTING_DEFS = {
   /** Emergency switch: when false, only admins can get a sign-in link. */
   signin_enabled: { type: 'bool', def: true } as BoolDef,
-  /** When false, existing learners can sign in but no new account is created. */
-  new_accounts_enabled: { type: 'bool', def: true } as BoolDef,
+  /**
+   * Who may create a new account: everyone (open), only with an invite code (invite), or nobody
+   * (closed). Existing accounts can always sign in. Every account is confirmed by email: it is
+   * created only when the emailed link is opened.
+   */
+  registration_mode: { type: 'enum', def: 'open', values: REGISTRATION_MODES } as EnumDef<RegistrationMode>,
   /** Sign-in requests per IP per minute. */
   start_ip_per_min: { type: 'int', def: 5, min: 1, max: 60 } as IntDef,
   /** Sign-in emails per address per 10 minutes. */
@@ -21,7 +28,9 @@ export const SETTING_DEFS = {
 };
 
 export type SettingKey = keyof typeof SETTING_DEFS;
-export type Settings = { [K in SettingKey]: (typeof SETTING_DEFS)[K] extends BoolDef ? boolean : number };
+export type Settings = {
+  [K in SettingKey]: (typeof SETTING_DEFS)[K] extends BoolDef ? boolean : (typeof SETTING_DEFS)[K] extends EnumDef<infer T> ? T : number;
+};
 
 export const SETTING_KEYS = Object.keys(SETTING_DEFS) as SettingKey[];
 
@@ -30,18 +39,22 @@ export function defaults(): Settings {
 }
 
 /** Returns the clean value, or undefined when the value is not acceptable for that key. */
-export function clean(key: string, value: unknown): boolean | number | undefined {
+export function clean(key: string, value: unknown): boolean | number | string | undefined {
   if (!(key in SETTING_DEFS)) return undefined;
-  const d = SETTING_DEFS[key as SettingKey] as BoolDef | IntDef;
+  const d = SETTING_DEFS[key as SettingKey] as BoolDef | IntDef | EnumDef<string>;
   if (d.type === 'bool') return typeof value === 'boolean' ? value : undefined;
+  if (d.type === 'enum') return typeof value === 'string' && d.values.includes(value) ? value : undefined;
   if (typeof value !== 'number' || !Number.isInteger(value)) return undefined;
   return value < d.min || value > d.max ? undefined : value;
 }
 
 export async function readSettings(db: D1Database): Promise<Settings> {
-  const out = defaults() as Record<string, boolean | number>;
+  const out = defaults() as Record<string, boolean | number | string>;
   try {
     const { results } = await db.prepare('SELECT key, value FROM settings').all<{ key: string; value: string }>();
+    // Legacy switch (before registration modes): "new accounts off" means closed.
+    const legacy = (results ?? []).find((r) => r.key === 'new_accounts_enabled');
+    if (legacy?.value === 'false' && !(results ?? []).some((r) => r.key === 'registration_mode')) out.registration_mode = 'closed';
     for (const r of results ?? []) {
       try {
         const v = clean(r.key, JSON.parse(r.value));

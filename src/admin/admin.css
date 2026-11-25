@@ -853,3 +853,39 @@
   font-weight: 600;
   word-break: break-word;
 }
+
+.adm-invite-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+.adm-codes {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.adm-codes li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.adm-codes code {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  user-select: all;
+}
+.adm-setting > .adm-seg {
+  flex: none;
+  flex-wrap: nowrap;
+  border-radius: 999px;
+}
+.adm-seg button {
+  white-space: nowrap;
+}

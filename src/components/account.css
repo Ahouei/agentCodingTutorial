@@ -101,3 +101,9 @@
   font-weight: 800;
   text-decoration: none;
 }
+
+.acc-invite {
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}

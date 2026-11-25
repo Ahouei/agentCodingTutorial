@@ -11,7 +11,7 @@
  * - Owner-only: granting/removing admin. Nobody can block, demote or delete the owner or themselves.
  */
 import { sanitize, type Progress } from '../src/lib/progressMerge';
-import { json, roleOf, sameOrigin, sessionUser, type Env, type Role } from './api';
+import { json, newInviteCode, roleOf, sameOrigin, sessionUser, sha256, type Env, type Role } from './api';
 import { clean, defaults, emailDayKey, readSettings, SETTING_DEFS, SETTING_KEYS } from './settings';
 import { DEFAULT_AI, evictAi, hasKey, PROVIDERS, readAi, sanitizeAi } from './ai/config';
 import { DEFAULT_PERSONA, generate, poolKeyOf, promptVersion, storeLines, topic } from './ai/bit';
@@ -530,6 +530,52 @@ export async function handleAdmin(r: Request, env: Env, db: D1Database, url: URL
     const stored = await storeLines(db, poolKey, t, lang, pv, out.candidate, out.lines);
     await audit(db, me, 'ai.generate', 'bit_pool', poolKey, { count: stored.length, model: `${out.candidate.provider}/${out.candidate.model}` });
     return ok({ ok: true, lines: stored, model: out.candidate });
+  }
+
+  /* ── Invite codes (registration mode "invite") ── */
+  if (path === '/invites' && r.method === 'GET') {
+    const { results } = await db
+      .prepare(
+        `SELECT i.id, i.hint, i.label, i.max_uses, i.uses, i.expires_at, i.created_at, i.created_by, i.revoked_at,
+           (SELECT COUNT(*) FROM users u WHERE u.invite_id = i.id) accounts
+         FROM invite_codes i ORDER BY i.created_at DESC LIMIT 500`,
+      )
+      .all();
+    return ok({ invites: results ?? [], mode: (await readSettings(db)).registration_mode });
+  }
+  if (path === '/invites' && r.method === 'POST') {
+    const b = await body(r);
+    const label = typeof b?.label === 'string' ? b.label.trim().slice(0, 80) : '';
+    const maxUses = typeof b?.maxUses === 'number' && Number.isInteger(b.maxUses) ? Math.min(1000, Math.max(1, b.maxUses)) : 1;
+    const days = typeof b?.expiresDays === 'number' && Number.isInteger(b.expiresDays) ? Math.min(365, Math.max(0, b.expiresDays)) : 0;
+    const count = typeof b?.count === 'number' && Number.isInteger(b.count) ? Math.min(50, Math.max(1, b.count)) : 1;
+    const now = Date.now();
+    const expires = days ? now + days * DAY : null;
+    const codes: { id: string; code: string }[] = [];
+    const stmts = [];
+    for (let i = 0; i < count; i++) {
+      const code = newInviteCode();
+      const id = crypto.randomUUID();
+      codes.push({ id, code });
+      stmts.push(
+        db
+          .prepare('INSERT INTO invite_codes (id, code_hash, hint, label, max_uses, expires_at, created_at, created_by) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)')
+          .bind(id, await sha256(code), code.slice(0, 4), label, maxUses, expires, now, me.email),
+      );
+    }
+    await db.batch(stmts);
+    // The audit row keeps only the hints: the full codes are shown once, to this admin, now.
+    await audit(db, me, 'invite.create', 'invite', codes.map((c) => c.id).join(','), { count, label, maxUses, expiresDays: days, hints: codes.map((c) => c.code.slice(0, 4)) });
+    return ok({ ok: true, codes, maxUses, expiresAt: expires });
+  }
+  const invMatch = path.match(/^\/invites\/([0-9a-f-]{36})\/revoke$/);
+  if (invMatch && r.method === 'POST') {
+    const inv = await db.prepare('SELECT id, hint, label, revoked_at FROM invite_codes WHERE id = ?1').bind(invMatch[1]).first<{ id: string; hint: string; label: string; revoked_at: number | null }>();
+    if (!inv) return ok({ error: 'not_found' }, 404);
+    if (inv.revoked_at) return ok({ ok: true, unchanged: true });
+    await db.prepare('UPDATE invite_codes SET revoked_at = ?2 WHERE id = ?1').bind(inv.id, Date.now()).run();
+    await audit(db, me, 'invite.revoke', 'invite', inv.id, { hint: inv.hint, label: inv.label });
+    return ok({ ok: true });
   }
 
   /* ── Audit log ── */

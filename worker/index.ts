@@ -51,7 +51,7 @@ function secure(h: Headers) {
 }
 
 type Page = { status: number; title: string; desc: string; path: string; og: string; noindex?: boolean };
-const ADMIN_SECTIONS = ['overview', 'learners', 'content', 'announcements', 'ai', 'settings', 'audit'];
+const ADMIN_SECTIONS = ['overview', 'learners', 'invites', 'content', 'announcements', 'ai', 'settings', 'audit'];
 
 function pageFor(pathname: string): Page {
   const p = pathname.replace(/\/+$/, '') || '/';

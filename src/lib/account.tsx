@@ -15,10 +15,12 @@ type AccountState = {
   turnstileSiteKey: string | null;
   /** Bit can say AI lines (server says it's on); only meaningful when signed in. */
   bitAi: boolean;
+  /** Who may create a new account right now. */
+  registration: 'open' | 'invite' | 'closed';
   syncing: boolean;
   lastSync: number | null;
   justSignedIn: boolean;
-  startSignIn: (email: string, turnstile: string) => Promise<'ok' | 'rate_limited' | 'turnstile_failed' | 'paused' | 'busy' | 'error'>;
+  startSignIn: (email: string, turnstile: string, invite?: string) => Promise<'ok' | 'rate_limited' | 'turnstile_failed' | 'paused' | 'busy' | 'closed' | 'invite_required' | 'invite_invalid' | 'error'>;
   signOut: () => Promise<void>;
   deleteAccount: () => Promise<boolean>;
   dismissWelcome: () => void;
@@ -34,6 +36,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<AccountState['role']>(null);
   const [siteKey, setSiteKey] = useState<string | null>(null);
   const [bitAi, setBitAi] = useState(false);
+  const [registration, setRegistration] = useState<'open' | 'invite' | 'closed'>('open');
   const [syncing, setSyncing] = useState(false);
   const [lastSync, setLastSync] = useState<number | null>(null);
   const [justSignedIn, setJustSignedIn] = useState(false);
@@ -52,6 +55,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         if (!cfg?.accounts) return setStatus('unavailable');
         setSiteKey(cfg.turnstileSiteKey ?? null);
         setBitAi(cfg.bitAi === true);
+        if (cfg.registration === 'invite' || cfg.registration === 'closed') setRegistration(cfg.registration);
         const me = await fetch('/api/me', { credentials: 'same-origin' }).then((r) => (r.ok ? r.json() : null));
         if (!alive) return;
         if (me?.user?.email) {
@@ -127,15 +131,18 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   }, [status, app.done, app.labs, app.quizzes, app.position]);
 
   const startSignIn = useCallback(
-    async (mail: string, turnstile: string) => {
+    async (mail: string, turnstile: string, invite?: string) => {
       try {
-        const r = await fetch('/api/auth/start', { method: 'POST', headers: H, body: JSON.stringify({ email: mail, turnstile, lang: app.lang }) });
+        const r = await fetch('/api/auth/start', { method: 'POST', headers: H, body: JSON.stringify({ email: mail, turnstile, lang: app.lang, ...(invite ? { invite } : {}) }) });
         if (r.ok) return 'ok' as const;
         const j = await r.json().catch(() => ({}));
         if (j.error === 'rate_limited') return 'rate_limited' as const;
         if (j.error === 'turnstile_failed') return 'turnstile_failed' as const;
         if (j.error === 'signin_paused') return 'paused' as const;
         if (j.error === 'busy') return 'busy' as const;
+        if (j.error === 'registration_closed') return 'closed' as const;
+        if (j.error === 'invite_required') return 'invite_required' as const;
+        if (j.error === 'invite_invalid') return 'invite_invalid' as const;
         return 'error' as const;
       } catch {
         return 'error' as const;
@@ -172,6 +179,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         role: status === 'signed-in' ? role : null,
         turnstileSiteKey: siteKey,
         bitAi: status === 'signed-in' && bitAi,
+        registration,
         syncing,
         lastSync,
         justSignedIn,
