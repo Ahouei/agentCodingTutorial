@@ -11,6 +11,7 @@ import context from '../bitContext.json';
 import { limited, sha256 } from '../api';
 import { hasKey, readAi, type AiConfig, type AiKeys, type Candidate } from './config';
 import { callProvider, maxTokensFor, ProviderError } from './gateway';
+import { registryPrice } from './registry';
 
 type L = { fa: string; en: string };
 type Ctx = Record<string, { title: L; tagline: L; sections: Record<string, { title: L; gist: L; terms: string[] }> }>;
@@ -67,6 +68,7 @@ function buildUser(t: NonNullable<ReturnType<typeof topic>>, lang: 'fa' | 'en', 
   return lines.filter(Boolean).join('\n');
 }
 
+export const UNKNOWN_PRICE = { in: 10, out: 50 };
 const norm = (s: string) => s.replace(/\s+/g, ' ').trim().toLowerCase();
 
 /** Keep only usable lines. Soft issues are repaired (whitespace, quotes); bad ones dropped. */
@@ -131,7 +133,10 @@ export async function generate(env: AiKeys, db: D1Database, cfg: AiConfig, t: No
   let lastError = 'no_candidate';
   for (const cand of cfg.chain) {
     if (!hasKey(env, cand.provider)) continue;
-    const price = cfg.prices[cand.model] ?? { in: 0, out: 0 };
+    // Price: the registry row (single source), then the legacy config map, else unknown (0).
+    const reg = await registryPrice(db, cand.provider, cand.model);
+    // Unknown price: count it as expensive, so the monthly budget can't be slipped past.
+    const price = reg && reg.price_in != null && reg.price_out != null ? { in: reg.price_in, out: reg.price_out } : (cfg.prices[cand.model] ?? UNKNOWN_PRICE);
     // Exact-prompt cache first, per candidate.
     const key = await sha256(['bit_line', cand.provider, cand.model, cfg.effort, norm(system), norm(user)].join('|'));
     const cached = await db.prepare('SELECT value FROM ai_cache WHERE key = ?1').bind(key).first<{ value: string }>();

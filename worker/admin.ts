@@ -11,10 +11,11 @@
  * - Owner-only: granting/removing admin. Nobody can block, demote or delete the owner or themselves.
  */
 import { sanitize, type Progress } from '../src/lib/progressMerge';
-import { json, roleOf, sameOrigin, sessionUser, type Env, type Role } from './api';
+import { json, newInviteCode, roleOf, sameOrigin, sessionUser, sha256, type Env, type Role } from './api';
 import { clean, defaults, emailDayKey, readSettings, SETTING_DEFS, SETTING_KEYS } from './settings';
 import { DEFAULT_AI, evictAi, hasKey, PROVIDERS, readAi, sanitizeAi } from './ai/config';
 import { DEFAULT_PERSONA, generate, poolKeyOf, promptVersion, storeLines, topic } from './ai/bit';
+import { catalogueIsStale, catalogueStatus, isRegistered, listModels, syncAll } from './ai/registry';
 
 type Actor = { id: string; email: string; role: Role };
 const DAY = 24 * 3600 * 1000;
@@ -88,7 +89,7 @@ function cleanAnnouncement(b: Record<string, unknown>) {
 
 /* ───────────── Router ───────────── */
 
-export async function handleAdmin(r: Request, env: Env, db: D1Database, url: URL): Promise<Response> {
+export async function handleAdmin(r: Request, env: Env, db: D1Database, url: URL, ctx?: ExecutionContext): Promise<Response> {
   const path = url.pathname.slice('/api/admin'.length); // e.g. /overview
   const s = await sessionUser(r, env, false);
   if (!s) return json({ error: 'signed_out' }, 401);
@@ -442,6 +443,8 @@ export async function handleAdmin(r: Request, env: Env, db: D1Database, url: URL
     if (!b || typeof b.config !== 'object' || !b.config) return ok({ error: 'bad_request' }, 400);
     const { config, rejected } = sanitizeAi(b.config);
     if (rejected.length) return ok({ error: 'invalid', fields: rejected }, 400);
+    // The chain may only name models that are active rows in the registry (never a free string).
+    for (const c of config.chain) if (!(await isRegistered(db, c.provider, c.model))) return ok({ error: 'unknown_model', model: `${c.provider}/${c.model}` }, 400);
     const before = await readAi(db);
     const diff: Record<string, unknown> = {};
     for (const k of Object.keys(config) as (keyof typeof config)[]) {
@@ -459,6 +462,31 @@ export async function handleAdmin(r: Request, env: Env, db: D1Database, url: URL
     }
     return ok({ ok: true, config, changed: Object.keys(diff), promptVersion: promptVersion(config) });
   }
+  /* Model registry: the picker's source. Stale-on-read refresh runs after the response. */
+  if (path === '/ai/models' && r.method === 'GET') {
+    const [models, status] = await Promise.all([listModels(db), catalogueStatus(db)]);
+    if (ctx && (await catalogueIsStale(db, env))) ctx.waitUntil(syncAll(db, env).catch(() => undefined));
+    return ok({ models, status, keys: Object.fromEntries(PROVIDERS.map((p) => [p, hasKey(env, p)])) });
+  }
+  if (path === '/ai/models/sync' && r.method === 'POST') {
+    const providers = await syncAll(db, env);
+    await audit(db, me, 'ai.models_sync', 'ai_models', 'all', Object.fromEntries(providers.map((p) => [p.provider, p.skipped ? 'no key' : p.error ?? `+${p.added} ~${p.updated} -${p.deactivated}`])));
+    return ok({ providers, models: await listModels(db), status: await catalogueStatus(db) });
+  }
+  if (path === '/ai/models/price' && r.method === 'PUT') {
+    const b = await body(r);
+    const provider = typeof b?.provider === 'string' ? b.provider : '';
+    const model = typeof b?.model === 'string' ? b.model : '';
+    const pin = typeof b?.in === 'number' && b.in >= 0 && b.in <= 500 ? Math.round(b.in * 1000) / 1000 : null;
+    const pout = typeof b?.out === 'number' && b.out >= 0 && b.out <= 2000 ? Math.round(b.out * 1000) / 1000 : null;
+    if (!provider || !model || pin === null || pout === null) return ok({ error: 'bad_request' }, 400);
+    const before = await db.prepare('SELECT price_in, price_out FROM ai_models WHERE provider = ?1 AND model_id = ?2').bind(provider, model).first<{ price_in: number | null; price_out: number | null }>();
+    if (!before) return ok({ error: 'not_found' }, 404);
+    await db.prepare('UPDATE ai_models SET price_in = ?3, price_out = ?4 WHERE provider = ?1 AND model_id = ?2').bind(provider, model, pin, pout).run();
+    await audit(db, me, 'ai.model_price', 'ai_models', `${provider}/${model}`, { in: { from: before.price_in, to: pin }, out: { from: before.price_out, to: pout } });
+    return ok({ ok: true });
+  }
+
   if (path === '/ai/lines' && r.method === 'GET') {
     const cfg = await readAi(db);
     const slug = url.searchParams.get('slug') ?? '';
@@ -502,6 +530,52 @@ export async function handleAdmin(r: Request, env: Env, db: D1Database, url: URL
     const stored = await storeLines(db, poolKey, t, lang, pv, out.candidate, out.lines);
     await audit(db, me, 'ai.generate', 'bit_pool', poolKey, { count: stored.length, model: `${out.candidate.provider}/${out.candidate.model}` });
     return ok({ ok: true, lines: stored, model: out.candidate });
+  }
+
+  /* ── Invite codes (registration mode "invite") ── */
+  if (path === '/invites' && r.method === 'GET') {
+    const { results } = await db
+      .prepare(
+        `SELECT i.id, i.hint, i.label, i.max_uses, i.uses, i.expires_at, i.created_at, i.created_by, i.revoked_at,
+           (SELECT COUNT(*) FROM users u WHERE u.invite_id = i.id) accounts
+         FROM invite_codes i ORDER BY i.created_at DESC LIMIT 500`,
+      )
+      .all();
+    return ok({ invites: results ?? [], mode: (await readSettings(db)).registration_mode });
+  }
+  if (path === '/invites' && r.method === 'POST') {
+    const b = await body(r);
+    const label = typeof b?.label === 'string' ? b.label.trim().slice(0, 80) : '';
+    const maxUses = typeof b?.maxUses === 'number' && Number.isInteger(b.maxUses) ? Math.min(1000, Math.max(1, b.maxUses)) : 1;
+    const days = typeof b?.expiresDays === 'number' && Number.isInteger(b.expiresDays) ? Math.min(365, Math.max(0, b.expiresDays)) : 0;
+    const count = typeof b?.count === 'number' && Number.isInteger(b.count) ? Math.min(50, Math.max(1, b.count)) : 1;
+    const now = Date.now();
+    const expires = days ? now + days * DAY : null;
+    const codes: { id: string; code: string }[] = [];
+    const stmts = [];
+    for (let i = 0; i < count; i++) {
+      const code = newInviteCode();
+      const id = crypto.randomUUID();
+      codes.push({ id, code });
+      stmts.push(
+        db
+          .prepare('INSERT INTO invite_codes (id, code_hash, hint, label, max_uses, expires_at, created_at, created_by) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)')
+          .bind(id, await sha256(code), code.slice(0, 4), label, maxUses, expires, now, me.email),
+      );
+    }
+    await db.batch(stmts);
+    // The audit row keeps only the hints: the full codes are shown once, to this admin, now.
+    await audit(db, me, 'invite.create', 'invite', codes.map((c) => c.id).join(','), { count, label, maxUses, expiresDays: days, hints: codes.map((c) => c.code.slice(0, 4)) });
+    return ok({ ok: true, codes, maxUses, expiresAt: expires });
+  }
+  const invMatch = path.match(/^\/invites\/([0-9a-f-]{36})\/revoke$/);
+  if (invMatch && r.method === 'POST') {
+    const inv = await db.prepare('SELECT id, hint, label, revoked_at FROM invite_codes WHERE id = ?1').bind(invMatch[1]).first<{ id: string; hint: string; label: string; revoked_at: number | null }>();
+    if (!inv) return ok({ error: 'not_found' }, 404);
+    if (inv.revoked_at) return ok({ ok: true, unchanged: true });
+    await db.prepare('UPDATE invite_codes SET revoked_at = ?2 WHERE id = ?1').bind(inv.id, Date.now()).run();
+    await audit(db, me, 'invite.revoke', 'invite', inv.id, { hint: inv.hint, label: inv.label });
+    return ok({ ok: true });
   }
 
   /* ── Audit log ── */

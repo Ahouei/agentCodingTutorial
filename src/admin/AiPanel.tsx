@@ -41,6 +41,11 @@ type AiState = {
   };
   pools: { slug: string; section: string; lang: string; n: number; hidden: number; served: number }[];
 };
+type RegModel = { provider: Provider; model_id: string; display_name: string; source: string; created: number | null; price_in: number | null; price_out: number | null };
+type CatStatus = { provider: Provider; synced_at: number; ok: number; error: string | null; models: number };
+type SyncSummary = { provider: Provider; added: number; updated: number; deactivated: number; total: number; error?: string; skipped?: boolean };
+type Registry = { models: RegModel[]; status: CatStatus[]; keys: Record<Provider, boolean> };
+
 type Line = { id: number; section: string; text: string; provider: string; model: string; created_at: number; hidden: number; served: number };
 
 const PROVIDERS: Provider[] = ['anthropic', 'gemini', 'openai', 'deepseek', 'xai'];
@@ -51,6 +56,9 @@ export function AiPanel() {
   const tx = useTx();
   const f = useFmt();
   const { data, error, loading, reload } = useLoad(() => api.get<AiState>('/ai'));
+  const reg = useLoad(() => api.get<Registry>('/ai/models'));
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<SyncSummary[] | null>(null);
   const [cfg, setCfg] = useState<AiConfig | null>(null);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
@@ -73,8 +81,6 @@ export function AiPanel() {
     [ch[i], ch[j]] = [ch[j], ch[i]];
     set('chain', ch);
   };
-  const price = (model: string) => cfg.prices[model] ?? { in: 0, out: 0 };
-  const setPrice = (model: string, k: 'in' | 'out', v: number) => set('prices', { ...cfg.prices, [model]: { ...price(model), [k]: v } });
 
   const save = async () => {
     setBusy(true);
@@ -151,7 +157,35 @@ export function AiPanel() {
         </div>
       </Section>
 
-      <Section title={tx('مدل‌ها به ترتیب', 'Models, in order')} sub={tx('اولی امتحان می‌شود؛ اگر کلید نداشت، محدود شد یا جواب به‌دردبخور نداد، بعدی. قیمت‌ها (دلار به ازای هر میلیون Token) فقط برای حساب هزینه‌اند؛ با صفحه قیمت ارائه‌دهنده یکی‌شان کنید.', 'The first is tried; if it has no key, is rate-limited or gives nothing usable, the next. Prices ($ per million tokens) are only for cost tracking; keep them in line with the provider’s pricing page.')}>
+      <Section
+        title={tx('مدل‌ها به ترتیب', 'Models, in order')}
+        sub={tx(
+          'فهرست مدل‌ها مستقیم از خود ارائه‌دهنده‌ها خوانده می‌شود (هر ۱۲ ساعت خودکار، یا با دکمه همگام‌سازی). فقط مدل‌هایی که واقعاً قابل استفاده‌اند و کلیدشان تنظیم شده انتخاب‌شدنی‌اند. اولی امتحان می‌شود؛ خطا یا محدودیت داشت، بعدی.',
+          'The model list comes straight from each provider (refreshed automatically every 12 h, or with the sync button). Only callable models whose key is set can be picked. The first is tried; on an error or limit, the next.',
+        )}
+        actions={
+          <button
+            type="button"
+            className="btn btn--small"
+            disabled={syncing}
+            onClick={async () => {
+              setSyncing(true);
+              try {
+                const r = await api.post<{ providers: SyncSummary[] }>('/ai/models/sync');
+                setSyncResult(r.providers);
+                reg.reload();
+              } catch {
+                setSyncResult([]);
+              } finally {
+                setSyncing(false);
+              }
+            }}
+          >
+            {syncing ? tx('در حال همگام‌سازی…', 'Syncing…') : tx('همگام‌سازی مدل‌ها', 'Sync models now')}
+          </button>
+        }
+      >
+        <ModelStatus reg={reg.data} result={syncResult} />
         <div className="tbl-wrap">
           <table className="adm-tbl">
             <thead>
@@ -159,54 +193,70 @@ export function AiPanel() {
                 <th scope="col">#</th>
                 <th scope="col">{tx('ارائه‌دهنده', 'Provider')}</th>
                 <th scope="col">{tx('مدل', 'Model')}</th>
-                <th scope="col">{tx('ورودی $/M', 'In $/M')}</th>
-                <th scope="col">{tx('خروجی $/M', 'Out $/M')}</th>
-                <th scope="col">{tx('کلید', 'Key')}</th>
+                <th scope="col">{tx('قیمت (دلار/میلیون Token)', 'Price ($ / M tokens)')}</th>
                 <th scope="col" />
               </tr>
             </thead>
             <tbody>
-              {cfg.chain.map((c, i) => (
-                <tr key={i}>
-                  <td className="num muted">{f.n(i + 1)}</td>
-                  <td>
-                    <select className="adm-input" value={c.provider} onChange={(e) => setCand(i, { provider: e.target.value as Provider })} aria-label={tx('ارائه‌دهنده', 'Provider')}>
-                      {PROVIDERS.map((p) => (
-                        <option key={p} value={p}>
-                          {PNAME[p]}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td>
-                    <input className="adm-input" dir="ltr" value={c.model} onChange={(e) => setCand(i, { model: e.target.value.trim() })} aria-label={tx('مدل', 'Model')} />
-                  </td>
-                  <td>
-                    <input className="adm-input adm-input--sm" dir="ltr" type="number" min={0} step={0.01} value={price(c.model).in} onChange={(e) => setPrice(c.model, 'in', Number(e.target.value) || 0)} aria-label="in" />
-                  </td>
-                  <td>
-                    <input className="adm-input adm-input--sm" dir="ltr" type="number" min={0} step={0.01} value={price(c.model).out} onChange={(e) => setPrice(c.model, 'out', Number(e.target.value) || 0)} aria-label="out" />
-                  </td>
-                  <td>{data.keys[c.provider] ? <Chip tone="mint">✓</Chip> : <Chip tone="coral">{tx('ندارد', 'none')}</Chip>}</td>
-                  <td className="nowrap">
-                    <button type="button" className="btn btn--small btn--ghost" onClick={() => move(i, -1)} disabled={i === 0} aria-label={tx('بالاتر', 'Up')}>
-                      ↑
-                    </button>
-                    <button type="button" className="btn btn--small btn--ghost" onClick={() => move(i, 1)} disabled={i === cfg.chain.length - 1} aria-label={tx('پایین‌تر', 'Down')}>
-                      ↓
-                    </button>
-                    <button type="button" className="btn btn--small btn--ghost" onClick={() => set('chain', cfg.chain.filter((_, j) => j !== i))} disabled={cfg.chain.length === 1} aria-label={tx('حذف', 'Remove')}>
-                      ✕
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {cfg.chain.map((c, i) => {
+                const options = (reg.data?.models ?? []).filter((m) => m.provider === c.provider);
+                const current = options.find((m) => m.model_id === c.model);
+                return (
+                  <tr key={i}>
+                    <td className="num muted">{f.n(i + 1)}</td>
+                    <td>
+                      <select
+                        className="adm-input"
+                        value={c.provider}
+                        aria-label={tx('ارائه‌دهنده', 'Provider')}
+                        onChange={(e) => {
+                          const p = e.target.value as Provider;
+                          const first = (reg.data?.models ?? []).find((m) => m.provider === p);
+                          setCand(i, { provider: p, model: first?.model_id ?? '' });
+                        }}
+                      >
+                        {PROVIDERS.map((p) => (
+                          <option key={p} value={p} disabled={!data.keys[p]}>
+                            {PNAME[p]}
+                            {data.keys[p] ? '' : tx(' (بدون کلید)', ' (no key)')}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td>
+                      <ModelPicker value={c.model} options={options} loading={reg.loading && !reg.data} onChange={(model) => setCand(i, { model })} />
+                    </td>
+                    <td>
+                      {current ? <PriceEditor m={current} onSaved={reg.reload} /> : <span className="muted">—</span>}
+                    </td>
+                    <td className="nowrap">
+                      <button type="button" className="btn btn--small btn--ghost" onClick={() => move(i, -1)} disabled={i === 0} aria-label={tx('بالاتر', 'Up')}>
+                        ↑
+                      </button>
+                      <button type="button" className="btn btn--small btn--ghost" onClick={() => move(i, 1)} disabled={i === cfg.chain.length - 1} aria-label={tx('پایین‌تر', 'Down')}>
+                        ↓
+                      </button>
+                      <button type="button" className="btn btn--small btn--ghost" onClick={() => set('chain', cfg.chain.filter((_, j) => j !== i))} disabled={cfg.chain.length === 1} aria-label={tx('حذف', 'Remove')}>
+                        ✕
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
         <div className="adm-actions">
           {cfg.chain.length < 4 && (
-            <button type="button" className="btn btn--small" onClick={() => set('chain', [...cfg.chain, { provider: 'anthropic', model: 'claude-haiku-5-5' }])}>
+            <button
+              type="button"
+              className="btn btn--small"
+              onClick={() => {
+                const keyed = PROVIDERS.find((p) => data.keys[p]) ?? 'anthropic';
+                const first = (reg.data?.models ?? []).find((m) => m.provider === keyed);
+                set('chain', [...cfg.chain, { provider: keyed, model: first?.model_id ?? '' }]);
+              }}
+            >
               {tx('+ مدل پشتیبان', '+ Fallback model')}
             </button>
           )}
@@ -221,8 +271,8 @@ export function AiPanel() {
         </div>
         <p className="adm-fine">
           {tx(
-            'برای ارزان‌تر شدن، claude-haiku-5-5 را بالای فهرست بگذارید (حدود ۴۰ برابر ارزان‌تر از claude-opus-5-5). جمله‌ها در مخزن ذخیره می‌شوند، پس هزینه با تعداد کاربر زیاد نمی‌شود.',
-            'For a lower bill, put claude-haiku-5-5 first (about 40× cheaper than claude-opus-5-5). Lines are pooled, so cost doesn’t grow with the number of learners.',
+            'برای ارزان‌تر شدن، Claude Haiku 5.5 را بالای فهرست بگذارید (حدود ۴۰ برابر ارزان‌تر از Opus 5.5). مدلی که قیمتش معلوم نیست برای سقف بودجه گران حساب می‌شود (۱۰/۵۰ دلار) تا قیمتش را وارد کنید.',
+            'For a lower bill, put Claude Haiku 5.5 first (about 40× cheaper than Opus 5.5). A model with an unknown price counts as expensive ($10/$50) against the budget until you enter its price.',
           )}
         </p>
       </Section>
@@ -474,5 +524,105 @@ function Lines({ pools, onChanged }: { pools: AiState['pools']; onChanged: () =>
           ))
       )}
     </Section>
+  );
+}
+
+/** A real picker: models from the registry, newest first, curated ones on top. No typing. */
+function ModelPicker({ value, options, loading, onChange }: { value: string; options: RegModel[]; loading: boolean; onChange: (m: string) => void }) {
+  const tx = useTx();
+  const [q, setQ] = useState('');
+  if (loading) return <span className="muted">{tx('در حال بارگیری…', 'Loading…')}</span>;
+  if (!options.length) return <span className="adm-error">{tx('مدلی نیست؛ همگام‌سازی کنید', 'No models; sync first')}</span>;
+  const shown = options.filter((m) => !q || `${m.display_name} ${m.model_id}`.toLowerCase().includes(q.toLowerCase()) || m.model_id === value);
+  const hasValue = options.some((m) => m.model_id === value);
+  return (
+    <span className="adm-picker">
+      {options.length > 12 && <input className="adm-input adm-input--sm" dir="ltr" value={q} onChange={(e) => setQ(e.target.value)} placeholder={tx('فیلتر', 'filter')} aria-label={tx('فیلتر مدل‌ها', 'Filter models')} />}
+      <select className="adm-input" dir="ltr" value={hasValue ? value : ''} onChange={(e) => onChange(e.target.value)} aria-label={tx('مدل', 'Model')}>
+        {!hasValue && <option value="">{tx('انتخاب کنید…', 'Choose…')}</option>}
+        {shown.map((m) => (
+          <option key={m.model_id} value={m.model_id}>
+            {m.display_name === m.model_id ? m.model_id : `${m.display_name} — ${m.model_id}`}
+            {m.price_in != null ? `  ($${m.price_in}/$${m.price_out})` : ''}
+            {m.source !== 'catalogue' ? ' ★' : ''}
+          </option>
+        ))}
+      </select>
+    </span>
+  );
+}
+
+function PriceEditor({ m, onSaved }: { m: RegModel; onSaved: () => void }) {
+  const tx = useTx();
+  const [pin, setPin] = useState(m.price_in == null ? '' : String(m.price_in));
+  const [pout, setPout] = useState(m.price_out == null ? '' : String(m.price_out));
+  const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  useEffect(() => {
+    setPin(m.price_in == null ? '' : String(m.price_in));
+    setPout(m.price_out == null ? '' : String(m.price_out));
+  }, [m.model_id, m.price_in, m.price_out]);
+  const dirty = pin !== (m.price_in == null ? '' : String(m.price_in)) || pout !== (m.price_out == null ? '' : String(m.price_out));
+  return (
+    <span className="adm-price">
+      <input className="adm-input adm-input--sm" dir="ltr" type="number" min={0} step={0.01} value={pin} placeholder="in" onChange={(e) => setPin(e.target.value)} aria-label={tx('قیمت ورودی', 'Input price')} />
+      <input className="adm-input adm-input--sm" dir="ltr" type="number" min={0} step={0.01} value={pout} placeholder="out" onChange={(e) => setPout(e.target.value)} aria-label={tx('قیمت خروجی', 'Output price')} />
+      {dirty && pin !== '' && pout !== '' ? (
+        <button
+          type="button"
+          className="btn btn--small"
+          disabled={state === 'saving'}
+          onClick={async () => {
+            setState('saving');
+            try {
+              await api.put('/ai/models/price', { provider: m.provider, model: m.model_id, in: Number(pin), out: Number(pout) });
+              setState('saved');
+              onSaved();
+            } catch {
+              setState('error');
+            }
+          }}
+        >
+          {tx('ذخیره قیمت', 'Save price')}
+        </button>
+      ) : m.price_in == null ? (
+        <Chip tone="butter">{tx('قیمت نامعلوم', 'price unknown')}</Chip>
+      ) : state === 'saved' ? (
+        <Chip tone="mint">✓</Chip>
+      ) : null}
+      {state === 'error' && <Chip tone="coral">{tx('ذخیره نشد', 'not saved')}</Chip>}
+    </span>
+  );
+}
+
+function ModelStatus({ reg, result }: { reg: Registry | null; result: SyncSummary[] | null }) {
+  const tx = useTx();
+  const f = useFmt();
+  if (!reg) return null;
+  const count = (p: Provider) => reg.models.filter((m) => m.provider === p).length;
+  return (
+    <div className="adm-keys" style={{ marginBottom: 12 }}>
+      {PROVIDERS.map((p) => {
+        const st = reg.status.find((s) => s.provider === p);
+        const r = result?.find((x) => x.provider === p);
+        const err = r?.error ?? (st && !st.ok ? st.error : null);
+        return (
+          <span key={p} className={`adm-key ${reg.keys[p] && !err ? 'is-set' : ''}`}>
+            <b>{PNAME[p]}</b>
+            <span>
+              {!reg.keys[p] ? (
+                <Chip>{tx('بدون کلید', 'no key')}</Chip>
+              ) : err ? (
+                <Chip tone="coral">{tx('خطا', 'error')}</Chip>
+              ) : (
+                <Chip tone="mint">{tx(`${f.n(count(p))} مدل`, `${count(p)} models`)}</Chip>
+              )}{' '}
+              {st && <small className="muted">{f.rel(st.synced_at)}</small>}
+            </span>
+            {err && <small className="adm-error ltr">{err}</small>}
+            {r && !r.error && !r.skipped && <small className="muted ltr">+{r.added} ~{r.updated} −{r.deactivated}</small>}
+          </span>
+        );
+      })}
+    </div>
   );
 }

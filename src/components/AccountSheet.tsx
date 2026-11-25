@@ -40,7 +40,9 @@ export function AccountSheet({ open, onClose }: { open: boolean; onClose: () => 
   const tx = useTx();
   const [email, setEmail] = useState('');
   const [token, setToken] = useState<string | null>(null);
-  const [state, setState] = useState<'form' | 'sending' | 'sent' | 'error' | 'rate' | 'bot' | 'paused' | 'busy'>('form');
+  const [state, setState] = useState<'form' | 'sending' | 'sent' | 'error' | 'rate' | 'bot' | 'paused' | 'busy' | 'closed' | 'invite_required' | 'invite_invalid'>('form');
+  const [invite, setInvite] = useState('');
+  const inviteId = useId();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const box = useRef<HTMLDivElement>(null);
   const widget = useRef<string | null>(null);
@@ -74,8 +76,18 @@ export function AccountSheet({ open, onClose }: { open: boolean; onClose: () => 
     e.preventDefault();
     if (!token || !email.trim()) return;
     setState('sending');
-    const r = await acc.startSignIn(email.trim(), token);
-    setState(r === 'ok' ? 'sent' : r === 'rate_limited' ? 'rate' : r === 'turnstile_failed' ? 'bot' : r === 'paused' ? 'paused' : r === 'busy' ? 'busy' : 'error');
+    const r = await acc.startSignIn(email.trim(), token, invite.trim() || undefined);
+    setState(
+      r === 'ok'
+        ? 'sent'
+        : r === 'rate_limited'
+          ? 'rate'
+          : r === 'turnstile_failed'
+            ? 'bot'
+            : r === 'paused' || r === 'busy' || r === 'closed' || r === 'invite_required' || r === 'invite_invalid'
+              ? r
+              : 'error',
+    );
     if (r !== 'ok' && widget.current && window.turnstile) window.turnstile.reset(widget.current);
   };
 
@@ -159,6 +171,28 @@ export function AccountSheet({ open, onClose }: { open: boolean; onClose: () => 
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
           />
+          {acc.registration === 'invite' && (
+            <>
+              <label className="acc-label" htmlFor={inviteId}>
+                {tx('کد دعوت (فقط برای حساب تازه)', 'Invite code (new accounts only)')}
+              </label>
+              <input
+                id={inviteId}
+                className="acc-input acc-invite"
+                dir="ltr"
+                autoComplete="off"
+                autoCapitalize="characters"
+                spellCheck={false}
+                maxLength={16}
+                value={invite}
+                onChange={(e) => setInvite(e.target.value.toUpperCase())}
+                placeholder="XXXX-XXXX-XXXX"
+              />
+            </>
+          )}
+          {acc.registration === 'closed' && (
+            <p className="acc-fine">{tx('ثبت‌نام تازه فعلاً بسته است؛ اگر حساب دارید، وارد شوید.', 'New registration is closed for now; if you have an account, sign in.')}</p>
+          )}
           <div ref={box} className="acc-turnstile" />
           {state === 'error' && <p className="acc-err">{tx('چیزی درست کار نکرد. کمی بعد دوباره امتحان کنید.', 'Something went wrong. Try again in a moment.')}</p>}
           {state === 'rate' && <p className="acc-err">{tx('درخواست‌ها زیاد شد. یک دقیقه صبر کنید.', 'Too many requests. Wait a minute.')}</p>}
@@ -166,6 +200,9 @@ export function AccountSheet({ open, onClose }: { open: boolean; onClose: () => 
             <p className="acc-err">{tx('ورود فعلاً متوقف است. بدون ورود هم همه دوره در دسترس است و پیشرفتتان روی همین دستگاه می‌ماند.', 'Sign-in is paused for now. The whole course works without it, and your progress stays on this device.')}</p>
           )}
           {state === 'busy' && <p className="acc-err">{tx('امروز ایمیل‌های ورود زیاد بوده. فردا دوباره امتحان کنید.', 'Too many sign-in emails today. Try again tomorrow.')}</p>}
+          {state === 'closed' && <p className="acc-err">{tx('ثبت‌نام تازه فعلاً بسته است. بدون ورود هم همه دوره در دسترس است.', 'New registration is closed for now. The whole course works without signing in.')}</p>}
+          {state === 'invite_required' && <p className="acc-err">{tx('برای ساخت حساب تازه کد دعوت ۱۲ حرفی لازم است.', 'A 12-character invite code is needed to create a new account.')}</p>}
+          {state === 'invite_invalid' && <p className="acc-err">{tx('این کد دعوت معتبر نیست، منقضی شده یا تمام شده است.', 'This invite code is not valid, has expired or is used up.')}</p>}
           {state === 'bot' && <p className="acc-err">{tx('بررسی امنیتی کامل نشد. صفحه را تازه کنید و دوباره امتحان کنید.', "The security check didn't complete. Reload and try again.")}</p>}
           <button type="submit" className="btn btn--primary" disabled={!token || !email.trim() || state === 'sending'}>
             {state === 'sending' ? tx('در حال ارسال…', 'Sending…') : tx('پیوند ورود را بفرست', 'Email me a sign-in link')}

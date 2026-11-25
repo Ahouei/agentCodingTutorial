@@ -16,6 +16,8 @@
   // Custom Domain: Cloudflare creates the DNS record and HTTPS certificate for it.
   "routes": [{ "pattern": "start.ahouei.site", "custom_domain": true }],
   "observability": { "enabled": true },
+  // Twice a day: refresh the AI model registry (worker/ai/registry.ts).
+  "triggers": { "crons": ["17 3,15 * * *"] },
   "d1_databases": [
     {
       "binding": "DB",

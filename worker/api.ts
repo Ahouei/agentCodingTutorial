@@ -100,6 +100,25 @@ export async function sessionUser(r: Request, env: Env, renew: boolean) {
   return { userId: row.user_id, email: row.email, role: roleOf(env, row.email, row.role), hash, setCookie };
 }
 
+/* ───────── Invite codes: 12 characters, no look-alikes (no I, O, 0, 1) ───────── */
+const INVITE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 32 symbols: 256 % 32 = 0, so no bias
+export function newInviteCode() {
+  const b = crypto.getRandomValues(new Uint8Array(12));
+  return Array.from(b, (x) => INVITE_ALPHABET[x % 32]).join('');
+}
+/** Accepts "k7qm-4xrp-9tnb", spaces etc.; returns the 12-character code or null. */
+export function normalizeInvite(v: unknown): string | null {
+  if (typeof v !== 'string') return null;
+  const c = v.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  return c.length === 12 && [...c].every((ch) => INVITE_ALPHABET.includes(ch)) ? c : null;
+}
+async function findInvite(db: D1Database, code: string) {
+  return db
+    .prepare('SELECT id FROM invite_codes WHERE code_hash = ?1 AND revoked_at IS NULL AND uses < max_uses AND (expires_at IS NULL OR expires_at > ?2)')
+    .bind(await sha256(code), Date.now())
+    .first<{ id: string }>();
+}
+
 const EMAIL_RE = /^[^\s@<>()[\],;:"]{1,64}@[A-Za-z0-9.-]{1,190}\.[A-Za-z]{2,24}$/;
 
 function emailHtml(link: string, fa: boolean) {
@@ -128,7 +147,7 @@ function continuePage(token: string, fa: boolean, error?: string) {
   );
 }
 
-export async function handleApi(r: Request, env: Env, url: URL): Promise<Response> {
+export async function handleApi(r: Request, env: Env, url: URL, ctx?: ExecutionContext): Promise<Response> {
   const path = url.pathname;
 
   if (path === '/api/config' && r.method === 'GET') {
@@ -138,7 +157,9 @@ export async function handleApi(r: Request, env: Env, url: URL): Promise<Respons
       const ai = await readAi(env.DB).catch(() => null);
       bitAi = !!ai?.enabled && ai.chain.some((c) => hasKey(env, c.provider));
     }
-    return json({ accounts: enabled(env), turnstileSiteKey: enabled(env) ? env.TURNSTILE_SITE_KEY : null, bitAi });
+    let registration = 'open';
+    if (enabled(env) && env.DB) registration = (await readSettings(env.DB).catch(() => null))?.registration_mode ?? 'open';
+    return json({ accounts: enabled(env), turnstileSiteKey: enabled(env) ? env.TURNSTILE_SITE_KEY : null, bitAi, registration });
   }
 
   // The one published announcement (admin panel → Announcements). Works without accounts.
@@ -155,12 +176,12 @@ export async function handleApi(r: Request, env: Env, url: URL): Promise<Respons
   if (!enabled(env) || !env.DB) return json({ error: 'accounts_unavailable' }, 503);
   const db = env.DB;
 
-  if (path.startsWith('/api/admin/')) return handleAdmin(r, env, db, url);
+  if (path.startsWith('/api/admin/')) return handleAdmin(r, env, db, url, ctx);
 
   // ── Start sign-in: Turnstile + rate limits + email the link ──
   if (path === '/api/auth/start' && r.method === 'POST') {
     if (!sameOrigin(r)) return json({ error: 'bad_origin' }, 403);
-    let body: { email?: unknown; turnstile?: unknown; lang?: unknown };
+    let body: { email?: unknown; turnstile?: unknown; lang?: unknown; invite?: unknown };
     try {
       body = await r.json();
     } catch {
@@ -186,6 +207,20 @@ export async function handleApi(r: Request, env: Env, url: URL): Promise<Respons
     // Paused by an admin: learners are told so; staff still get their link.
     const paused = !cfg.signin_enabled;
     if (paused && !isStaff) return json({ error: 'signin_paused' }, 503);
+    // Registration control for NEW accounts (existing ones always sign in). Staff are exempt.
+    let inviteId: string | null = null;
+    if (!existing && !isStaff) {
+      if (cfg.registration_mode === 'closed') return json({ error: 'registration_closed' }, 403);
+      if (cfg.registration_mode === 'invite') {
+        const code = normalizeInvite(body.invite);
+        if (!code) return json({ error: body.invite ? 'invite_invalid' : 'invite_required' }, 403);
+        // Guessing is bounded by the per-IP limit above plus this one.
+        if (await limited(db, `invite-try:${ip}`, 10, 10 * 60_000)) return json({ error: 'rate_limited' }, 429);
+        const inv = await findInvite(db, code);
+        if (!inv) return json({ error: 'invite_invalid' }, 403);
+        inviteId = inv.id;
+      }
+    }
     // Same answer whether or not the email exists, is blocked or is over its limit (no enumeration).
     const blocked = existing?.status === 'blocked';
     if (!blocked && !(await limited(db, `start-email:${email}`, cfg.start_email_per_10min, 10 * 60_000))) {
@@ -194,8 +229,8 @@ export async function handleApi(r: Request, env: Env, url: URL): Promise<Respons
       const token = randomToken();
       const now = Date.now();
       await db
-        .prepare('INSERT INTO login_tokens (token_hash, email, expires_at, created_at, ip) VALUES (?1, ?2, ?3, ?4, ?5)')
-        .bind(await sha256(token), email, now + LINK_TTL, now, ip)
+        .prepare('INSERT INTO login_tokens (token_hash, email, expires_at, created_at, ip, invite_id) VALUES (?1, ?2, ?3, ?4, ?5, ?6)')
+        .bind(await sha256(token), email, now + LINK_TTL, now, ip, inviteId)
         .run();
       const link = `${ORIGIN}/api/auth/verify?token=${encodeURIComponent(token)}&lang=${fa ? 'fa' : 'en'}`;
       const res = await fetch('https://api.resend.com/emails', {
@@ -230,20 +265,36 @@ export async function handleApi(r: Request, env: Env, url: URL): Promise<Respons
       const now = Date.now();
       // Consume atomically: only one request can flip used_at.
       const row = await db
-        .prepare('UPDATE login_tokens SET used_at = ?1 WHERE token_hash = ?2 AND used_at IS NULL AND expires_at > ?1 RETURNING email')
+        .prepare('UPDATE login_tokens SET used_at = ?1 WHERE token_hash = ?2 AND used_at IS NULL AND expires_at > ?1 RETURNING email, invite_id')
         .bind(now, await sha256(token))
-        .first<{ email: string }>();
+        .first<{ email: string; invite_id: string | null }>();
       if (!row)
         return continuePage('', fa, fa ? 'این پیوند منقضی یا قبلاً استفاده شده است. دوباره درخواست ورود بدهید.' : 'This link expired or was already used. Ask for a new one.');
       let user = await db.prepare('SELECT id, role, status FROM users WHERE email = ?1').bind(row.email).first<{ id: string; role: string; status: string }>();
       if (user?.status === 'blocked')
         return continuePage('', fa, fa ? 'این حساب نمی‌تواند وارد شود.' : 'This account cannot sign in.');
       if (!user) {
+        // The account is created only now, after the email address is confirmed by this link.
+        // Registration rules are checked again at this moment (an admin may have changed them).
         const cfg = await readSettings(db);
-        if (!cfg.new_accounts_enabled && roleOf(env, row.email, null) === 'learner')
-          return continuePage('', fa, fa ? 'ساخت حساب تازه فعلاً متوقف است. بدون ورود هم همه دوره در دسترس است.' : 'New accounts are paused for now. The whole course still works without signing in.');
+        const staff = roleOf(env, row.email, null) !== 'learner';
+        let inviteUsed: string | null = null;
+        if (!staff && cfg.registration_mode === 'closed')
+          return continuePage('', fa, fa ? 'ثبت‌نام فعلاً بسته است. بدون ورود هم همه دوره در دسترس است.' : 'Registration is closed for now. The whole course still works without signing in.');
+        if (!staff && cfg.registration_mode === 'invite') {
+          // Use the invite atomically: only while it is valid and has uses left.
+          const inv = row.invite_id
+            ? await db
+                .prepare('UPDATE invite_codes SET uses = uses + 1 WHERE id = ?1 AND revoked_at IS NULL AND uses < max_uses AND (expires_at IS NULL OR expires_at > ?2) RETURNING id')
+                .bind(row.invite_id, now)
+                .first<{ id: string }>()
+            : null;
+          if (!inv)
+            return continuePage('', fa, fa ? 'ثبت‌نام فقط با کد دعوت معتبر است و این کد دیگر کار نمی‌کند. از کسی که دعوتتان کرده کد تازه بگیرید.' : 'Registration needs a valid invite code, and this one no longer works. Ask whoever invited you for a new one.');
+          inviteUsed = inv.id;
+        }
         const id = crypto.randomUUID();
-        await db.prepare('INSERT INTO users (id, email, created_at) VALUES (?1, ?2, ?3)').bind(id, row.email, now).run();
+        await db.prepare('INSERT INTO users (id, email, created_at, invite_id) VALUES (?1, ?2, ?3, ?4)').bind(id, row.email, now, inviteUsed).run();
         user = { id, role: 'learner', status: 'active' };
       }
       const raw = randomToken();
