@@ -37,6 +37,7 @@ p { margin: 0; }
 code { font-family: var(--f-mono); font-size: 0.86em; background: var(--paper-2); border: 1px solid var(--line); border-radius: 6px; padding: 0 5px; }
 .fa { font-family: var(--f-fa); direction: rtl; }
 .muted { color: var(--ink-2); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 :focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; border-radius: 6px; }
 button { font: inherit; color: inherit; }
 
@@ -271,7 +272,61 @@ table.chg td { min-width: 180px; }
 .road td.p { font-family: var(--f-mono); font-weight: 600; white-space: nowrap; }
 .foot { padding-block: 40px 60px; color: var(--ink-2); font-size: 14px; border-top: 1.5px dashed var(--line); }
 
+
+/* ── decisions ── */
+.howto { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: start; margin-top: 22px; padding: 16px 18px; border-radius: 18px; border: 2px solid var(--ink); background: var(--butter-soft); }
+.howto ol { margin: 6px 0 0; padding-inline-start: 20px; }
+.howto .st { font-size: 13.5px; font-weight: 800; }
+.decide { display: grid; gap: 10px; margin-top: 18px; padding: 14px 16px; border-radius: 16px; border: 2px dashed var(--ink-3); background: var(--paper-2); }
+.decide.picked { border-style: solid; border-color: var(--ink); background: var(--card); }
+.decide-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.decide-row .lbl { font-weight: 800; font-size: 14px; margin-inline-end: 4px; }
+.pri { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+.pri button { min-height: 44px; min-width: 44px; padding: 6px 14px; border-radius: 12px; border: 2px solid var(--line); background: var(--card); font-weight: 800; font-size: 14px; cursor: pointer; transition: background-color 150ms ease, border-color 150ms ease, transform 120ms var(--ease-out); }
+.pri button:active { transform: scale(0.96); }
+@media (hover: hover) and (pointer: fine) { .pri button:hover { border-color: var(--ink); } }
+.pri button[aria-pressed="true"][data-p="1"] { background: var(--coral); border-color: var(--ink); color: #2a211b; }
+.pri button[aria-pressed="true"][data-p="2"] { background: var(--butter); border-color: var(--ink); color: #2a211b; }
+.pri button[aria-pressed="true"][data-p="3"] { background: var(--sky); border-color: var(--ink); color: #2a211b; }
+.pri button[aria-pressed="true"][data-p="0"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.pri button small { font-weight: 600; opacity: .8; margin-inline-start: 4px; }
+.decide textarea { width: 100%; min-height: 64px; padding: 10px 12px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); font: 15px/1.6 var(--f-doc); resize: vertical; }
+.decide textarea:focus { outline: none; border-color: var(--ink); }
+.saved { font-size: 12.5px; color: var(--ink-2); min-height: 18px; }
+.qa-group { margin-top: 26px; }
+.qa-group h3 { font-size: 22px; margin-bottom: 4px; }
+.qa-group > p { color: var(--ink-2); margin-bottom: 12px; }
+.qa-list { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.qa-item { padding: 16px; border-radius: 18px; border: 1.5px solid var(--line); background: var(--card); }
+.qa-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.qa-id { font: 12.5px var(--f-mono); padding: 1px 8px; border-radius: 8px; background: var(--ink); color: var(--paper); }
+.qa-item b.t { font-size: 16.5px; }
+.qa-item .d { margin-top: 6px; color: var(--ink-2); font-size: 15px; max-width: 80ch; }
+.qa-item .ev { margin-top: 6px; font-size: 13.5px; color: var(--ink-2); }
+.qa-item .ev::before { content: 'Evidence: '; font-weight: 800; color: var(--ink); }
+.qa-item .decide { margin-top: 12px; }
+.sev { font-size: 12px; font-weight: 800; padding: 1px 9px; border-radius: 999px; border: 1.5px solid var(--ink); }
+.sev.high { background: var(--coral-soft); } .sev.med { background: var(--butter-soft); } .sev.low { background: var(--mint-soft); } .sev.add { background: var(--sky-soft); } .sev.ops { background: var(--blush-soft); }
+.ex .decide { margin-top: 8px; padding: 10px 12px; }
+.ex .decide .lbl { display: none; }
+.dupe { font-size: 13px; font-weight: 800; color: var(--ink-2); }
+.bar { position: sticky; bottom: 0; z-index: 20; margin-top: 30px; padding-bottom: env(safe-area-inset-bottom, 0px); }
+.bar-in { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 12px 16px; border-radius: 18px 18px 0 0; border: 2px solid var(--ink); border-bottom: 0; background: var(--card); box-shadow: 0 -10px 30px -18px rgba(0,0,0,.35); }
+.bar-in .cnt { display: flex; gap: 8px; flex-wrap: wrap; font-weight: 800; font-size: 14px; }
+.bar-in .cnt span { padding: 2px 10px; border-radius: 999px; border: 1.5px solid var(--ink); }
+.bar-in .status { flex: 1; min-width: 180px; font-size: 13.5px; color: var(--ink-2); }
+.bar-link { text-decoration: none; color: var(--ink); }
+@media (max-width: 600px) {
+  .bar-in { padding: 8px 12px; gap: 8px; }
+  .bar-in .status { display: none; }
+  .bar-in .cnt span { padding: 1px 8px; font-size: 13px; }
+  .bar-link { min-height: 40px; padding: 4px 12px; font-size: 14px; }
+}
+.general textarea { width: 100%; min-height: 110px; padding: 12px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); font: 15.5px/1.6 var(--f-doc); }
+.copy-out { width: 100%; min-height: 160px; margin-top: 10px; padding: 12px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--paper-2); color: var(--ink); font: 13px/1.6 var(--f-mono); }
+
 @media (prefers-reduced-motion: reduce) {
+  .pri button,
   .piece, .sheet, .scrim, .stamp, .sw .t::after, .m-btn { transition: none; }
 }
 </style>
@@ -291,6 +346,19 @@ table.chg td { min-width: 180px; }
       <div class="theme"><span class="n" style="background:var(--mint)">3</span><div><b>Learning that sticks</b><span class="muted">Honest quizzes, warm-up recall, terms you can tap anywhere.</span></div></div>
     </div>
   </header>
+
+  <div class="howto" id="howto">
+    <svg width="40" height="40" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H11l-4.5 4v-4A2.5 2.5 0 0 1 4 13.5Z" fill="var(--butter)" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg>
+    <div>
+      <b>How to tell Claude what to build</b>
+      <ol>
+        <li>Under each proposal and each QA finding, pick a priority: <b>1 · now</b>, <b>2 · next</b>, <b>3 · later</b>, or <b>Skip</b>.</li>
+        <li>Add a comment where you want something done differently.</li>
+        <li>Come back to the chat and say <b>"implement my picks"</b>. Claude reads them straight from this page.</li>
+      </ol>
+      <p class="st" id="storeState">Connecting…</p>
+    </div>
+  </div>
   <ul class="toc" aria-label="Proposals">
     <li><a href="#c1"><i>01</i> Story spine</a></li>
     <li><a href="#c2"><i>02</i> Hero</a></li>
@@ -302,7 +370,10 @@ table.chg td { min-width: 180px; }
     <li><a href="#c8"><i>08</i> Motion system</a></li>
     <li><a href="#c9"><i>09</i> Color &amp; dark mode</a></li>
     <li><a href="#c10"><i>10</i> Finishing</a></li>
-    <li><a href="#road"><i>→</i> Roadmap</a></li>
+    <li><a href="#qa"><i>QA</i> QA findings</a></li>
+    <li><a href="#ops"><i>?</i> Open decisions</a></li>
+    <li><a href="#road"><i>→</i> More ideas &amp; roadmap</a></li>
+    <li><a href="#notes"><i>✎</i> General notes</a></li>
   </ul>
 
   <!-- 1 ─────────────── Story spine -->
@@ -354,6 +425,7 @@ table.chg td { min-width: 180px; }
       <tr><td>Chapter ends with "I finished" only</td><td>Chapter ends with "the café gained: …" and the piece appears</td><td>Shows the learner what this chapter added to a real thing</td></tr>
       <tr><td>Finale lists badges</td><td>Finale replays the café's build history, chapter by chapter</td><td>The resolution beat of a story arc</td></tr>
     </tbody></table></div>
+      <div class="decide" data-id="rd-01" data-title="Story spine: one café across all chapters"></div>
   </section>
 
   <!-- 2 ─────────────── Hero -->
@@ -384,6 +456,7 @@ table.chg td { min-width: 180px; }
       <tr><td>Decorative underline drawn once</td><td>Underline = progress, <code>pathLength</code> to <code>done/18</code>, 900ms <code>cubic-bezier(0.23,1,0.32,1)</code> on return</td><td>Structure should encode something true</td></tr>
       <tr><td>"Continue the journey" → chapter top</td><td>Resume card → exact section (<code>#/c/cloudflare/storage</code>)</td><td>Saves the learner from re-scrolling</td></tr>
     </tbody></table></div>
+      <div class="decide" data-id="rd-02" data-title="Hero: ink headline + progress line + resume card"></div>
   </section>
 
   <!-- 3 ─────────────── Map -->
@@ -405,6 +478,7 @@ table.chg td { min-width: 180px; }
       <tr><td>Every stop fades in with blur on scroll</td><td>Only the newly-earned tick animates, once</td><td>Animate what changed, not what is already known</td></tr>
       <tr><td>Map card → chapter: instant swap</td><td>Map icon morphs into the chapter badge (see 08)</td><td>Spatial continuity between the two views</td></tr>
     </tbody></table></div>
+      <div class="decide" data-id="rd-03" data-title="Journey map: "you are here""></div>
   </section>
 
   <!-- 4 ─────────────── Chapter opening -->
@@ -440,6 +514,7 @@ table.chg td { min-width: 180px; }
       <tr><td>«Domain، DNS و Nameserver» renders mis-ordered</td><td><code>Rich.tsx</code> wraps Latin runs in <code>&lt;bdi&gt;</code> automatically</td><td>Mixed-direction text needs explicit isolation</td></tr>
       <tr><td>Big Bit floats endlessly on all 18 chapters</td><td>Static Bit; mood changes only</td><td>Ambient motion on a page read daily is noise</td></tr>
     </tbody></table></div>
+      <div class="decide" data-id="rd-04" data-title="Chapter opening: mission brief + warm-up + bdi fix"></div>
   </section>
 
   <!-- 5 ─────────────── Mobile -->
@@ -478,6 +553,7 @@ table.chg td { min-width: 180px; }
       <tr><td>Terms defined only in one chapter</td><td>Dotted terms everywhere → glossary sheet with ‹ › through the paragraph's terms; built from existing <code>terms</code> blocks</td><td>Recall at the moment of need; no new content to write</td></tr>
       <tr><td>—</td><td>Sheet: <code>translateY(100%)→0</code>, 350ms <code>cubic-bezier(0.32,0.72,0,1)</code>; flick closes if velocity &gt; 0.11 px/ms; Back closes it</td><td>Feels native; Back never leaves the chapter by surprise</td></tr>
     </tbody></table></div>
+      <div class="decide" data-id="rd-05" data-title="Mobile: bottom bar, sections sheet, tap-a-term glossary"></div>
   </section>
 
   <!-- 6 ─────────────── Quiz -->
@@ -508,6 +584,7 @@ table.chg td { min-width: 180px; }
       <tr><td>Only the chosen option is explained</td><td>Every option explains itself after answering</td><td>Wrong options are where the misconceptions live</td></tr>
       <tr><td>One question per chapter</td><td>+ 5-question review at the end of each act, mixing chapters</td><td>Interleaved retrieval improves retention</td></tr>
     </tbody></table></div>
+      <div class="decide" data-id="rd-06" data-title="Quizzes: equal-length options, explain all, act reviews"></div>
   </section>
 
   <!-- 7 ─────────────── Lab standard -->
@@ -535,10 +612,11 @@ table.chg td { min-width: 180px; }
       </div>
     </div>
     <div class="extras" style="margin-top:18px">
-      <div class="ex"><b>New lab · Meet the agents</b><p><bdi dir="rtl">«کدام Agent برای من؟»</bdi> Four questions (budget, region, terminal comfort, editor) give a recommendation with availability notes.</p></div>
-      <div class="ex"><b>New lab · Design first</b><p><bdi dir="rtl">«۵ ایراد را پیدا کنید»</bdi>. A mock page with purple gradient, lorem ipsum, 2.8:1 text, a 30px button and LTR text in RTL. Tap a flaw to wipe in the fix (clip-path reveal).</p></div>
-      <div class="ex"><b>New lab · Security</b><p><bdi dir="rtl">«Secret را پیدا کنید»</bdi>. A fake commit diff hides a token; find it, then rotate it in the right order.</p></div>
+      <div class="ex"><b>New lab · Meet the agents</b><p><bdi dir="rtl">«کدام Agent برای من؟»</bdi> Four questions (budget, region, terminal comfort, editor) give a recommendation with availability notes.</p><div class="decide" data-id="rd-07a" data-title="New lab: which agent for me"></div></div>
+      <div class="ex"><b>New lab · Design first</b><p><bdi dir="rtl">«۵ ایراد را پیدا کنید»</bdi>. A mock page with purple gradient, lorem ipsum, 2.8:1 text, a 30px button and LTR text in RTL. Tap a flaw to wipe in the fix (clip-path reveal).</p><div class="decide" data-id="rd-07b" data-title="New lab: find 5 design flaws"></div></div>
+      <div class="ex"><b>New lab · Security</b><p><bdi dir="rtl">«Secret را پیدا کنید»</bdi>. A fake commit diff hides a token; find it, then rotate it in the right order.</p><div class="decide" data-id="rd-07c" data-title="New lab: find the leaked secret"></div></div>
     </div>
+      <div class="decide" data-id="rd-07" data-title="Lab standard: one anatomy, 44px targets, done stamp"></div>
   </section>
 
   <!-- 8 ─────────────── Motion -->
@@ -573,6 +651,7 @@ table.chg td { min-width: 180px; }
       <tr><td>Route change swaps instantly</td><td>View Transition: map icon → chapter badge, 300ms ease-in-out; rest crossfades 200ms; skipped under reduced motion</td><td>Spatial continuity, one orchestrated moment</td></tr>
       <tr><td>29 hard-coded <code>[0.23,1,0.32,1]</code>; bounce 0.25/0.3/0.35 ad hoc</td><td><code>src/lib/motion.ts</code> tokens; bounce only after momentum</td><td>Cohesion; bounce without a gesture reads as wobble</td></tr>
     </tbody></table></div>
+      <div class="decide" data-id="rd-08" data-title="Motion: trim reveals, still mascots, shared-element transition, tokens"></div>
   </section>
 
   <!-- 9 ─────────────── Color -->
@@ -599,6 +678,7 @@ table.chg td { min-width: 180px; }
       <tr><td>Dark sticker: <code>-4px 4px 0 #0c0907</code> on <code>#1b1612</code></td><td><code>-4px 4px 0 #5a2a1e</code> + outline <code>color-mix(ink 55%)</code></td><td>The sticker signature should survive dark mode</td></tr>
       <tr><td>One palette, cream + coral</td><td><code>data-style="candy|kashi"</code> second axis, A/B before deciding</td><td>Distinct identity without a risky big-bang change</td></tr>
     </tbody></table></div>
+      <div class="decide" data-id="rd-09" data-title="Color: contrast fixes, dark stickers, Kashi palette A/B"></div>
   </section>
 
   <!-- 10 ─────────────── Finishing -->
@@ -620,17 +700,36 @@ table.chg td { min-width: 180px; }
         </div></div>
       </div>
     </div>
+      <div class="decide" data-id="rd-10" data-title="Finishing: earned done + certificate"></div>
+  </section>
+
+
+  <section class="case" id="qa">
+    <div class="case-head"><span class="case-num">QA</span><div>
+      <h2>QA findings from the review</h2>
+      <p class="why">Everything the QA pass found on the live site, the code and the course content. Each item was reproduced or measured; the evidence line says how. Pick a priority for the ones you want fixed.</p>
+      <div class="chips"><span class="chip skill">qa-verification-discipline</span><span class="chip skill">data:validate-data</span><span class="chip skill">axe-core 4.14 · 28 page/configs</span><span class="chip skill">Playwright, live site</span></div>
+    </div></div>
+    <div id="qaGroups"></div>
+  </section>
+
+  <section class="case" id="ops">
+    <div class="case-head"><span class="case-num">?</span><div>
+      <h2>Open decisions from earlier</h2>
+      <p class="why">Things still waiting on you from the build and deploy steps.</p>
+    </div></div>
+    <div id="opsGroup"></div>
   </section>
 
   <!-- Extras + roadmap -->
   <section class="case" id="road">
-    <div class="case-head"><span class="case-num">→</span><div><h2>Also worth doing</h2></div></div>
+    <div class="case-head"><span class="case-num">→</span><div><h2>More ideas &amp; suggested order</h2></div></div>
     <div class="extras">
-      <div class="ex"><b>Voice notes with timestamps</b><p>Each chapter plays your recording from the right minute (<code>voice: {src, from, to}</code>), with the original transcript in a collapsible <bdi dir="rtl">«صدای نویسنده»</bdi> panel.</p></div>
-      <div class="ex"><b>A 20-second trailer</b><p>A Remotion video of Bit building the café, for Telegram and Instagram, plus a 1200×630 share card per chapter.</p></div>
-      <div class="ex"><b>Real URLs and share previews</b><p><code>/c/cloudflare</code> instead of <code>#/c/cloudflare</code>, with Open Graph tags, so every chapter can be shared and indexed.</p></div>
-      <div class="ex"><b>Copy pass</b><p>Drop hint bubbles that restate the lab title; keep Bit's hint only where the action isn't obvious. Verb-first buttons throughout.</p></div>
-      <div class="ex"><b>Persian consistency</b><p>One spelling per term: <span class="fa">وب‌سایت</span> with half-space (13 places lack it), and one choice each for Database/<span class="fa">دیتابیس</span> and Repository/<span class="fa">مخزن</span>.</p></div>
+      <div class="ex"><b>Voice notes with timestamps</b><p>Each chapter plays your recording from the right minute (<code>voice: {src, from, to}</code>), with the original transcript in a collapsible <bdi dir="rtl">«صدای نویسنده»</bdi> panel.</p><p class="dupe">Pick it under QA-23 in the QA list.</p></div>
+      <div class="ex"><b>A 20-second trailer</b><p>A Remotion video of Bit building the café, for Telegram and Instagram, plus a 1200×630 share card per chapter.</p><div class="decide" data-id="rd-11" data-title="Remotion trailer + per-chapter share cards"></div></div>
+      <div class="ex"><b>Real URLs and share previews</b><p><code>/c/cloudflare</code> instead of <code>#/c/cloudflare</code>, with Open Graph tags, so every chapter can be shared and indexed.</p><p class="dupe">Pick it under QA-29 in the QA list.</p></div>
+      <div class="ex"><b>Copy pass</b><p>Drop hint bubbles that restate the lab title; keep Bit's hint only where the action isn't obvious. Verb-first buttons throughout.</p><div class="decide" data-id="rd-12" data-title="Copy pass on labs and buttons"></div></div>
+      <div class="ex"><b>Persian consistency</b><p>One spelling per term: <span class="fa">وب‌سایت</span> with half-space (13 places lack it), and one choice each for Database/<span class="fa">دیتابیس</span> and Repository/<span class="fa">مخزن</span>.</p><p class="dupe">Pick it under QA-20 in the QA list.</p></div>
     </div>
     <h3 style="margin:34px 0 12px;font-size:24px">Suggested order</h3>
     <div class="tbl" style="margin-top:0"><table class="road"><thead><tr><th>Phase</th><th>Proposals</th><th>Why this order</th></tr></thead><tbody>
@@ -641,8 +740,28 @@ table.chg td { min-width: 180px; }
     </tbody></table></div>
   </section>
 
+
+  <section class="case general" id="notes">
+    <div class="case-head"><span class="case-num">✎</span><div>
+      <h2>General notes for Claude</h2>
+      <p class="why">Anything that doesn't belong to one item: overall direction, deadlines, things to avoid.</p>
+    </div></div>
+    <div class="decide" data-id="zz-general" data-title="General notes" data-noprio="1"></div>
+    <div style="margin-top:18px">
+      <button class="m-btn" type="button" id="copyBtn">Copy my picks as text</button>
+      <span class="muted" style="margin-inline-start:10px;font-size:14px">Backup: paste it into the chat if saving here isn't available.</span>
+      <textarea class="copy-out" id="copyOut" readonly hidden aria-label="Your picks as text"></textarea>
+    </div>
+  </section>
+
   <p class="foot">Before images: the live site at start.ahouei.site, captured today in headless Chromium. After panels: working mocks, not final code. Contrast numbers computed with the WCAG formula. Skill sources: emil-design-eng, web-animation-design, improve-animations, animation-vocabulary, apple-design, app-ui-ux-patterns, premium-web-design, scroll-experience, frontend-design, tap-a-word, spa-overlay-back-navigation, learn, exam-cram-planning, structured-curriculum-content, course-build-discipline, lms-course-completion, remotion, ui-ux-pro-max, accessibility-review, ux-copy.</p>
 </div>
+
+<div class="bar" aria-live="polite"><div class="wrap"><div class="bar-in">
+  <div class="cnt"><span style="background:var(--coral);color:#2a211b">P1 <b id="c1n">0</b></span><span style="background:var(--butter);color:#2a211b">P2 <b id="c2n">0</b></span><span style="background:var(--sky);color:#2a211b">P3 <b id="c3n">0</b></span><span>Comments <b id="ccn">0</b></span></div>
+  <span class="status" id="barStatus">Picks save automatically.</span>
+  <a class="m-btn ghost bar-link" href="#notes">Notes &amp; copy</a>
+</div></div></div>
 
 <script>
 (() => {
@@ -813,6 +932,182 @@ table.chg td { min-width: 180px; }
   /* 10 Certificate */
   const cn = document.getElementById('certName'), co = document.getElementById('certOut');
   cn.addEventListener('input', () => { co.textContent = cn.value.trim() || '…'; });
+
+  /* ───────── QA data ───────── */
+  const QA = [
+    { g: 'Bugs', note: 'Things that behave wrongly today.', items: [
+      ['qa-01','high','A bad saved value blanks the whole site','If a visitor\'s saved progress or a lab draft is readable but in the wrong shape (likely after a future update changes the format), the page goes completely empty. There is also no error boundary, so one broken lab takes down the whole page.','Reproduced live: act:done = null and a malformed brief-builder draft both leave the page root empty; a clean visit renders normally.'],
+      ['qa-02','high','Quiz answers can be guessed without reading','The correct option is the longest one in 17 of 18 quizzes (English) and 16 of 18 (Persian), and it is never option D.','Measured from the content data: answer index A ×1, B ×12, C ×5, D ×0.'],
+      ['qa-03','med','Token lab under-rates "All permissions: Edit"','Turning on only the most dangerous permission scores "Medium", although the lab itself says it is effectively a master key.','TokenBuilder.tsx adds danger weights like any other; 55 points → amber "Medium".'],
+      ['qa-04','med','Recommended token can\'t run wrangler tail','The course teaches `npx wrangler tail`, but the recommended token lacks "Workers Tail Read", so an agent using it fails at that debugging step.','Cloudflare permissions reference; no "Tail" in TokenBuilder.tsx or workshop.ts.'],
+      ['qa-05','med','Claude Code plans are outdated','Text says Pro or Max; Anthropic now lists Pro, Max, Ultra, Team and Enterprise. The link label is stale too.','Live support article 11145838; platform.ts:954 and :1049.'],
+      ['qa-06','med','Wrong cross-reference in the GitHub chapter','Says "last chapter showed the pieces the web is built from" but the previous chapter is Domains & DNS.','platform.ts:280–281.'],
+      ['qa-07','med','Vibe-loop double-click commits twice','The commit button stays active for 650ms; a double-click records two identical commits with duplicate keys.','Reproduced live.'],
+      ['qa-08','med','Screen readers get flooded','The DNS lab announces its countdown every second for 5 minutes; the brief builder re-reads the whole generated file on every keystroke.','aria-live regions in DnsLookup.tsx and BriefBuilder.tsx.'],
+      ['qa-09','med','Same tab title everywhere; focus not moved','Every chapter has the same browser-tab title, and keyboard focus stays at the top after opening a chapter.','Measured live: document.title unchanged, focus on body after navigation.'],
+      ['qa-10','med','Header progress pill does nothing on the home page','It only works when coming from a chapter.','Measured live: map still 986px down after the click.'],
+      ['qa-11','low','Storage game hint gives the answer away','The hint after a wrong pick names the correct bucket.','StoragePicker.tsx:103–109.'],
+      ['qa-12','low','Some lab feedback stays in the old language','StoragePicker feedback and the AgentLoop log keep the language they were created in.','Switch language mid-lab.'],
+      ['qa-13','low','Back button loses your place on the map','Returning from a chapter lands about 680px away from the card you clicked.','Measured live: 1579 → 898.'],
+      ['qa-14','low','Section links land about 85px too low','Two scroll offsets add together.','scroll-padding-top 88px + scroll-margin-top 90px.'],
+      ['qa-15','low','Possible race in the nameserver lab','Pressing "Start over" right as propagation finishes can jump to "Active" with nothing ticked.','Found by reading the code (untracked 500ms timeout); not reproduced.'],
+    ]},
+    { g: 'Needs refining', note: 'Works, but below the bar the site sets for itself.', items: [
+      ['qa-16','med','Two text colors fail contrast','The coral «قهرمان»/"hero" headline is 2.85:1 (needs 3:1); the prompt-lab placeholder line is 3.25:1 (needs 4.5:1).','axe-core, light mode; WCAG formula.'],
+      ['qa-17','med','Tap targets under 44px','Small lab buttons 38px, token switches 28px, language chips 32px, breadcrumb 26px.','Measured on a 390px phone across 6 pages (220 controls).'],
+      ['qa-18','low','Smaller accessibility items','Code blocks can\'t be scrolled by keyboard; lab headings skip a level (h2 → h4); one empty table header; the EN button and logo have labels that don\'t match their visible text.','axe-core 4.14: scrollable-region-focusable, heading-order, empty-table-header, label-content-name-mismatch.'],
+      ['qa-19','low','Two reading times are too low','Welcome says 8 min (about 13), How the web works says 12 (about 19). The course total is about right.','16,519 Persian words at ~100 wpm + ~4 min per lab.'],
+      ['qa-20','low','Persian spelling is inconsistent','«وبسایت» without the half-space appears 13 times; Database and «دیتابیس» are mixed, as are Repository and «مخزن».','Counted in the chapter files.'],
+      ['qa-21','low','Untypable placeholder in Persian','`/نام-skill` is shown as code a learner would copy.','building.ts:485.'],
+      ['qa-22','low','Three chapters have no lab','Meet the agents, Design first and Security & maintenance break the "every chapter has a Try it" promise. (Proposed labs are under proposal 07.)','Content validator data.'],
+      ['qa-23','low','Voice notes mapped loosely','Your recording on domains, nameservers and GitHub isn\'t attached to those chapters, and each player would start at 0:00. The files aren\'t on the site yet.','Transcripts vs chapter mapping.'],
+      ['qa-24','low','Browsers re-check every file on every visit','All files are served with max-age=0, even though file names change whenever content changes.','Response headers on the live site.'],
+      ['qa-25','low','One docs link redirects to a broad page','The Dependabot link now lands on GitHub\'s generic supply-chain page.','81 links checked: 78 load directly, 2 are bot-checked but exist, 1 is an example address.'],
+    ]},
+    { g: 'Missing', note: 'Not built yet.', items: [
+      ['qa-26','add','A launch lesson on being findable','Page titles and descriptions, share previews, sitemap, Google Search Console, Cloudflare Web Analytics. SEO is listed as an old team role but only mentioned in passing.','Topic search across all chapter files.'],
+      ['qa-27','add','A plan B for Iran','The course warns Cloudflare may be blocked for Iranian visitors but offers no alternative route.','platform.ts warning has no follow-up.'],
+      ['qa-28','add','Share previews for the course site','No Open Graph tags, so links shared in Telegram or WhatsApp show no card.','0 og: tags in the live HTML.'],
+      ['qa-29','add','Real URLs instead of #/c/…','Chapters can\'t be shared or indexed individually, and the page is blank without JavaScript.','No-JS render: empty body.'],
+      ['qa-30','add','Security headers','No CSP, HSTS, nosniff or Referrer-Policy. Can be added with a _headers file.','Response headers on the live site.'],
+      ['qa-31','add','Real 404 pages','Every unknown address returns the home page with status 200.','/sitemap.xml and /audio/voice1.mp3 return HTML 200.'],
+    ]},
+  ];
+  const OPS = [
+    ['op-01','ops','Push this work as main','The repo has only the working branch, so there is no main to open a pull request against.'],
+    ['op-02','ops','Deploy on every push','Connect the repo in Cloudflare (Workers & Pages → agent-coding-tutorial → Settings → Builds) so pushes deploy automatically.'],
+    ['op-03','ops','Add the voice MP3s','Put voice1–3.mp3 in public/audio/ and redeploy; the players appear on their chapters.'],
+    ['op-04','ops','Raise the minimum TLS version to 1.2','Zone-wide on ahouei.site. Very old devices would no longer connect.'],
+    ['op-05','ops','SSL mode Full (strict)','Zone-wide. No effect on this site; matters for subdomains served from your own servers.'],
+  ];
+  const sevLabel = { high: 'High', med: 'Medium', low: 'Low', add: 'Add', ops: 'Decision' };
+  const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  const fmt = (t) => esc(t).replace(/`([^`]+)`/g, '<code>$1</code>');
+  const qaRoot = document.getElementById('qaGroups');
+  qaRoot.innerHTML = QA.map((grp) => `<div class="qa-group"><h3>${esc(grp.g)}</h3><p>${esc(grp.note)}</p><ul class="qa-list">${grp.items.map(([id, sev, t, d, ev]) => `
+    <li class="qa-item" id="${id}"><div class="qa-top"><span class="qa-id">${id.toUpperCase()}</span><span class="sev ${sev}">${sevLabel[sev]}</span><b class="t">${fmt(t)}</b></div>
+    <p class="d">${fmt(d)}</p><p class="ev">${fmt(ev)}</p><div class="decide" data-id="${id}" data-title="${esc(t)}"></div></li>`).join('')}</ul></div>`).join('');
+  document.getElementById('opsGroup').innerHTML = `<ul class="qa-list">${OPS.map(([id, sev, t, d]) => `
+    <li class="qa-item" id="${id}"><div class="qa-top"><span class="qa-id">${id.toUpperCase()}</span><span class="sev ${sev}">${sevLabel[sev]}</span><b class="t">${fmt(t)}</b></div>
+    <p class="d">${fmt(d)}</p><div class="decide" data-id="${id}" data-title="${esc(t)}"></div></li>`).join('')}</ul>`;
+
+  /* ───────── decision controls ───────── */
+  const state = {}; // id -> {priority, comment, title}
+  const slots = [...document.querySelectorAll('.decide')];
+  const PRI = [['1', '1', 'now'], ['2', '2', 'next'], ['3', '3', 'later'], ['0', 'Skip', '']];
+  slots.forEach((el) => {
+    const id = el.dataset.id, noP = el.dataset.noprio === '1';
+    el.innerHTML = `${noP ? '' : `<div class="decide-row"><span class="lbl">Implement?</span><div class="pri" role="group" aria-label="Priority for ${esc(el.dataset.title)}">${PRI.map(([v, l, s2]) => `<button type="button" data-p="${v}" aria-pressed="false">${l}${s2 ? `<small>${s2}</small>` : ''}</button>`).join('')}</div></div>`}
+      <label class="sr-only" for="cm-${id}">Comment</label>
+      <textarea id="cm-${id}" placeholder="${noP ? 'Overall direction, constraints, anything else…' : 'Comment (optional): what to change, keep, or avoid'}"></textarea>
+      <span class="saved" aria-live="polite"></span>`;
+    el.querySelectorAll('.pri button').forEach((b) => b.addEventListener('click', () => {
+      const cur = state[id]?.priority ?? null;
+      const v = +b.dataset.p;
+      setDecision(id, { priority: cur === v ? null : v });
+    }));
+    const ta = el.querySelector('textarea');
+    let t = null;
+    ta.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => setDecision(id, { comment: ta.value }), 900); });
+    ta.addEventListener('blur', () => { clearTimeout(t); if ((state[id]?.comment ?? '') !== ta.value) setDecision(id, { comment: ta.value }); });
+  });
+
+  function paint(id) {
+    const el = document.querySelector(`.decide[data-id="${id}"]`);
+    if (!el) return;
+    const d = state[id] || {};
+    el.querySelectorAll('.pri button').forEach((b) => b.setAttribute('aria-pressed', String(d.priority === +b.dataset.p)));
+    const ta = el.querySelector('textarea');
+    if (document.activeElement !== ta && ta.value !== (d.comment || '')) ta.value = d.comment || '';
+    el.classList.toggle('picked', d.priority != null && d.priority !== undefined || !!(d.comment && d.comment.trim()));
+  }
+  function counts() {
+    const v = Object.values(state);
+    document.getElementById('c1n').textContent = v.filter((d) => d.priority === 1).length;
+    document.getElementById('c2n').textContent = v.filter((d) => d.priority === 2).length;
+    document.getElementById('c3n').textContent = v.filter((d) => d.priority === 3).length;
+    document.getElementById('ccn').textContent = v.filter((d) => d.comment && d.comment.trim()).length;
+  }
+
+  /* storage: page database first, browser as fallback */
+  let db = null, mode = 'connecting';
+  const LS = 'zth-redesign-picks';
+  const lsRead = () => { try { return JSON.parse(localStorage.getItem(LS) || '{}') || {}; } catch { return {}; } };
+  const lsWrite = () => { try { localStorage.setItem(LS, JSON.stringify(state)); } catch {} };
+  const storeEl = document.getElementById('storeState'), barEl = document.getElementById('barStatus');
+  function setMode(m, msg) {
+    mode = m;
+    const text = msg || (m === 'db' ? 'Saving to this page: Claude can read your picks directly.' : m === 'local' ? 'Saving in this browser only. When you are done, use "Copy my picks as text" and paste it into the chat.' : m === 'readonly' ? 'You can view picks here, but only the owner can change them.' : 'Connecting…');
+    storeEl.textContent = text; barEl.textContent = text;
+  }
+  const queue = {}; // one write at a time per document
+  async function write(id) {
+    if (mode !== 'db') { lsWrite(); return; }
+    if (queue[id]) { queue[id].again = true; return; }
+    queue[id] = { again: false };
+    const el = document.querySelector(`.decide[data-id="${id}"] .saved`);
+    try {
+      do {
+        queue[id].again = false;
+        const d = state[id];
+        await db.doc('decisions/' + id).set({ id, title: d.title, priority: d.priority ?? null, comment: d.comment || '', updatedAt: new Date().toISOString() });
+      } while (queue[id].again);
+      if (el) el.textContent = 'Saved';
+      setTimeout(() => { if (el && el.textContent === 'Saved') el.textContent = ''; }, 1500);
+    } catch (e) {
+      if (e && e.code === 'invalid_argument') { setMode('readonly'); }
+      else { setMode('local', 'Could not save to the page just now; keeping your picks in this browser. Use "Copy my picks as text" to send them.'); lsWrite(); }
+      if (el) el.textContent = 'Not saved to the page';
+    } finally { delete queue[id]; }
+  }
+  function setDecision(id, patch) {
+    const el = document.querySelector(`.decide[data-id="${id}"]`);
+    state[id] = { title: el ? el.dataset.title : id, priority: null, comment: '', ...state[id], ...patch };
+    paint(id); counts(); write(id);
+  }
+
+  // Start from browser copy so the page is useful immediately.
+  Object.assign(state, lsRead());
+  Object.keys(state).forEach(paint); counts();
+  setMode('connecting');
+  (async () => {
+    const api = window.claude && typeof window.claude.use === 'function' ? window.claude : null;
+    const d = api ? await api.use('db').catch(() => null) : null;
+    if (!d) { setMode('local'); return; }
+    db = d; setMode('db');
+    const timer = setTimeout(() => setMode('db', 'Still connecting to the page store; your picks will save when it answers.'), 10000);
+    db.collection('decisions').onSnapshot((snap) => {
+      if (!snap.metadata.fromCache) { clearTimeout(timer); setMode('db'); }
+      snap.docs.forEach((doc) => {
+        const b = doc.data(); if (!b) return;
+        if (queue[doc.id]) return; // our own write in flight wins
+        state[doc.id] = { title: b.title || doc.id, priority: typeof b.priority === 'number' ? b.priority : null, comment: typeof b.comment === 'string' ? b.comment : '' };
+        paint(doc.id);
+      });
+      counts();
+    }, () => { clearTimeout(timer); setMode('local', 'The page store is unavailable; keeping picks in this browser. Use "Copy my picks as text" to send them.'); });
+  })();
+
+  /* copy as text */
+  document.getElementById('copyBtn').addEventListener('click', async () => {
+    const order = slots.map((s2) => s2.dataset.id);
+    const lines = ['My picks for Zero to Hero:'];
+    for (const p of [1, 2, 3]) {
+      const ids = order.filter((id) => state[id]?.priority === p);
+      if (ids.length) { lines.push('', `Priority ${p}:`); ids.forEach((id) => lines.push(`- ${id.toUpperCase()} ${state[id].title}${state[id].comment ? ' — ' + state[id].comment.trim() : ''}`)); }
+    }
+    const skipped = order.filter((id) => state[id]?.priority === 0);
+    if (skipped.length) lines.push('', 'Skip: ' + skipped.map((id) => id.toUpperCase()).join(', '));
+    const commentOnly = order.filter((id) => state[id] && state[id].priority == null && state[id].comment && state[id].comment.trim() && id !== 'zz-general');
+    if (commentOnly.length) { lines.push('', 'Comments without a priority:'); commentOnly.forEach((id) => lines.push(`- ${id.toUpperCase()} ${state[id].title} — ${state[id].comment.trim()}`)); }
+    if (state['zz-general']?.comment?.trim()) lines.push('', 'General notes: ' + state['zz-general'].comment.trim());
+    const text = lines.join('\n');
+    const out = document.getElementById('copyOut'); out.hidden = false; out.value = text;
+    try { await navigator.clipboard.writeText(text); document.getElementById('copyBtn').textContent = 'Copied'; }
+    catch { out.focus(); out.select(); document.getElementById('copyBtn').textContent = 'Select and copy below'; }
+    setTimeout(() => { document.getElementById('copyBtn').textContent = 'Copy my picks as text'; }, 2000);
+  });
+
 })();
 </script>
 
