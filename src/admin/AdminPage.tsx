@@ -11,13 +11,14 @@ import { useApp } from '../lib/app';
 import { api, ApiError, type Me } from './api';
 import { AnnouncementsPanel } from './Announcements';
 import { AuditPanel } from './AuditPanel';
+import { AiPanel } from './AiPanel';
 import { ContentPanel, OverviewPanel } from './Insights';
 import { LearnersPanel } from './Learners';
 import { SettingsPanel } from './SettingsPanel';
 import { Loading } from './ui';
 import './admin.css';
 
-const SECTIONS = ['overview', 'learners', 'content', 'announcements', 'settings', 'audit'] as const;
+const SECTIONS = ['overview', 'learners', 'content', 'announcements', 'ai', 'settings', 'audit'] as const;
 type SectionId = (typeof SECTIONS)[number];
 
 export default function AdminPage({ section }: { section: string }) {
@@ -52,6 +53,7 @@ export default function AdminPage({ section }: { section: string }) {
     learners: tx('یادگیرنده‌ها', 'Learners'),
     content: tx('محتوا', 'Content'),
     announcements: tx('اطلاعیه‌ها', 'Announcements'),
+    ai: tx('Bit و AI', 'Bit & AI'),
     settings: tx('تنظیمات', 'Settings'),
     audit: tx('گزارش کارها', 'Audit log'),
   };
@@ -108,6 +110,7 @@ export default function AdminPage({ section }: { section: string }) {
           {current === 'learners' && <LearnersPanel me={me} />}
           {current === 'content' && <ContentPanel />}
           {current === 'announcements' && <AnnouncementsPanel />}
+          {current === 'ai' && <AiPanel />}
           {current === 'settings' && <SettingsPanel />}
           {current === 'audit' && <AuditPanel />}
         </div>

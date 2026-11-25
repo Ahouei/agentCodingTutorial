@@ -13,6 +13,8 @@
 import { sanitize, type Progress } from '../src/lib/progressMerge';
 import { json, roleOf, sameOrigin, sessionUser, type Env, type Role } from './api';
 import { clean, defaults, emailDayKey, readSettings, SETTING_DEFS, SETTING_KEYS } from './settings';
+import { DEFAULT_AI, evictAi, hasKey, PROVIDERS, readAi, sanitizeAi } from './ai/config';
+import { DEFAULT_PERSONA, generate, poolKeyOf, promptVersion, storeLines, topic } from './ai/bit';
 
 type Actor = { id: string; email: string; role: Role };
 const DAY = 24 * 3600 * 1000;
@@ -393,6 +395,113 @@ export async function handleAdmin(r: Request, env: Env, db: D1Database, url: URL
       await audit(db, me, 'announcement.duplicate', 'announcement', nid, { from: id });
       return ok({ ok: true, id: nid });
     }
+  }
+
+  /* ── Bit & AI ── */
+  if (path === '/ai' && r.method === 'GET') {
+    const cfg = await readAi(db);
+    const pv = promptVersion(cfg);
+    const d = new Date();
+    const month = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1);
+    const [totals, byModel, daily, errors, pools] = await Promise.all([
+      db
+        .prepare(
+          `SELECT COALESCE(SUM(cost_usd),0) cost, COUNT(*) requests,
+             SUM(source='ai') ai, SUM(source='ai' AND ok=1) ai_ok, SUM(source='pool') pool, SUM(source='cache') cache, SUM(source='denied') denied,
+             COUNT(DISTINCT user_id) users
+           FROM ai_usage WHERE at >= ?1`,
+        )
+        .bind(month)
+        .first<Record<string, number | null>>(),
+      db
+        .prepare("SELECT provider, model, COUNT(*) calls, SUM(ok=0) failed, SUM(tokens_in) tin, SUM(tokens_out) tout, SUM(cost_usd) cost FROM ai_usage WHERE at >= ?1 AND source='ai' GROUP BY provider, model ORDER BY cost DESC")
+        .bind(month)
+        .all(),
+      db
+        .prepare("SELECT CAST(at / 86400000 AS INTEGER) d, SUM(cost_usd) cost, SUM(source='ai') ai, SUM(source='pool') pool FROM ai_usage WHERE at >= ?1 GROUP BY d ORDER BY d")
+        .bind(Date.now() - 14 * 86_400_000)
+        .all(),
+      db.prepare("SELECT at, provider, model, error FROM ai_usage WHERE ok = 0 ORDER BY id DESC LIMIT 12").all(),
+      db
+        .prepare('SELECT slug, section, lang, COUNT(*) n, SUM(hidden) hidden, SUM(served) served FROM bit_lines WHERE prompt_version = ?1 GROUP BY slug, section, lang ORDER BY slug, section, lang')
+        .bind(pv)
+        .all(),
+    ]);
+    return ok({
+      config: cfg,
+      defaults: DEFAULT_AI,
+      defaultPersona: DEFAULT_PERSONA,
+      promptVersion: pv,
+      keys: Object.fromEntries(PROVIDERS.map((p) => [p, hasKey(env, p)])),
+      usage: { totals, byModel: byModel.results ?? [], daily: daily.results ?? [], errors: errors.results ?? [] },
+      pools: pools.results ?? [],
+    });
+  }
+  if (path === '/ai' && r.method === 'PUT') {
+    const b = await body(r);
+    if (!b || typeof b.config !== 'object' || !b.config) return ok({ error: 'bad_request' }, 400);
+    const { config, rejected } = sanitizeAi(b.config);
+    if (rejected.length) return ok({ error: 'invalid', fields: rejected }, 400);
+    const before = await readAi(db);
+    const diff: Record<string, unknown> = {};
+    for (const k of Object.keys(config) as (keyof typeof config)[]) {
+      const a = JSON.stringify(before[k]);
+      const z = JSON.stringify(config[k]);
+      if (a !== z) diff[k] = k === 'persona' ? { from: `${before.persona.length} chars`, to: `${config.persona.length} chars` } : { from: before[k], to: config[k] };
+    }
+    if (Object.keys(diff).length) {
+      await db
+        .prepare("INSERT INTO settings (key, value, updated_at, updated_by) VALUES ('ai_config', ?1, ?2, ?3) ON CONFLICT(key) DO UPDATE SET value = ?1, updated_at = ?2, updated_by = ?3")
+        .bind(JSON.stringify(config), Date.now(), me.email)
+        .run();
+      evictAi();
+      await audit(db, me, 'ai.update', 'settings', 'ai_config', diff);
+    }
+    return ok({ ok: true, config, changed: Object.keys(diff), promptVersion: promptVersion(config) });
+  }
+  if (path === '/ai/lines' && r.method === 'GET') {
+    const cfg = await readAi(db);
+    const slug = url.searchParams.get('slug') ?? '';
+    const lang = url.searchParams.get('lang') === 'en' ? 'en' : 'fa';
+    const { results } = await db
+      .prepare('SELECT id, section, text, provider, model, created_at, hidden, served FROM bit_lines WHERE slug = ?1 AND lang = ?2 AND prompt_version = ?3 ORDER BY section, id DESC LIMIT 400')
+      .bind(slug, lang, promptVersion(cfg))
+      .all();
+    return ok({ lines: results ?? [] });
+  }
+  const lineMatch = path.match(/^\/ai\/lines\/(\d+)$/);
+  if (lineMatch) {
+    const id = Number(lineMatch[1]);
+    const line = await db.prepare('SELECT id, text, hidden FROM bit_lines WHERE id = ?1').bind(id).first<{ id: number; text: string; hidden: number }>();
+    if (!line) return ok({ error: 'not_found' }, 404);
+    if (r.method === 'POST') {
+      const b = await body(r);
+      if (typeof b?.hidden !== 'boolean') return ok({ error: 'bad_request' }, 400);
+      await db.prepare('UPDATE bit_lines SET hidden = ?2 WHERE id = ?1').bind(id, b.hidden ? 1 : 0).run();
+      await audit(db, me, b.hidden ? 'ai.line_hide' : 'ai.line_show', 'bit_line', String(id), { text: line.text });
+      return ok({ ok: true });
+    }
+    if (r.method === 'DELETE') {
+      await db.prepare('DELETE FROM bit_lines WHERE id = ?1').bind(id).run();
+      await audit(db, me, 'ai.line_delete', 'bit_line', String(id), { text: line.text });
+      return ok({ ok: true });
+    }
+  }
+  if (path === '/ai/generate' && r.method === 'POST') {
+    const b = await body(r);
+    const lang = b?.lang === 'en' ? 'en' : 'fa';
+    const t = typeof b?.slug === 'string' ? topic(b.slug, typeof b.section === 'string' ? b.section : undefined) : null;
+    if (!t) return ok({ error: 'bad_request' }, 400);
+    const cfg = await readAi(db);
+    const pv = promptVersion(cfg);
+    const poolKey = poolKeyOf(t.slug, t.section, lang, pv);
+    const { results } = await db.prepare('SELECT text FROM bit_lines WHERE pool_key = ?1').bind(poolKey).all<{ text: string }>();
+    // Staff: skips the per-minute limit, never the monthly budget. Works even while Bit AI is switched off (to preview).
+    const out = await generate(env, db, cfg, t, lang, (results ?? []).map((x) => x.text), me.id, true);
+    if (!out.lines.length || !out.candidate) return ok({ error: out.error ?? 'failed' }, 502);
+    const stored = await storeLines(db, poolKey, t, lang, pv, out.candidate, out.lines);
+    await audit(db, me, 'ai.generate', 'bit_pool', poolKey, { count: stored.length, model: `${out.candidate.provider}/${out.candidate.model}` });
+    return ok({ ok: true, lines: stored, model: out.candidate });
   }
 
   /* ── Audit log ── */

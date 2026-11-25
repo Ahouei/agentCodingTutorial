@@ -30,6 +30,33 @@ const order = [...readFileSync('src/content/index.ts', 'utf8').matchAll(/^  '([a
 if (order.length !== all.length || order.some((s) => !chapters[s])) throw new Error('ORDER in src/content/index.ts does not match the chapters');
 writeFileSync('worker/meta.json', JSON.stringify({ chapters, order }, null, 0));
 
+// Context for Bit's AI lines (worker/ai): the Worker builds prompts from this, never from client text.
+type Blk = { type: string; text?: { fa: string; en: string }; items?: { term?: string }[]; codex?: Blk[] };
+const gist = (blocks: Blk[], lang: 'fa' | 'en') => {
+  const p = blocks.find((b) => b.type === 'p' && b.text);
+  return p?.text ? strip(p.text[lang]).slice(0, 260) : '';
+};
+const terms = (blocks: Blk[]) =>
+  blocks
+    .filter((b) => b.type === 'terms')
+    .flatMap((b) => (b.items ?? []).map((i) => i.term ?? ''))
+    .filter(Boolean)
+    .slice(0, 8);
+const bitContext: Record<string, unknown> = {};
+for (const c of all) {
+  bitContext[c.slug] = {
+    title: { fa: strip(c.title.fa), en: strip(c.title.en) },
+    tagline: { fa: strip(c.tagline.fa), en: strip(c.tagline.en) },
+    sections: Object.fromEntries(
+      c.sections.map((s) => [
+        s.id,
+        { title: { fa: strip(s.title.fa), en: strip(s.title.en) }, gist: { fa: gist(s.blocks as Blk[], 'fa'), en: gist(s.blocks as Blk[], 'en') }, terms: terms(s.blocks as Blk[]) },
+      ]),
+    ),
+  };
+}
+writeFileSync('worker/bitContext.json', JSON.stringify(bitContext));
+
 const today = new Date().toISOString().slice(0, 10);
 const urls = ['/', '/glossary', ...order.map((slug) => `/c/${slug}`)];
 writeFileSync(
