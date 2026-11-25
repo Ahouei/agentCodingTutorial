@@ -85,7 +85,7 @@ Update this file in the same commit as the work. A fresh session resumes from he
 
 | ID | Item | Status |
 |---|---|---|
-| RD-10 | Optional sign-in (email magic link via Resend, Turnstile), D1 users/sessions/progress, offline-first merge; earned "done" (quiz + lab); certificate with live URL | done in code; sign-in switches on when the owner adds TURNSTILE_SITE_KEY + secrets RESEND_API_KEY, TURNSTILE_SECRET_KEY |
+| RD-10 | Optional sign-in (email magic link via Resend, Turnstile), D1 users/sessions/progress, offline-first merge; earned "done" (quiz + lab); certificate with live URL | done in code; Turnstile widget created (site key in wrangler.jsonc, TURNSTILE_SECRET_KEY set on the Worker); sign-in switches on when RESEND_API_KEY is added and ahouei.site is verified in Resend |
 
 ## Phase 5 · Media
 

@@ -26,7 +26,7 @@
   ],
   "vars": {
     // Public Turnstile site key goes here once created (the secret key is a Worker secret).
-    "TURNSTILE_SITE_KEY": "",
+    "TURNSTILE_SITE_KEY": "0x4AAAAAAGSOtdWVZ-nv4-Z5",
     "MAIL_FROM": "از صفر تا قهرمان <noreply@ahouei.site>"
   }
   // Secrets (never in this file): RESEND_API_KEY, TURNSTILE_SECRET_KEY
