@@ -100,6 +100,7 @@ Update this file in the same commit as the work. A fresh session resumes from he
 | ADM | Admin panel (owner's Leitneria pattern): overview + chapter funnel, learners table + detail sheet, question/lab insights, announcements draft → preview → publish, live settings, audit log; role re-checked in D1 on every request | done (verified locally: permission matrix, validation, audit rows, all screens at 1366/390/dark) |
 | SKL | Skills in Claude, Codex and Lovable: "one idea, three homes" section, comparison table, Skill vs MCP vs prompt, Lovable install/call steps, new lab `skill-homes` | done |
 | FTR | Footer on every learner page with Ehsan's credit | done |
+| BIT2 | Bit motion pass (improve-animations audit: React-driven blink → CSS, remount hop → interruptible squash-and-stretch, shoulder-pivot arms, syllable mouth, off-screen pause, CSS float) + new roles: tap for tips, idle nap and wake-up, cheer on completion, love when the course is finished, reading milestones, lab/panel loader, 404 search, dark-mode antenna glow; trailer's Bit re-rendered with the same moves | done (verified: interactions, idle nap at 40s, milestones, no overflow, axe 0 on 4 pages) |
 | BIT | Bit alive everywhere: blink, antenna, hop on mood change, talks (typewriter + mouth) in chapter heroes, quizzes and lab hints, waves in the footer, rides the reading-progress line | done |
 
 ## Skipped by the owner

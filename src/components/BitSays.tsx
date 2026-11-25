@@ -2,7 +2,9 @@ import { motion, useReducedMotion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 import { useTx } from '../lib/app';
 import { EASE_OUT } from '../lib/motion';
-import { Mascot, type Mood } from './Mascot';
+import { type Mood } from './Mascot';
+import { TapBit } from './TapBit';
+import { useIdle } from '../lib/useIdle';
 import './bitsays.css';
 
 /**
@@ -17,6 +19,7 @@ export function BitSays({
   size = 56,
   wave = false,
   cycleMs = 7000,
+  sleepy = false,
   className,
 }: {
   lines: string[];
@@ -25,6 +28,8 @@ export function BitSays({
   wave?: boolean;
   /** Auto-advance between lines (0 = only on tap). */
   cycleMs?: number;
+  /** Naps (Zzz) when the visitor has been idle for a while. */
+  sleepy?: boolean;
   className?: string;
 }) {
   const reduce = useReducedMotion();
@@ -71,9 +76,10 @@ export function BitSays({
   }, [seen, typing, lines.length, cycleMs, i]);
 
   const more = lines.length > 1;
+  const idle = useIdle(sleepy ? 40000 : 2147483647);
   return (
     <div ref={box} className={`bitsays ${className ?? ''}`}>
-      <Mascot size={size} mood={mood} follow={false} talking={typing} wave={wave} />
+      <TapBit size={size} mood={sleepy && idle ? 'sleep' : mood} talking={typing} wave={wave && !idle} onTap={() => (seen ? setI((x) => x + 1) : setSeen(true))} />
       <motion.div
           className="bitsays-bubble"
           initial={false}

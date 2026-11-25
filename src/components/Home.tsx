@@ -7,7 +7,8 @@ import { usePageTitle } from '../lib/title';
 import { HeroStory } from './HeroStory';
 import { Rich } from './blocks/Rich';
 import { ACT_TINT, Icon } from './Icon';
-import { Mascot } from './Mascot';
+import { TapBit } from './TapBit';
+import { useIdle } from '../lib/useIdle';
 
 const EASE = EASE_OUT;
 const LABS = CHAPTERS.flatMap((c) => c.sections.flatMap((s) => s.blocks)).filter((b) => b.type === 'widget').length;
@@ -21,6 +22,7 @@ export function Home() {
   // The underline under «قهرمان» is the learner's own progress line (RD-02).
   const progress = doneCount / CHAPTERS.length;
   const resumeChapter = position ? CHAPTERS.find((c) => c.slug === position.slug) : undefined;
+  const idle = useIdle(40000);
   const resumeIndex = resumeChapter ? CHAPTERS.indexOf(resumeChapter) : -1;
   const resumeSection = resumeChapter && position?.section ? resumeChapter.sections.find((x) => x.id === position.section) : undefined;
 
@@ -165,7 +167,7 @@ export function Home() {
       {/* ── Author note ── */}
       <section className="author wrap">
         <div className="author-card sticker">
-          <Mascot size={92} mood="wink" ambient />
+          <TapBit size={92} mood={idle ? 'sleep' : 'wink'} follow />
           <div>
             <p className="eyebrow">{tx('درباره این دوره', 'About this course')}</p>
             <p className="author-text">
@@ -200,6 +202,7 @@ function Arrow() {
 function JourneyMap() {
   const tx = useTx();
   const { t, lang, done } = useApp();
+  const finishedAll = CHAPTERS.every((c) => done[c.slug]);
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start 70%', 'end 70%'] });
   const trail = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.5 });
@@ -286,7 +289,7 @@ function JourneyMap() {
           ))}
 
           <div className="map-finish">
-            <Mascot size={110} mood="happy" ambient />
+            <TapBit size={110} mood={finishedAll ? 'love' : 'happy'} />
             <p className="display">{tx('و حالا شما یک قهرمان هستید.', 'And now, you are a hero.')}</p>
           </div>
         </div>

@@ -874,7 +874,7 @@
   position: absolute;
   inset-inline: 0;
   top: 100%;
-  height: 34px;
+  height: 76px;
   overflow: hidden;
   pointer-events: none;
 }
@@ -949,5 +949,35 @@
 @media (max-width: 900px) {
   .ft {
     padding-block-end: 112px; /* clear the chapter's bottom bar on phones */
+  }
+}
+
+.hd-rider-say {
+  position: absolute;
+  top: 28px;
+  inset-inline-start: 50%;
+  translate: -50% 0;
+  white-space: nowrap;
+  padding: 3px 10px;
+  border: 1.5px solid var(--outline);
+  border-radius: 999px;
+  background: var(--butter-soft);
+  color: var(--ink);
+  font-size: 12.5px;
+  font-weight: 800;
+  box-shadow: var(--sticker-sm);
+}
+:root[dir='rtl'] .hd-rider-say {
+  translate: 50% 0;
+}
+.hd-rider-say--end,
+:root[dir='rtl'] .hd-rider-say--end {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+  translate: 0 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hd-rider-say {
+    display: none;
   }
 }
