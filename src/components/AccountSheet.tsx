@@ -106,7 +106,7 @@ export function AccountSheet({ open, onClose }: { open: boolean; onClose: () => 
               : tx(`پیشرفت شما (${num(doneCount, lang)} فصل) روی همه دستگاه‌ها یکی است.`, `Your progress (${doneCount} chapters) is the same on all your devices.`)}
           </p>
           {(acc.role === 'admin' || acc.role === 'owner') && (
-            <a className="acc-admin" href={href.admin()} onClick={onClose}>
+            <a className="acc-admin" href={href.admin()}>
               <span>{tx('پنل مدیریت', 'Admin panel')}</span>
               <b>{acc.role === 'owner' ? tx('مالک', 'Owner') : tx('مدیر', 'Admin')}</b>
             </a>

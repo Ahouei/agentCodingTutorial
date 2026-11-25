@@ -204,7 +204,7 @@ export function Header() {
             <span>{tx('حالت روشن و تیره', 'Light and dark')}</span>
             <b>{tx('تغییر', 'Switch')}</b>
           </button>
-          <a className="hd-sheet-row" href={href.glossary} onClick={() => setMore(false)}>
+          <a className="hd-sheet-row" href={href.glossary}>
             <span>{tx('واژه‌نامه همه اصطلاح‌ها', 'Glossary of all terms')}</span>
             <b>›</b>
           </a>
