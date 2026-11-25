@@ -1,7 +1,7 @@
 import { AnimatePresence, motion, useScroll, useSpring, useTransform } from 'motion/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ACTS, CHAPTERS, chapterIndex } from '../content';
-import type { Block, Chapter } from '../content/types';
+import type { Block, Chapter, L } from '../content/types';
 import { href, num, useApp, useTx } from '../lib/app';
 import { EASE_OUT, SPRING } from '../lib/motion';
 import { useOverlay } from '../lib/router';
@@ -13,6 +13,9 @@ import { BottomSheet } from './BottomSheet';
 import { ACT_TINT, Icon } from './Icon';
 import { Mascot } from './Mascot';
 import { plain, useTypewriter } from './BitSays';
+import { TapBit } from './TapBit';
+import { BIT_TAPS, BIT_WAKE } from '../content/bitLines';
+import { useIdle } from '../lib/useIdle';
 import { NotFound } from './NotFound';
 import './chapter.css';
 
@@ -53,7 +56,18 @@ function ChapterBody({ chapter: c, index, section }: { chapter: Chapter; index: 
   const [celebrate, setCelebrate] = useState(false);
   const [sayStart, setSayStart] = useState(false);
   const [hello, setHello] = useState(true);
-  const say = useTypewriter(plain(t(c.mascotLine)), sayStart);
+  // Bit's line: the chapter's own, then whatever he says when tapped or when he wakes up.
+  const [said, setSaid] = useState<L | null>(null);
+  const tapN = useRef(Math.floor(Math.random() * BIT_TAPS.length));
+  const sayText = t(said ?? c.mascotLine);
+  const say = useTypewriter(plain(sayText), sayStart);
+  const idle = useIdle(40000);
+  const wasIdle = useRef(false);
+  useEffect(() => {
+    if (wasIdle.current && !idle) setSaid(BIT_WAKE);
+    wasIdle.current = idle;
+  }, [idle]);
+  const heroMood = idle ? 'sleep' : celebrate ? 'cheer' : isDone ? 'happy' : 'calm';
   useEffect(() => {
     const a = window.setTimeout(() => setSayStart(true), 450);
     const b = window.setTimeout(() => setHello(false), 2600);
@@ -170,12 +184,12 @@ function ChapterBody({ chapter: c, index, section }: { chapter: Chapter; index: 
                   transition={{ duration: 0.4, ease: EASE_OUT, delay: 0.25 }}
                 >
                   {/* Bit says the chapter's line: typed out while his mouth moves, then shown with formatting. */}
-                  <span className="sr-only">
-                    <Rich text={t(c.mascotLine)} />
+                  <span className="sr-only" aria-live="polite">
+                    <Rich text={sayText} />
                   </span>
                   <span aria-hidden>
                     {say.done ? (
-                      <Rich text={t(c.mascotLine)} />
+                      <Rich text={sayText} />
                     ) : (
                       <>
                         {say.typed}
@@ -184,8 +198,21 @@ function ChapterBody({ chapter: c, index, section }: { chapter: Chapter; index: 
                     )}
                   </span>
                 </motion.div>
-                {/* Bit greets you: waves while talking, then floats; hops when the chapter is done. */}
-                <Mascot size={128} mood={isDone ? 'happy' : 'calm'} talking={say.typing} wave={hello} float={!say.typing} />
+                {/* Bit greets you (waves while talking), floats, naps when you're idle, cheers when the
+                    chapter is done, and says a tip when tapped. */}
+                <TapBit
+                  size={128}
+                  mood={heroMood}
+                  talking={say.typing}
+                  wave={hello}
+                  float={!say.typing && !idle}
+                  follow
+                  onTap={() => {
+                    tapN.current = (tapN.current + 1) % BIT_TAPS.length;
+                    setSaid(BIT_TAPS[tapN.current]);
+                    setSayStart(true);
+                  }}
+                />
               </div>
             </div>
 

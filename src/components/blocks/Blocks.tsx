@@ -5,6 +5,7 @@ import { num, useApp, useTx } from '../../lib/app';
 import { DUR, EASE_OUT } from '../../lib/motion';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { Mascot } from '../Mascot';
+import { BitLoader } from '../BitLoader';
 import { WIDGETS } from '../widgets';
 import { LabContext } from '../widgets/Frame';
 import { CopyButton } from './CopyButton';
@@ -77,7 +78,7 @@ export function BlockView({ block, ctx }: { block: Block; ctx?: BlockCtx }) {
       );
     case 'compare':
       return (
-        <div className="b-table-wrap sticker" role="region" tabIndex={0} aria-label={t(block.headers[0]) || tx('جدول مقایسه', 'Comparison table')}>
+        <div className="b-table-wrap sticker" role="region" tabIndex={0} aria-label={t(block.headers[0]) || tx('مقایسه: ', 'Comparison: ') + block.headers.slice(1).map((h) => t(h)).join(tx('، ', ', '))}>
           <table className="b-table">
             <thead>
               <tr>
@@ -118,7 +119,13 @@ export function BlockView({ block, ctx }: { block: Block; ctx?: BlockCtx }) {
         <div className="b-widget">
           <ErrorBoundary scope="lab" lang={lang} resetKey={block.id}>
             <LabContext.Provider value={{ id: block.id }}>
-              <Suspense fallback={<div className="b-widget-skeleton sticker" />}>
+              <Suspense
+                fallback={
+                  <div className="b-widget-skeleton sticker">
+                    <BitLoader />
+                  </div>
+                }
+              >
                 <W />
               </Suspense>
             </LabContext.Provider>

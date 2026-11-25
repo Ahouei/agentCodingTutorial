@@ -33,61 +33,106 @@ function useFonts() {
 const rise = (frame: number, start: number, dur = 18) =>
   interpolate(frame, [start, start + dur], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: EASE_OUT });
 
-function Bit({ size = 260, mood = 'happy', look = 0 }: { size?: number; mood?: 'happy' | 'think' | 'wow'; look?: number }) {
+type BitMood = 'happy' | 'think' | 'wow' | 'cheer';
+
+/**
+ * Bit, frame-driven (no CSS animations in Remotion). Same moves as the site's Bit:
+ * breathing, smooth blinks, antenna wiggle, a squash-and-stretch hop at `hopAt`, an arm
+ * that rises from the shoulder and waves, a syllable-rhythm mouth while `talking`, and
+ * both arms up when cheering.
+ */
+function Bit({
+  size = 260,
+  mood = 'happy',
+  look = 0,
+  wave = false,
+  talking = false,
+  hopAt,
+}: {
+  size?: number;
+  mood?: BitMood;
+  look?: number;
+  wave?: boolean;
+  talking?: boolean;
+  hopAt?: number;
+}) {
   const frame = useCurrentFrame();
-  const blink = frame % 90 > 84;
+  const clamp = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
+  // Blink: eyes squash closed and open over 6 frames, every 96 frames.
+  const bp = frame % 96;
+  const blinkY = interpolate(bp, [88, 91, 94], [1, 0.1, 1], clamp);
+  const breathe = Math.sin(frame / 17) * 1.4;
+  const wiggle = Math.sin(frame / 9) * 7;
+  // Hop: anticipation squash, stretch up, land squash, settle.
+  let hopY = 0;
+  let sx = 1;
+  let sy = 1;
+  if (hopAt !== undefined) {
+    const t = frame - hopAt;
+    const k = [0, 3, 9, 14, 18, 22];
+    hopY = interpolate(t, k, [0, 2, -14, 0, -2, 0], clamp);
+    sy = interpolate(t, k, [1, 0.9, 1.07, 0.93, 1.02, 1], clamp);
+    sx = interpolate(t, k, [1, 1.06, 0.96, 1.05, 0.99, 1], clamp);
+  }
+  const cheer = mood === 'cheer';
+  // Arms rotate from the shoulders.
+  const raised = wave || cheer ? -95 + Math.sin(frame / 4.5) * 14 : 0;
+  const leftRaised = cheer ? 95 - Math.sin(frame / 4.5) * 14 : 0;
+  // Talking: an uneven rhythm built from two sines.
+  const mouth = talking ? 0.35 + Math.abs(Math.sin(frame / 2.3) * 0.6 + Math.sin(frame / 5.1) * 0.35) : 1;
+  const EYE = '#9ff0cf';
   const eyes =
-    mood === 'happy' && !blink ? (
-      <g fill="none" stroke="#9ff0cf" strokeWidth="4.5" strokeLinecap="round">
+    mood === 'happy' || cheer ? (
+      <g fill="none" stroke={EYE} strokeWidth="4.5" strokeLinecap="round">
         <path d="M44 60 q6 -8 12 0" />
         <path d="M64 60 q6 -8 12 0" />
       </g>
-    ) : mood === 'wow' && !blink ? (
-      <g fill="#9ff0cf">
+    ) : mood === 'wow' ? (
+      <g fill={EYE}>
         <circle cx="50" cy="57" r="7.5" />
         <circle cx="70" cy="57" r="7.5" />
       </g>
-    ) : blink ? (
-      <g stroke="#9ff0cf" strokeWidth="4" strokeLinecap="round">
-        <line x1="45" y1="58" x2="54" y2="58" />
-        <line x1="66" y1="58" x2="75" y2="58" />
-      </g>
     ) : (
-      <g fill="#9ff0cf">
+      <g fill={EYE}>
         <rect x="46" y="49" width="8" height="10" rx="4" />
         <rect x="66" y="49" width="8" height="10" rx="4" />
       </g>
     );
-  const wiggle = Math.sin(frame / 9) * 7;
   return (
     <svg viewBox="0 0 120 132" width={size} height={size * 1.1} style={{ overflow: 'visible' }}>
-      <ellipse cx="60" cy="127" rx="30" ry="4" fill={C.ink} opacity="0.12" />
-      <g transform={`rotate(${wiggle} 60 22)`}>
-        <line x1="60" y1="22" x2="60" y2="9" stroke={C.ink} strokeWidth="3" strokeLinecap="round" />
-        <circle cx="60" cy="8" r="6" fill={C.coral} stroke={C.ink} strokeWidth="2.5" />
+      <ellipse cx="60" cy="127" rx={30 - breathe} ry="4" fill={C.ink} opacity="0.12" />
+      <g transform={`translate(0 ${hopY + breathe * -1}) translate(60 126) scale(${sx} ${sy}) translate(-60 -126)`}>
+        <g transform={`rotate(${wiggle} 60 22)`}>
+          <line x1="60" y1="22" x2="60" y2="9" stroke={C.ink} strokeWidth="3" strokeLinecap="round" />
+          <circle cx="60" cy="8" r="6" fill={C.coral} stroke={C.ink} strokeWidth="2.5" />
+        </g>
+        <rect x="11" y="48" width="10" height="22" rx="5" fill={C.mint} stroke={C.ink} strokeWidth="2.5" />
+        <rect x="99" y="48" width="10" height="22" rx="5" fill={C.mint} stroke={C.ink} strokeWidth="2.5" />
+        <path d="M26 98 q-10 6 -8 16" fill="none" stroke={C.ink} strokeWidth="3" strokeLinecap="round" transform={`rotate(${leftRaised} 26 98)`} />
+        <path d="M94 98 q10 6 8 16" fill="none" stroke={C.ink} strokeWidth="3" strokeLinecap="round" transform={`rotate(${raised} 94 98)`} />
+        <rect x="28" y="88" width="64" height="34" rx="14" fill="#ffe6ad" stroke={C.ink} strokeWidth="2.5" />
+        <rect x="51" y="97" width="18" height="10" rx="5" fill={C.coral} stroke={C.ink} strokeWidth="2" />
+        <rect x="18" y="22" width="84" height="70" rx="26" fill="#fff0cc" stroke={C.ink} strokeWidth="2.5" />
+        <rect x="30" y="34" width="60" height="44" rx="16" fill="#243530" stroke={C.ink} strokeWidth="2" />
+        <g transform={`translate(${look * 4} 0)`}>
+          <g transform={`translate(0 57) scale(1 ${mood === 'happy' || cheer ? 1 : blinkY}) translate(0 -57)`}>{eyes}</g>
+          {mood === 'think' ? (
+            <g fill={EYE}>
+              {[52, 60, 68].map((x, i) => (
+                <circle key={x} cx={x} cy={70 - Math.max(0, Math.sin((frame - i * 4) / 4)) * 2.5} r="1.8" />
+              ))}
+            </g>
+          ) : talking ? (
+            <ellipse cx="60" cy="70" rx="5" ry={3.2 * mouth} fill={EYE} />
+          ) : cheer ? (
+            <path d="M52 66 q8 10 16 0 Z" fill={EYE} stroke={EYE} strokeWidth="2" strokeLinejoin="round" />
+          ) : (
+            <path d="M53 68 q7 6 14 0" fill="none" stroke={EYE} strokeWidth="3.5" strokeLinecap="round" />
+          )}
+        </g>
+        <ellipse cx="27" cy="72" rx="5.5" ry="3.5" fill="#f6a3b6" />
+        <ellipse cx="93" cy="72" rx="5.5" ry="3.5" fill="#f6a3b6" />
       </g>
-      <rect x="11" y="48" width="10" height="22" rx="5" fill={C.mint} stroke={C.ink} strokeWidth="2.5" />
-      <rect x="99" y="48" width="10" height="22" rx="5" fill={C.mint} stroke={C.ink} strokeWidth="2.5" />
-      <path d="M26 98 q-10 6 -8 16" fill="none" stroke={C.ink} strokeWidth="3" strokeLinecap="round" />
-      <path d="M94 98 q10 6 8 16" fill="none" stroke={C.ink} strokeWidth="3" strokeLinecap="round" />
-      <rect x="28" y="88" width="64" height="34" rx="14" fill="#ffe6ad" stroke={C.ink} strokeWidth="2.5" />
-      <rect x="51" y="97" width="18" height="10" rx="5" fill={C.coral} stroke={C.ink} strokeWidth="2" />
-      <rect x="18" y="22" width="84" height="70" rx="26" fill="#fff0cc" stroke={C.ink} strokeWidth="2.5" />
-      <rect x="30" y="34" width="60" height="44" rx="16" fill="#243530" stroke={C.ink} strokeWidth="2" />
-      <g transform={`translate(${look * 4} 0)`}>
-        {eyes}
-        {mood === 'think' ? (
-          <g fill="#9ff0cf">
-            <circle cx="52" cy="70" r="1.8" />
-            <circle cx="60" cy="70" r="1.8" />
-            <circle cx="68" cy="70" r="1.8" />
-          </g>
-        ) : (
-          <path d="M53 68 q7 6 14 0" fill="none" stroke="#9ff0cf" strokeWidth="3.5" strokeLinecap="round" />
-        )}
-      </g>
-      <ellipse cx="27" cy="72" rx="5.5" ry="3.5" fill="#f6a3b6" />
-      <ellipse cx="93" cy="72" rx="5.5" ry="3.5" fill="#f6a3b6" />
     </svg>
   );
 }
@@ -106,7 +151,7 @@ function Intro() {
   return (
     <AbsoluteFill style={{ alignItems: 'center', justifyContent: 'center', direction: 'rtl', gap: 24 }}>
       <div style={{ transform: `translateY(${(1 - pop) * 40}px) scale(${0.92 + pop * 0.08})`, opacity: pop }}>
-        <Bit size={300} />
+        <Bit size={300} wave={f > 14 && f < 84} hopAt={10} />
       </div>
       <div style={{ fontFamily: DISPLAY, fontSize: 150, color: C.ink, opacity: rise(f, 6), transform: `translateY(${(1 - rise(f, 6)) * 20}px)`, lineHeight: 1.1 }}>
         از صفر تا قهرمان
@@ -151,7 +196,7 @@ function Agent() {
   return (
     <AbsoluteFill style={{ direction: 'rtl', padding: 80, gap: 26, justifyContent: 'center' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 26 }}>
-        <Bit size={170} mood={f < 34 ? 'think' : 'happy'} look={Math.sin(f / 12)} />
+        <Bit size={170} mood={f < 34 ? 'think' : 'happy'} look={Math.sin(f / 12)} hopAt={34} talking={f >= 36 && f < 80} />
         <div style={{ fontFamily: DISPLAY, fontSize: 84, color: C.ink, opacity: rise(f, 0) }}>{f < 34 ? 'دارم برنامه‌ریزی می‌کنم…' : 'Agent دست‌به‌کار شد'}</div>
       </div>
       <Sticker style={{ padding: '30px 40px', display: 'grid', gap: 18 }}>
@@ -221,7 +266,7 @@ function Outro() {
   const f = useCurrentFrame();
   return (
     <AbsoluteFill style={{ alignItems: 'center', justifyContent: 'center', direction: 'rtl', gap: 26 }}>
-      <Bit size={230} mood="happy" />
+      <Bit size={230} mood="cheer" hopAt={4} />
       <div style={{ fontFamily: DISPLAY, fontSize: 96, color: C.ink, opacity: rise(f, 0) }}>نوبت شماست</div>
       <div style={{ fontFamily: FA, fontWeight: 700, fontSize: 40, color: C.ink2, opacity: rise(f, 8) }}>
         ۲۰ فصل · مسیر <Lat>Codex</Lat> یا <Lat>Lovable</Lat> · رایگان

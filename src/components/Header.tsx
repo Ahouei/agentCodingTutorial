@@ -37,6 +37,21 @@ export function Header() {
   const [moving, setMoving] = useState(false);
   const stop = useRef(0);
   const { scrollY } = useScroll();
+  // Reading milestones: Bit cheers at halfway and at the end of a chapter (once per visit).
+  const [milestone, setMilestone] = useState<null | 'half' | 'end'>(null);
+  const hit = useRef<{ half: boolean; end: boolean; key: string }>({ half: false, end: false, key: '' });
+  const routeKey = route.name === 'chapter' ? route.slug : '';
+  useMotionValueEvent(scrollYProgress, 'change', (v) => {
+    if (route.name !== 'chapter') return;
+    if (hit.current.key !== routeKey) hit.current = { half: false, end: false, key: routeKey };
+    const fire = (m: 'half' | 'end') => {
+      hit.current[m] = true;
+      setMilestone(m);
+      window.setTimeout(() => setMilestone((cur) => (cur === m ? null : cur)), 2600);
+    };
+    if (!hit.current.half && v > 0.5) fire('half');
+    if (!hit.current.end && v > 0.97) fire('end');
+  });
   useMotionValueEvent(scrollY, 'change', (y) => {
     setRiding(y > 120);
     setMoving(true);
@@ -138,7 +153,21 @@ export function Header() {
         <div className="hd-rider-clip" aria-hidden>
           <motion.div className={`hd-rider-track ${riding ? 'is-on' : ''}`} style={{ transform: riderX }}>
             <span className={`hd-rider ${moving ? 'is-moving' : ''}`}>
-              <Mascot size={24} mood={moving ? 'happy' : 'calm'} follow={false} />
+              <Mascot size={24} mood={milestone === 'end' ? 'cheer' : milestone === 'half' ? 'wow' : moving ? 'happy' : 'calm'} follow={false} />
+              <AnimatePresence>
+                {milestone && (
+                  <motion.span
+                    key={milestone}
+                    className={`hd-rider-say ${milestone === 'end' ? 'hd-rider-say--end' : ''}`}
+                    initial={{ opacity: 0, transform: 'translateY(-4px) scale(0.95)' }}
+                    animate={{ opacity: 1, transform: 'translateY(0px) scale(1)' }}
+                    exit={{ opacity: 0, transform: 'translateY(-2px) scale(0.98)' }}
+                    transition={{ duration: 0.2, ease: EASE_OUT }}
+                  >
+                    {milestone === 'half' ? tx('نصف راه! 🎉', 'Halfway! 🎉') : tx('تمام! حالا سؤال‌ها ✨', 'Done! Now the questions ✨')}
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </span>
           </motion.div>
         </div>

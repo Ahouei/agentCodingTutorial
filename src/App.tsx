@@ -2,6 +2,7 @@ import { MotionConfig } from 'motion/react';
 import { lazy, Suspense, useLayoutEffect } from 'react';
 import { SiteAnnouncement } from './components/Announcement';
 import { SiteFooter } from './components/SiteFooter';
+import { BitLoader } from './components/BitLoader';
 import { ChapterPage } from './components/ChapterPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Glossary } from './components/Glossary';
@@ -64,7 +65,13 @@ function Routes() {
       {route.name !== 'admin' && <SiteAnnouncement />}
       <ErrorBoundary scope="page" lang={lang} resetKey={key}>
         {route.name === 'admin' ? (
-          <Suspense fallback={<main id="main" className="wrap" style={{ minHeight: '60vh' }} />}>
+          <Suspense
+            fallback={
+              <main id="main" className="wrap" style={{ minHeight: '60vh' }}>
+                <BitLoader label={lang === 'fa' ? 'Bit دارد پنل را باز می‌کند…' : 'Bit is opening the panel…'} />
+              </main>
+            }
+          >
             <AdminPage section={route.section} />
           </Suspense>
         ) : route.name === 'chapter' ? (
