@@ -446,3 +446,68 @@ kbd,
     animation: none;
   }
 }
+
+/* ───────── Optical centring of short text in round badges ─────────
+ * Vazirmatn and Nunito reserve more space below the letters than above, so text centred by its
+ * line box sits visually high. These badges get line-height 1 plus a measured nudge down
+ * (padding shifts the centre by half its size). Measured ink centre vs circle centre with the
+ * scratch tool circ.cjs at 2× zoom; target |Δ| ≤ 0.5px. */
+.hd-icon:not(:has(svg)),
+.map-gate-num,
+.story-avatar,
+.b-step-num,
+.ch-h2-num,
+.b-quiz-letter,
+.pl-dot {
+  line-height: 1;
+}
+/* Persian (Vazirmatn) and English (Nunito) sit differently, so each language gets its own nudge.
+   The :root[lang] prefix also outranks component padding (e.g. .b-quiz-letter's padding shorthand). */
+:root[lang='fa'] .b-step-num {
+  padding-top: 5px; /* sat 2.5px high */
+}
+:root[lang='en'] .b-step-num {
+  padding-top: 0.8px;
+}
+:root[lang='fa'] .ch-h2-num {
+  padding-top: 4.6px; /* sat 2.3px high */
+}
+:root[lang='en'] .ch-h2-num {
+  padding-top: 1.6px; /* sat 0.8px high */
+}
+/* «الف ب ج د» have very different shapes (tall alef; dots and tails below the line), so each
+   option's letter gets its own measured offset. */
+:root[lang='fa'] .b-quiz-opt:nth-child(1) .b-quiz-letter {
+  padding-top: 4.6px; /* الف sat 2.3px high */
+}
+:root[lang='fa'] .b-quiz-opt:nth-child(2) .b-quiz-letter {
+  padding-bottom: 1.4px; /* ب sat 0.7px low */
+}
+:root[lang='fa'] .b-quiz-opt:nth-child(3) .b-quiz-letter {
+  padding-bottom: 2px; /* ج sat 1px low */
+}
+:root[lang='fa'] .b-quiz-opt:nth-child(4) .b-quiz-letter {
+  padding-top: 2px; /* د sat 0.5–1.3px high */
+}
+:root[lang='en'] .b-quiz-letter {
+  padding-top: 2.8px; /* A B C D sat 1.4px high */
+}
+:root[lang='en'] .method-num {
+  line-height: 1;
+  padding-top: 1px;
+}
+.pl-dot {
+  padding-top: 1.6px; /* sat 0.8px high */
+}
+.hd-icon[lang='en'] {
+  padding-top: 4.6px; /* "EN" sat 2.3px high */
+}
+.hd-icon[lang='fa'] {
+  padding-top: 3px; /* "فا" sat 1.5px high */
+}
+:root[lang='fa'] .map-gate-num {
+  padding-top: 4px; /* Persian digits sat 1.5–2.5px high */
+}
+:root[lang='en'] .map-gate-num {
+  padding-top: 2px;
+}
