@@ -14,8 +14,10 @@
 import { merge, sanitize, same, type Progress } from '../src/lib/progressMerge';
 import { handleAdmin } from './admin';
 import { readSettings, UTC_DAY } from './settings';
+import { hasKey, readAi, type AiKeys } from './ai/config';
+import { handleBitLine } from './ai/bit';
 
-export interface Env {
+export interface Env extends AiKeys {
   DB?: D1Database;
   RESEND_API_KEY?: string;
   TURNSTILE_SECRET_KEY?: string;
@@ -129,8 +131,15 @@ function continuePage(token: string, fa: boolean, error?: string) {
 export async function handleApi(r: Request, env: Env, url: URL): Promise<Response> {
   const path = url.pathname;
 
-  if (path === '/api/config' && r.method === 'GET')
-    return json({ accounts: enabled(env), turnstileSiteKey: enabled(env) ? env.TURNSTILE_SITE_KEY : null });
+  if (path === '/api/config' && r.method === 'GET') {
+    // bitAi: Bit's AI lines are on and at least one provider key exists (signed-in learners only).
+    let bitAi = false;
+    if (enabled(env) && env.DB) {
+      const ai = await readAi(env.DB).catch(() => null);
+      bitAi = !!ai?.enabled && ai.chain.some((c) => hasKey(env, c.provider));
+    }
+    return json({ accounts: enabled(env), turnstileSiteKey: enabled(env) ? env.TURNSTILE_SITE_KEY : null, bitAi });
+  }
 
   // The one published announcement (admin panel → Announcements). Works without accounts.
   if (path === '/api/announcement' && r.method === 'GET') {
@@ -260,6 +269,11 @@ export async function handleApi(r: Request, env: Env, url: URL): Promise<Respons
 
   if (!s) return json({ error: 'signed_out' }, 401);
   if (r.method !== 'GET' && !sameOrigin(r)) return json({ error: 'bad_origin' }, 403);
+
+  if (path === '/api/bit/line' && r.method === 'POST') {
+    const out = await handleBitLine(r, env, db, { userId: s.userId, role: s.role });
+    return withCookie(json(out.body, out.status));
+  }
 
   if (path === '/api/auth/logout' && r.method === 'POST') {
     await db.prepare('DELETE FROM sessions WHERE id_hash = ?1').bind(s.hash).run();

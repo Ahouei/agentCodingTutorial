@@ -16,6 +16,8 @@ import { plain, useTypewriter } from './BitSays';
 import { TapBit } from './TapBit';
 import { BIT_TAPS, BIT_WAKE } from '../content/bitLines';
 import { useIdle } from '../lib/useIdle';
+import { useAccount } from '../lib/account';
+import { fetchBitLine } from '../lib/bitAi';
 import { NotFound } from './NotFound';
 import './chapter.css';
 
@@ -67,7 +69,26 @@ function ChapterBody({ chapter: c, index, section }: { chapter: Chapter; index: 
     if (wasIdle.current && !idle) setSaid(BIT_WAKE);
     wasIdle.current = idle;
   }, [idle]);
-  const heroMood = idle ? 'sleep' : celebrate ? 'cheer' : isDone ? 'happy' : 'calm';
+  const acc = useAccount();
+  const [asking, setAsking] = useState(false);
+  const heroMood = idle ? 'sleep' : celebrate ? 'cheer' : asking ? 'think' : isDone ? 'happy' : 'calm';
+  // Tap: signed-in learners get a fresh, topic-aware line (AI, served from a shared pool);
+  // everyone else, or if anything fails, gets one of Bit's built-in tips.
+  const onBitTap = async () => {
+    if (asking) return;
+    setSayStart(true);
+    if (acc.bitAi) {
+      setAsking(true);
+      const text = await fetchBitLine(c.slug, active, lang);
+      setAsking(false);
+      if (text) {
+        setSaid({ fa: text, en: text });
+        return;
+      }
+    }
+    tapN.current = (tapN.current + 1) % BIT_TAPS.length;
+    setSaid(BIT_TAPS[tapN.current]);
+  };
   useEffect(() => {
     const a = window.setTimeout(() => setSayStart(true), 450);
     const b = window.setTimeout(() => setHello(false), 2600);
@@ -207,11 +228,7 @@ function ChapterBody({ chapter: c, index, section }: { chapter: Chapter; index: 
                   wave={hello}
                   float={!say.typing && !idle}
                   follow
-                  onTap={() => {
-                    tapN.current = (tapN.current + 1) % BIT_TAPS.length;
-                    setSaid(BIT_TAPS[tapN.current]);
-                    setSayStart(true);
-                  }}
+                  onTap={onBitTap}
                 />
               </div>
             </div>

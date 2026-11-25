@@ -13,6 +13,8 @@ type AccountState = {
   /** 'admin' or 'owner' can open the admin panel (the server checks again on every request). */
   role: 'learner' | 'admin' | 'owner' | null;
   turnstileSiteKey: string | null;
+  /** Bit can say AI lines (server says it's on); only meaningful when signed in. */
+  bitAi: boolean;
   syncing: boolean;
   lastSync: number | null;
   justSignedIn: boolean;
@@ -31,6 +33,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const [email, setEmail] = useState<string | null>(null);
   const [role, setRole] = useState<AccountState['role']>(null);
   const [siteKey, setSiteKey] = useState<string | null>(null);
+  const [bitAi, setBitAi] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [lastSync, setLastSync] = useState<number | null>(null);
   const [justSignedIn, setJustSignedIn] = useState(false);
@@ -48,6 +51,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         if (!alive) return;
         if (!cfg?.accounts) return setStatus('unavailable');
         setSiteKey(cfg.turnstileSiteKey ?? null);
+        setBitAi(cfg.bitAi === true);
         const me = await fetch('/api/me', { credentials: 'same-origin' }).then((r) => (r.ok ? r.json() : null));
         if (!alive) return;
         if (me?.user?.email) {
@@ -167,6 +171,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         email,
         role: status === 'signed-in' ? role : null,
         turnstileSiteKey: siteKey,
+        bitAi: status === 'signed-in' && bitAi,
         syncing,
         lastSync,
         justSignedIn,
