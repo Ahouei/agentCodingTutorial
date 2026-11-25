@@ -159,7 +159,7 @@ export async function handleApi(r: Request, env: Env, url: URL): Promise<Respons
         method: 'POST',
         headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          from: env.MAIL_FROM ?? 'Zero to Hero <noreply@ahouei.site>',
+          from: env.MAIL_FROM ?? 'Zero to Hero <noreply@mail.ahouei.site>',
           to: [email],
           subject: fa ? 'پیوند ورود به از صفر تا قهرمان' : 'Your Zero to Hero sign-in link',
           html: emailHtml(link, fa),
