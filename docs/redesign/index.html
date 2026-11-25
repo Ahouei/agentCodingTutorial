@@ -1,0 +1,820 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Zero to Hero Redesign</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Lalezar&family=Nunito:wght@400;600;800&family=Vazirmatn:wght@400;600;800;900&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout concept: a design-review dossier. Each proposal is a "case": why → before (live-site photo) → after (working mock) → change table. */
+:root {
+  --paper: #fbf6ee; --paper-2: #f4ebdd; --card: #fffdf9; --ink: #2a211b; --ink-2: #6b5e52; --ink-3: #7a6b5c; --line: #e6d9c6;
+  --coral: #ef6a4c; --coral-text: #d9532f; --coral-soft: #fde3da; --butter: #ffd36a; --butter-soft: #fff2cc;
+  --mint: #8fd5b5; --mint-ink: #2c7a57; --mint-soft: #ddf3e8; --sky: #a6cdf3; --sky-soft: #e1eefb; --blush: #f6bccb; --blush-soft: #fde6ec;
+  --firoozeh: #1f8a8a; --firoozeh-soft: #d8f0ee; --saffron: #f2a516; --anar: #b8324b; --kashi-paper: #f5f7f4;
+  --shadow: #2a211b;
+  --f-doc: 'Nunito', system-ui, sans-serif; --f-head: 'Fraunces', Georgia, serif; --f-fa: 'Vazirmatn', system-ui, sans-serif; --f-fa-display: 'Lalezar', 'Vazirmatn', serif; --f-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1); --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #1b1612; --paper-2: #231c17; --card: #2a221c; --ink: #f7ede1; --ink-2: #cbbba9; --ink-3: #a99886; --line: #3d322a;
+  --coral-text: #f47b5e; --coral-soft: #4a2a21; --butter-soft: #463a1d; --mint-ink: #9fe3c4; --mint-soft: #1f3a2e; --sky-soft: #1d2d3d; --blush-soft: #45262e;
+  --firoozeh-soft: #183433; --kashi-paper: #151a19; --shadow: #3a1f17; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --paper: #1b1612; --paper-2: #231c17; --card: #2a221c; --ink: #f7ede1; --ink-2: #cbbba9; --ink-3: #a99886; --line: #3d322a;
+  --coral-text: #f47b5e; --coral-soft: #4a2a21; --butter-soft: #463a1d; --mint-ink: #9fe3c4; --mint-soft: #1f3a2e; --sky-soft: #1d2d3d; --blush-soft: #45262e;
+  --firoozeh-soft: #183433; --kashi-paper: #151a19; --shadow: #3a1f17; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 16.5px/1.65 var(--f-doc); -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 1180px; margin-inline: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--f-head); font-weight: 700; letter-spacing: -0.02em; text-wrap: balance; margin: 0; }
+p { margin: 0; }
+code { font-family: var(--f-mono); font-size: 0.86em; background: var(--paper-2); border: 1px solid var(--line); border-radius: 6px; padding: 0 5px; }
+.fa { font-family: var(--f-fa); direction: rtl; }
+.muted { color: var(--ink-2); }
+:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; border-radius: 6px; }
+button { font: inherit; color: inherit; }
+
+/* ── top ── */
+.top { padding-block: clamp(36px, 6vw, 80px) 24px; display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 32px; align-items: end; }
+.top h1 { font-size: clamp(38px, 6vw, 72px); line-height: 1; }
+.top .lede { margin-top: 16px; font-size: 18px; max-width: 58ch; color: var(--ink-2); }
+.themes { display: grid; gap: 10px; }
+.theme { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: start; padding: 12px 14px; border: 2px solid var(--ink); border-radius: 16px; background: var(--card); box-shadow: 3px 3px 0 var(--shadow); }
+.theme b { display: block; }
+.theme span.n { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 11px; border: 1.5px solid var(--ink); font-weight: 800; color: #2a211b; }
+@media (max-width: 860px) { .top { grid-template-columns: 1fr; } }
+
+/* ── index / roadmap ── */
+.toc { display: flex; flex-wrap: wrap; gap: 8px; margin-block: 18px 0; padding: 0; list-style: none; }
+.toc a { display: inline-flex; gap: 6px; align-items: center; min-height: 40px; padding: 4px 12px; border-radius: 999px; border: 1.5px solid var(--line); text-decoration: none; font-weight: 700; font-size: 14px; transition: border-color 150ms ease; }
+@media (hover: hover) and (pointer: fine) { .toc a:hover { border-color: var(--ink); } }
+.toc a i { font-style: normal; font-family: var(--f-mono); font-size: 12px; color: var(--ink-2); }
+
+/* ── case ── */
+.case { padding-block: clamp(40px, 6vw, 72px); border-top: 1.5px dashed var(--line); scroll-margin-top: 16px; }
+.case-head { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px; align-items: start; margin-bottom: 22px; }
+.case-num { font-family: var(--f-mono); font-size: 13px; padding: 4px 10px; border-radius: 9px; background: var(--ink); color: var(--paper); margin-top: 8px; }
+.case h2 { font-size: clamp(26px, 3.4vw, 40px); line-height: 1.1; }
+.case .why { margin-top: 10px; max-width: 70ch; color: var(--ink-2); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.chip { display: inline-flex; align-items: center; gap: 5px; padding: 2px 10px; border-radius: 999px; font-size: 12.5px; font-weight: 800; border: 1.5px solid var(--ink); background: var(--card); }
+.chip.h { background: var(--coral-soft); } .chip.m { background: var(--butter-soft); } .chip.l { background: var(--mint-soft); }
+.chip.skill { border-style: dashed; border-color: var(--ink-3); font-weight: 600; color: var(--ink-2); }
+
+.ba { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.ba.wide-after { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); }
+@media (max-width: 900px) { .ba, .ba.wide-after { grid-template-columns: 1fr; } }
+.pane { min-width: 0; }
+.tag { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 8px; font-size: 12.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); }
+.tag::before { content: ''; width: 9px; height: 9px; border-radius: 50%; background: var(--ink-3); }
+.tag.after::before { background: var(--mint); border: 1.5px solid var(--ink); }
+.shot { display: block; width: 100%; height: auto; border-radius: 18px; border: 2px solid var(--line); background: var(--paper-2); }
+.shot-note { margin-top: 8px; font-size: 14px; color: var(--ink-2); }
+.stage { position: relative; border-radius: 22px; border: 2px solid var(--ink); background: var(--card); box-shadow: 4px 4px 0 var(--shadow); overflow: hidden; }
+
+table.chg { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+.tbl { margin-top: 22px; overflow-x: auto; border-radius: 16px; border: 1.5px solid var(--line); background: var(--card); }
+table.chg th, table.chg td { padding: 10px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+table.chg th { font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-2); background: var(--paper-2); }
+table.chg tr:last-child td { border-bottom: 0; }
+table.chg td:first-child { color: var(--ink-2); }
+table.chg td { min-width: 180px; }
+
+/* ── generic mock bits (Persian, RTL) ── */
+.m-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 8px 18px; border-radius: 999px; border: 2px solid var(--ink); background: var(--card); font-weight: 800; cursor: pointer; box-shadow: 3px 3px 0 var(--shadow); transition: transform 160ms var(--ease-out), box-shadow 160ms var(--ease-out); -webkit-tap-highlight-color: transparent; }
+[dir="rtl"] .m-btn { box-shadow: -3px 3px 0 var(--shadow); }
+.m-btn:active { transform: scale(0.97); box-shadow: 0 0 0 var(--shadow); }
+.m-btn.primary { background: var(--coral); color: #2a211b; }
+.m-btn.ghost { box-shadow: none; border-color: var(--line); }
+.range { width: 100%; accent-color: var(--coral); min-height: 44px; }
+.ctl { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px 16px; border-top: 1.5px dashed var(--line); background: var(--paper); font-size: 14px; }
+.ctl label { font-weight: 800; }
+
+/* 1. Story spine */
+.spine { padding: 18px; display: grid; gap: 14px; }
+.spine-site { border: 2px solid #2a211b; border-radius: 16px; overflow: hidden; background: #fffaf2; color: #2a211b; min-height: 300px; position: relative; }
+.spine-url { display: flex; gap: 8px; align-items: center; padding: 7px 12px; background: #f1e6d4; border-bottom: 1.5px solid #2a211b; font: 12.5px var(--f-mono); direction: ltr; }
+.spine-url .dots i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #ef6a4c; margin-right: 4px; }
+.spine-url .addr { flex: 1; padding: 2px 10px; border-radius: 8px; background: #fffaf2; color: #9a8b7c; transition: color 200ms ease; }
+.spine-url .addr.live { color: #2c7a57; }
+.piece { opacity: 0.08; transform: translateY(6px); transition: opacity 360ms var(--ease-out), transform 360ms var(--ease-out); }
+.piece.on { opacity: 1; transform: none; }
+.spine-body { padding: 14px; display: grid; gap: 10px; }
+.sp-hero { display: flex; gap: 12px; align-items: center; padding: 14px; border-radius: 14px; background: #eee5d6; }
+.sp-hero.styled { background: #fde3da; }
+.sp-hero b { font-family: var(--f-fa-display); font-size: 24px; font-weight: 400; }
+.sp-menu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.sp-menu span { padding: 8px; border-radius: 10px; border: 1.5px solid #2a211b; text-align: center; font-size: 13px; font-weight: 800; background: #fff; }
+.sp-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.sp-badge { display: inline-flex; gap: 5px; align-items: center; padding: 2px 10px; border-radius: 999px; border: 1.5px solid #2a211b; font-size: 12px; font-weight: 800; background: #fff; }
+.sp-note { position: absolute; top: 46px; left: 14px; padding: 8px 10px; background: #ffd36a; border: 1.5px solid #2a211b; border-radius: 4px 4px 14px 4px; font-size: 12.5px; transform: rotate(-3deg); max-width: 160px; }
+.spine-log { display: flex; gap: 10px; align-items: center; min-height: 44px; font-weight: 700; }
+.spine-log .ch { font-family: var(--f-mono); font-size: 12px; padding: 2px 8px; border-radius: 8px; background: var(--ink); color: var(--paper); direction: ltr; white-space: nowrap; }
+.names { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.names span { font: 12.5px var(--f-mono); padding: 2px 8px; border-radius: 8px; border: 1.5px dashed var(--coral-text); color: var(--coral-text); }
+
+/* 2. Hero */
+.hero-m { padding: 28px 24px; display: grid; gap: 18px; }
+.hero-m .eyebrow { font-size: 13.5px; font-weight: 800; color: var(--ink-2); }
+.hero-m h3 { font-family: var(--f-fa-display); font-weight: 400; letter-spacing: 0; font-size: clamp(44px, 6vw, 70px); line-height: 1.1; }
+.track-wrap { position: relative; display: inline-block; }
+.track { position: absolute; left: -2%; right: -2%; bottom: -12px; width: 104%; height: 18px; overflow: visible; }
+.resume { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 16px; border: 2px solid var(--ink); background: var(--butter-soft); }
+.resume .ring { width: 44px; height: 44px; }
+.resume b { display: block; }
+.resume small { color: var(--ink-2); }
+
+/* 3. Map */
+.map-m { padding: 18px; display: grid; gap: 14px; background: radial-gradient(var(--line) 1.1px, transparent 1.2px) 0 0 / 20px 20px, var(--paper-2); }
+.done-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.done-row span { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; background: var(--mint-soft); border: 1.5px solid var(--mint-ink); font-size: 12.5px; font-weight: 800; }
+.now-card { position: relative; padding: 18px; border-radius: 20px; border: 2px solid var(--ink); background: var(--card); box-shadow: -4px 4px 0 var(--shadow); }
+.now-card .here { position: absolute; top: -13px; right: 16px; padding: 1px 10px; border-radius: 999px; background: var(--coral); border: 1.5px solid var(--ink); font-size: 12px; font-weight: 900; color: #2a211b; }
+.now-card b { display: block; font-size: 20px; }
+.now-card .bar { height: 8px; border-radius: 8px; background: var(--line); margin-top: 12px; overflow: hidden; }
+.now-card .bar i { display: block; height: 100%; width: 40%; background: var(--coral); transform-origin: right; }
+.next-list { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.next-list li { display: flex; gap: 10px; align-items: center; padding: 8px 12px; border-radius: 12px; border: 1.5px dashed var(--line); background: var(--card); color: var(--ink-2); font-weight: 700; font-size: 14.5px; }
+.next-list li .n { font: 12px var(--f-mono); color: var(--ink-3); }
+.more { font-size: 13.5px; color: var(--ink-2); font-weight: 700; }
+
+/* 4. Chapter open */
+.open-m { padding: 22px; display: grid; gap: 14px; background: linear-gradient(to bottom, var(--sky-soft), var(--card) 60%); }
+.open-m h3 { font-family: var(--f-fa-display); font-weight: 400; letter-spacing: 0; font-size: clamp(34px, 4.6vw, 52px); line-height: 1.2; }
+.mission { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.mission > div { padding: 12px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--card); font-size: 14.5px; }
+.mission b { display: block; font-size: 12.5px; color: var(--ink-2); }
+@media (max-width: 560px) { .mission { grid-template-columns: 1fr; } }
+.warm { padding: 14px; border-radius: 16px; border: 2px solid var(--ink); background: var(--butter-soft); display: grid; gap: 10px; }
+.warm-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.warm-opts button { min-height: 44px; padding: 6px 14px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--card); cursor: pointer; font-family: var(--f-fa); transition: border-color 150ms ease, background-color 150ms ease; }
+.warm-opts button.right { background: var(--mint-soft); border-color: var(--mint-ink); }
+.warm-opts button.wrong { background: var(--blush-soft); border-color: var(--coral-text); }
+
+/* 5. Phone */
+.phone-wrap { display: grid; place-items: center; padding: 18px; background: var(--paper-2); }
+.phone { position: relative; width: min(340px, 100%); height: 620px; border-radius: 40px; border: 10px solid #2a211b; background: var(--card); overflow: hidden; box-shadow: 0 20px 40px -20px rgba(0,0,0,.35); }
+.phone-scroll { position: absolute; inset: 0 0 64px; overflow: auto; padding: 18px 16px 30px; }
+.phone-scroll h4 { font-family: var(--f-fa); font-size: 20px; font-weight: 900; margin: 6px 0 10px; }
+.phone-scroll p { font-size: 15px; line-height: 2; margin-bottom: 12px; }
+.term { font: inherit; padding: 0 2px; border: 0; background: none; cursor: pointer; text-decoration: underline dotted 2px; text-underline-offset: 6px; text-decoration-color: var(--coral); color: inherit; }
+.term.active { background: var(--butter-soft); border-radius: 4px; }
+.bbar { position: absolute; left: 0; right: 0; bottom: 0; height: 64px; display: flex; align-items: center; gap: 10px; padding: 0 12px; background: var(--card); border-top: 1.5px solid var(--line); z-index: 2; }
+.bbar .m-btn { min-height: 44px; padding: 6px 14px; box-shadow: none; font-size: 14px; }
+.bbar .sec { flex: 1; font-size: 13px; color: var(--ink-2); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.scrim { position: absolute; inset: 0; background: rgba(42,33,27,.32); opacity: 0; pointer-events: none; transition: opacity 300ms var(--ease-out); z-index: 3; }
+.scrim.on { opacity: 1; pointer-events: auto; }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 4; padding: 10px 16px 18px; background: var(--card); border-top: 2px solid var(--ink); border-radius: 24px 24px 0 0; transform: translateY(105%); transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1); touch-action: none; }
+.sheet.on { transform: translateY(0); }
+.sheet.dragging { transition: none; }
+.grab { width: 44px; height: 5px; border-radius: 5px; background: var(--line); margin: 0 auto 12px; }
+.sheet h5 { margin: 0 0 4px; font: 800 18px var(--f-mono); direction: ltr; text-align: right; }
+.sheet p { font-size: 14.5px; line-height: 1.9; }
+.sheet .nav { display: flex; justify-content: space-between; gap: 8px; margin-top: 12px; }
+.sheet ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.sheet ol li button { width: 100%; min-height: 44px; text-align: right; padding: 8px 12px; border-radius: 12px; border: 0; background: none; font-family: var(--f-fa); font-weight: 700; cursor: pointer; }
+.sheet ol li button.cur { background: var(--paper-2); box-shadow: inset 0 0 0 1.5px var(--ink); }
+
+/* 6. Quiz */
+.quiz-m { padding: 20px; display: grid; gap: 12px; }
+.quiz-m .q { font-weight: 900; font-size: 17px; line-height: 1.7; }
+.qopt { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 10px; align-items: start; width: 100%; min-height: 48px; padding: 10px 14px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--paper); text-align: right; cursor: pointer; font-family: var(--f-fa); transition: border-color 150ms ease, background-color 150ms ease; }
+.qopt .l { display: grid; place-items: center; height: 28px; border-radius: 9px; border: 1.5px solid var(--ink); background: var(--card); font-weight: 900; font-size: 13px; }
+.qopt .ex { grid-column: 2; display: none; font-size: 13.5px; color: var(--ink-2); line-height: 1.8; }
+.quiz-m.answered .qopt .ex { display: block; }
+.qopt.right { background: var(--mint-soft); border-color: var(--mint-ink); }
+.qopt.wrong { background: var(--blush-soft); border-color: var(--coral-text); }
+.lenbars { display: grid; gap: 6px; padding: 14px; border-radius: 14px; background: var(--paper-2); font-size: 13px; }
+.lenbars div { display: grid; grid-template-columns: 70px minmax(0, 1fr) 40px; gap: 8px; align-items: center; }
+.lenbars i { display: block; height: 10px; border-radius: 6px; background: var(--ink-3); }
+.lenbars i.c { background: var(--coral); }
+
+/* 7. Lab anatomy */
+.lab-m { display: grid; }
+.lab-h { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 14px 18px; background: var(--sky-soft); border-bottom: 2px solid var(--ink); }
+.lab-h .goal { font-size: 13px; padding: 2px 10px; border-radius: 999px; background: var(--ink); color: var(--paper); font-weight: 800; }
+.lab-h b { font-size: 17px; }
+.lab-s { padding: 18px; display: grid; gap: 10px; }
+.sw { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 6px 12px; border-radius: 14px; border: 1.5px solid var(--line); cursor: pointer; background: var(--paper); }
+.sw .t { position: relative; width: 52px; height: 32px; flex: none; border-radius: 999px; border: 2px solid var(--ink); background: var(--paper-2); transition: background-color 150ms ease; }
+.sw .t::after { content: ''; position: absolute; top: 3px; right: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--ink); transition: transform 200ms var(--ease-out); }
+.sw[aria-checked="true"] .t { background: var(--mint); }
+.sw[aria-checked="true"] .t::after { transform: translateX(-20px); }
+.sw .lab { font-family: var(--f-mono); font-size: 13px; direction: ltr; }
+.lab-f { display: flex; justify-content: space-between; gap: 10px; padding: 12px 18px; border-top: 1.5px dashed var(--line); background: var(--paper); }
+.stamp { position: absolute; top: 58px; left: 18px; padding: 6px 12px; border: 2.5px solid var(--mint-ink); color: var(--mint-ink); border-radius: 10px; font-weight: 900; transform: rotate(-8deg) scale(0.9); opacity: 0; transition: opacity 250ms var(--ease-out), transform 250ms var(--ease-out); background: var(--card); }
+.stamp.on { opacity: 1; transform: rotate(-8deg) scale(1); }
+.anno { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; font-size: 14.5px; }
+.anno li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 8px; }
+.anno li b.k { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 8px; background: var(--butter); color: #2a211b; border: 1.5px solid var(--ink); font-size: 12.5px; }
+
+/* 8. Motion */
+.mo-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 16px; }
+.mo-col { padding: 14px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--paper); min-height: 230px; }
+.mo-col h6 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-2); }
+.ln { height: 10px; border-radius: 6px; background: var(--ink-3); opacity: .55; margin-bottom: 10px; }
+.ln.h { height: 16px; width: 60%; background: var(--ink); opacity: 1; margin-bottom: 14px; }
+.flip-area { position: relative; padding: 16px; min-height: 260px; border-top: 1.5px dashed var(--line); background: var(--paper-2); }
+.mcard { display: flex; gap: 10px; align-items: center; width: 240px; max-width: 100%; padding: 10px 12px; border-radius: 16px; border: 2px solid var(--ink); background: var(--card); cursor: pointer; text-align: right; font-family: var(--f-fa); }
+.mcard .ic, .chead .ic { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; border: 2px solid var(--ink); background: var(--sky); color: #2a211b; flex: none; }
+.chead { position: absolute; inset: 16px; border-radius: 20px; border: 2px solid var(--ink); background: linear-gradient(to bottom, var(--sky-soft), var(--card)); padding: 18px; display: none; font-family: var(--f-fa); }
+.chead.on { display: block; }
+.chead .ic { width: 64px; height: 64px; border-radius: 18px; }
+.chead h4 { font-family: var(--f-fa-display); font-weight: 400; font-size: 34px; margin: 12px 0 4px; }
+.tokens { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; padding: 16px; border-top: 1.5px dashed var(--line); }
+.tok { padding: 12px; border-radius: 14px; background: var(--paper); border: 1.5px solid var(--line); font-size: 13.5px; }
+.tok code { display: block; margin-top: 4px; white-space: normal; overflow-wrap: anywhere; }
+.curve { height: 46px; margin-top: 6px; }
+
+/* 9. Color */
+.col-m { padding: 18px; display: grid; gap: 14px; }
+.sw-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.swatch { display: grid; gap: 2px; width: 104px; padding: 8px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--card); font-size: 11.5px; }
+.swatch i { display: block; height: 34px; border-radius: 8px; border: 1.5px solid rgba(0,0,0,.15); }
+.pal-demo { padding: 16px; border-radius: 16px; display: grid; gap: 10px; font-family: var(--f-fa); direction: rtl; transition: background-color 250ms ease; }
+.pal-demo .pd-card { padding: 12px 14px; border-radius: 14px; border: 2px solid #2a211b; background: #fff; color: #2a211b; box-shadow: -3px 3px 0 #2a211b; }
+.pal-demo .pd-title { font-family: var(--f-fa-display); font-size: 30px; color: #2a211b; }
+.pal-demo .pd-btn { display: inline-flex; min-height: 44px; align-items: center; padding: 6px 16px; border-radius: 999px; border: 2px solid #2a211b; font-weight: 800; color: #2a211b; }
+.pal-demo .pd-chip { display: inline-block; padding: 1px 10px; border-radius: 999px; border: 1.5px solid #2a211b; font-size: 12.5px; font-weight: 800; color: #2a211b; }
+.dk { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 16px; border-radius: 16px; background: #1b1612; }
+.dk .c { padding: 14px; border-radius: 14px; background: #2a221c; color: #f7ede1; font-family: var(--f-fa); font-weight: 800; }
+.dk .c small { display: block; font: 11.5px var(--f-mono); color: #cbbba9; margin-bottom: 6px; }
+.dk .c.old { border: 2px solid #f7ede1; box-shadow: -4px 4px 0 #0c0907; }
+.dk .c.new { border: 2px solid color-mix(in oklab, #f7ede1 55%, transparent); box-shadow: -4px 4px 0 #5a2a1e; }
+
+/* 10. Completion */
+.cert-m { padding: 18px; display: grid; gap: 14px; }
+.cert { position: relative; padding: 26px 22px; border-radius: 20px; border: 2px solid #2a211b; background: #fffaf2; color: #2a211b; text-align: center; font-family: var(--f-fa); overflow: hidden; }
+.cert::before { content: ''; position: absolute; inset: 8px; border: 1.5px dashed #c9b8a2; border-radius: 14px; pointer-events: none; }
+.cert .t { font-size: 13px; color: #6b5e52; font-weight: 800; }
+.cert .nm { font-family: var(--f-fa-display); font-size: 40px; line-height: 1.3; margin: 6px 0; min-height: 52px; }
+.cert .url { display: inline-block; margin-top: 8px; padding: 3px 12px; border-radius: 999px; background: #ddf3e8; border: 1.5px solid #2c7a57; font: 13px var(--f-mono); direction: ltr; color: #2c7a57; }
+.badges { display: flex; justify-content: center; gap: 10px; margin-top: 14px; }
+.badges span { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; border: 2px solid #2a211b; font-weight: 900; font-size: 13px; }
+.in { width: 100%; min-height: 44px; padding: 8px 12px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); font: 15px var(--f-fa); direction: rtl; }
+.auto-done { display: flex; gap: 10px; align-items: center; padding: 12px 14px; border-radius: 14px; background: var(--mint-soft); border: 1.5px solid var(--mint-ink); font-family: var(--f-fa); font-size: 14.5px; direction: rtl; }
+
+/* 11. Extras + roadmap */
+.extras { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
+.ex { padding: 16px; border-radius: 18px; border: 1.5px solid var(--line); background: var(--card); display: grid; gap: 6px; align-content: start; }
+.ex b { font-size: 16px; }
+.ex p { font-size: 14.5px; color: var(--ink-2); }
+.road { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+.road th, .road td { padding: 9px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.road th { background: var(--paper-2); font-size: 12.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-2); }
+.road td.p { font-family: var(--f-mono); font-weight: 600; white-space: nowrap; }
+.foot { padding-block: 40px 60px; color: var(--ink-2); font-size: 14px; border-top: 1.5px dashed var(--line); }
+
+@media (prefers-reduced-motion: reduce) {
+  .piece, .sheet, .scrim, .stamp, .sw .t::after, .m-btn { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <p class="muted" style="font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:13px">Design review · start.ahouei.site</p>
+      <h1>Zero to Hero, refined</h1>
+      <p class="lede">Ten proposals for the course site. Each one shows the live site today next to a working mock of the change, with the reason and the skill it comes from. The mocks are interactive: drag, tap and replay them. Persian mock text is right-to-left, like the real site.</p>
+    </div>
+    <div class="themes">
+      <div class="theme"><span class="n" style="background:var(--coral)">1</span><div><b>One story, start to finish</b><span class="muted">Sahar's café is built across all 18 chapters, instead of six different demo businesses.</span></div></div>
+      <div class="theme"><span class="n" style="background:var(--sky)">2</span><div><b>Calmer, purposeful motion</b><span class="muted">Animate what is new or what the learner caused; stop the rest.</span></div></div>
+      <div class="theme"><span class="n" style="background:var(--mint)">3</span><div><b>Learning that sticks</b><span class="muted">Honest quizzes, warm-up recall, terms you can tap anywhere.</span></div></div>
+    </div>
+  </header>
+  <ul class="toc" aria-label="Proposals">
+    <li><a href="#c1"><i>01</i> Story spine</a></li>
+    <li><a href="#c2"><i>02</i> Hero</a></li>
+    <li><a href="#c3"><i>03</i> Journey map</a></li>
+    <li><a href="#c4"><i>04</i> Chapter opening</a></li>
+    <li><a href="#c5"><i>05</i> Mobile reading</a></li>
+    <li><a href="#c6"><i>06</i> Quizzes</a></li>
+    <li><a href="#c7"><i>07</i> Lab standard</a></li>
+    <li><a href="#c8"><i>08</i> Motion system</a></li>
+    <li><a href="#c9"><i>09</i> Color &amp; dark mode</a></li>
+    <li><a href="#c10"><i>10</i> Finishing</a></li>
+    <li><a href="#road"><i>→</i> Roadmap</a></li>
+  </ul>
+
+  <!-- 1 ─────────────── Story spine -->
+  <section class="case" id="c1">
+    <div class="case-head"><span class="case-num">01</span><div>
+      <h2>One café, built chapter by chapter</h2>
+      <p class="why">Today the hero builds "Café Sahar", the vibe-coding lab builds "Bean &amp; Bit", the brief builder starts from "Nan-e Shirin" bakery, and the deploy labs use <code>my-cafe</code> and <code>my-site</code>. A learner never sees one project grow. Make Sahar's café the protagonist: every lab works on <code>cafe-sahar.ir</code>, and every chapter ends by adding its piece to the site. The finale shows the whole build history.</p>
+      <div class="chips"><span class="chip h">Impact high</span><span class="chip m">Effort medium</span><span class="chip skill">frontend-design: ground it in the subject</span><span class="chip skill">scroll-experience: story beats → resolution</span><span class="chip skill">structured-curriculum-content</span></div>
+    </div></div>
+    <div class="ba wide-after">
+      <div class="pane">
+        <div class="tag">Before</div>
+        <img class="shot" src="img/hero.jpg" alt="Current hero with the Café Sahar demo" loading="lazy">
+        <p class="shot-note">Names found in the widgets today:</p>
+        <div class="names"><span>Café Sahar</span><span>Bean &amp; Bit</span><span>Nan-e Shirin</span><span>bean-and-bit</span><span>my-cafe</span><span>my-site</span></div>
+      </div>
+      <div class="pane">
+        <div class="tag after">After · drag through the course</div>
+        <div class="stage" dir="rtl">
+          <div class="spine fa">
+            <div class="spine-site" id="spSite">
+              <div class="spine-url"><span class="dots"><i></i><i style="background:#ffd36a"></i><i style="background:#8fd5b5"></i></span><span class="addr" id="spAddr">localhost:5173</span><span class="piece" data-from="16" title="HTTPS">🔒</span></div>
+              <div class="sp-note piece" data-from="1">ایده: سایت کافه با منو، ساعت کاری و رزرو</div>
+              <div class="spine-body">
+                <div class="sp-hero piece" data-from="12" id="spHero">
+                  <svg width="34" height="34" viewBox="0 0 48 48" aria-hidden="true"><path d="M10 18h24v10a10 10 0 0 1-10 10h-4a10 10 0 0 1-10-10Z" fill="#fff4dc" stroke="#2a211b" stroke-width="2.5"/><path d="M34 21h3a5 5 0 0 1 0 10h-3" fill="none" stroke="#2a211b" stroke-width="2.5"/></svg>
+                  <div><b>کافه سحر</b><div style="font-size:13px;color:#6b5e52">هر روز ۸ صبح تا ۱۱ شب</div></div>
+                </div>
+                <div class="sp-menu piece" data-from="13"><span>منو</span><span style="background:#ffd36a">رزرو میز</span><span>تماس</span></div>
+                <div class="sp-row">
+                  <span class="sp-badge piece" data-from="3">DNS ✓</span>
+                  <span class="sp-badge piece" data-from="4">GitHub repo</span>
+                  <span class="sp-badge piece" data-from="9">Agent متصل</span>
+                  <span class="sp-badge piece" data-from="10">AGENTS.md</span>
+                  <span class="sp-badge piece" data-from="14">۱۲ تست سبز</span>
+                  <span class="sp-badge piece" data-from="15" style="background:#ddf3e8">منتشر شد</span>
+                  <span class="sp-badge piece" data-from="17">Turnstile</span>
+                </div>
+              </div>
+            </div>
+            <div class="spine-log" aria-live="polite"><span class="ch" id="spCh">ch 01</span><span id="spText"></span></div>
+          </div>
+          <div class="ctl" dir="ltr"><label for="spRange">Chapter</label><input class="range" id="spRange" type="range" min="1" max="18" value="1" style="flex:1"><button class="m-btn ghost" id="spPlay" type="button">Play</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="tbl"><table class="chg"><thead><tr><th>Before</th><th>After</th><th>Why</th></tr></thead><tbody>
+      <tr><td>Six demo businesses across labs</td><td>One project, <code>cafe-sahar.ir</code>, in every lab and prompt</td><td>A story needs one protagonist; progress becomes visible</td></tr>
+      <tr><td>Chapter ends with "I finished" only</td><td>Chapter ends with "the café gained: …" and the piece appears</td><td>Shows the learner what this chapter added to a real thing</td></tr>
+      <tr><td>Finale lists badges</td><td>Finale replays the café's build history, chapter by chapter</td><td>The resolution beat of a story arc</td></tr>
+    </tbody></table></div>
+  </section>
+
+  <!-- 2 ─────────────── Hero -->
+  <section class="case" id="c2">
+    <div class="case-head"><span class="case-num">02</span><div>
+      <h2>A hero that knows where you are</h2>
+      <p class="why">The coral <bdi dir="rtl">«قهرمان»</bdi> measures 2.85:1 on the cream background, under the 3:1 minimum for large text, and "accent one word" is a common AI-design tell. Keep the headline in ink and give the hand-drawn underline a job: it becomes the learner's progress line. Returning learners get a "continue" card with the exact section, not just the chapter.</p>
+      <div class="chips"><span class="chip h">Impact high</span><span class="chip l">Effort small</span><span class="chip skill">frontend-design: structure is information</span><span class="chip skill">accessibility-review: contrast by math</span><span class="chip skill">emil: rare moments may delight</span></div>
+    </div></div>
+    <div class="ba">
+      <div class="pane"><div class="tag">Before</div><img class="shot" src="img/hero.jpg" alt="Current home hero" loading="lazy"><p class="shot-note">Underline is decoration; the story card sits half-empty while the loop restarts.</p></div>
+      <div class="pane"><div class="tag after">After</div>
+        <div class="stage" dir="rtl"><div class="hero-m fa">
+          <p class="eyebrow">دوره عملی ساخت وب با Agent · ۱۸ فصل</p>
+          <h3>از صفر تا <span class="track-wrap">قهرمان<svg class="track" viewBox="0 0 200 18" preserveAspectRatio="none" aria-hidden="true"><path d="M197 12 C 120 4, 50 4, 3 14" fill="none" stroke="var(--line)" stroke-width="6" stroke-linecap="round" stroke-dasharray="2 10"/><path id="heroFill" d="M197 12 C 120 4, 50 4, 3 14" fill="none" stroke="var(--coral)" stroke-width="6" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/></svg></span></h3>
+          <p class="muted" style="max-width:46ch">خط زیر «قهرمان» مسیر شماست: هر فصل که تمام کنید، کمی جلوتر می‌رود.</p>
+          <div class="resume">
+            <svg class="ring" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18" fill="none" stroke="var(--line)" stroke-width="5"/><circle id="heroRing" cx="22" cy="22" r="18" fill="none" stroke="var(--mint-ink)" stroke-width="5" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" transform="rotate(-90 22 22)"/></svg>
+            <div><b>ادامه از فصل ۵: Cloudflare</b><small>بخش ۳ از ۴ · «سه انبار: D1، KV و R2»</small></div>
+            <button class="m-btn primary" type="button">ادامه</button>
+          </div>
+        </div>
+        <div class="ctl" dir="ltr"><label for="heroRange">Chapters done</label><input class="range" id="heroRange" type="range" min="0" max="18" value="4" style="flex:1"><span id="heroVal" style="font-family:var(--f-mono)">4/18</span></div></div>
+      </div>
+    </div>
+    <div class="tbl"><table class="chg"><thead><tr><th>Before</th><th>After</th><th>Why</th></tr></thead><tbody>
+      <tr><td><code>color: #ef6a4c</code> on <bdi dir="rtl">«قهرمان»</bdi> (2.85:1)</td><td>Headline in <code>var(--ink)</code>; coral kept for fills. Where coral text is needed: <code>#d9532f</code> (3.73:1)</td><td>Passes large-text contrast; removes the one-accent-word tell</td></tr>
+      <tr><td>Decorative underline drawn once</td><td>Underline = progress, <code>pathLength</code> to <code>done/18</code>, 900ms <code>cubic-bezier(0.23,1,0.32,1)</code> on return</td><td>Structure should encode something true</td></tr>
+      <tr><td>"Continue the journey" → chapter top</td><td>Resume card → exact section (<code>#/c/cloudflare/storage</code>)</td><td>Saves the learner from re-scrolling</td></tr>
+    </tbody></table></div>
+  </section>
+
+  <!-- 3 ─────────────── Map -->
+  <section class="case" id="c3">
+    <div class="case-head"><span class="case-num">03</span><div>
+      <h2>Journey map: "you are here", not a wall of 18 cards</h2>
+      <p class="why">The map shows every chapter at full size, done or not, so a learner on chapter 9 scrolls past eight finished cards. Collapse finished chapters into small ticks, give the current one a big "you are here" card with section progress, and show only the next three in detail.</p>
+      <div class="chips"><span class="chip h">Impact high</span><span class="chip m">Effort medium</span><span class="chip skill">structured-curriculum: roadmap renders progress state</span><span class="chip skill">app-ui-ux-patterns: progressive disclosure</span></div>
+    </div></div>
+    <div class="ba">
+      <div class="pane"><div class="tag">Before</div><img class="shot" src="img/map.jpg" alt="Current journey map" loading="lazy"></div>
+      <div class="pane"><div class="tag after">After</div>
+        <div class="stage" dir="rtl"><div class="map-m fa" id="mapM"></div>
+        <div class="ctl" dir="ltr"><label for="mapRange">Learner progress</label><input class="range" id="mapRange" type="range" min="0" max="17" value="6" style="flex:1"></div></div>
+      </div>
+    </div>
+    <div class="tbl"><table class="chg"><thead><tr><th>Before</th><th>After</th><th>Why</th></tr></thead><tbody>
+      <tr><td>18 equal cards, alternating sides</td><td>Done → tick chips; current → large card; next 3 → light list; rest → "+ n more"</td><td>Summary before detail; less scrolling every visit</td></tr>
+      <tr><td>Every stop fades in with blur on scroll</td><td>Only the newly-earned tick animates, once</td><td>Animate what changed, not what is already known</td></tr>
+      <tr><td>Map card → chapter: instant swap</td><td>Map icon morphs into the chapter badge (see 08)</td><td>Spatial continuity between the two views</td></tr>
+    </tbody></table></div>
+  </section>
+
+  <!-- 4 ─────────────── Chapter opening -->
+  <section class="case" id="c4">
+    <div class="case-head"><span class="case-num">04</span><div>
+      <h2>Chapter opening: a mission brief and a warm-up</h2>
+      <p class="why">Each chapter opens with a title, tagline and Bit's line, then goes straight into text. Add a three-part mission brief (what you'll be able to do, time, what the café gains) and one warm-up question from the previous chapter: recalling something is what makes it stick. Also isolate Latin words in Persian titles so the comma stops jumping (today <bdi dir="rtl">«Domain، DNS»</bdi> renders out of order).</p>
+      <div class="chips"><span class="chip h">Impact high</span><span class="chip m">Effort medium</span><span class="chip skill">learn: diagnose before you teach</span><span class="chip skill">exam-cram-planning: questions beat re-reading</span><span class="chip skill">lms-course-completion: &lt;bdi&gt; for Latin runs</span></div>
+    </div></div>
+    <div class="ba">
+      <div class="pane"><div class="tag">Before</div><img class="shot" src="img/chapter-open.jpg" alt="Current chapter opening" loading="lazy"></div>
+      <div class="pane"><div class="tag after">After</div>
+        <div class="stage" dir="rtl"><div class="open-m fa">
+          <p class="muted" style="font-weight:800;font-size:13.5px">فصل ۳ از ۱۸ · پرده اول</p>
+          <h3><bdi>Domain</bdi>، <bdi>DNS</bdi> و <bdi>Nameserver</bdi></h3>
+          <div class="mission">
+            <div><b>بعد از این فصل</b>می‌دانید وقتی کسی <bdi>cafe-sahar.ir</bdi> را تایپ می‌کند، دقیقاً چه کسی جواب می‌دهد.</div>
+            <div><b>زمان</b>حدود ۱۵ دقیقه، با یک تمرین</div>
+            <div><b>کافه سحر</b>آدرس اینترنتی‌اش را می‌گیرد</div>
+          </div>
+          <div class="warm" id="warm">
+            <b>گرم کردن: از فصل قبل یادتان هست؟</b>
+            <span>کدام بخش سایت در مرورگر کاربر اجرا می‌شود؟</span>
+            <div class="warm-opts"><button type="button" data-ok="0">Backend</button><button type="button" data-ok="1">Frontend</button><button type="button" data-ok="0">Database</button></div>
+            <span id="warmFb" class="muted" aria-live="polite"></span>
+          </div>
+        </div></div>
+      </div>
+    </div>
+    <div class="tbl"><table class="chg"><thead><tr><th>Before</th><th>After</th><th>Why</th></tr></thead><tbody>
+      <tr><td>Title, tagline, Bit's line</td><td>+ mission brief: outcome · time · what the café gains</td><td>Learners commit more when they know the payoff</td></tr>
+      <tr><td>No recall of earlier chapters</td><td>One warm-up question from the previous chapter</td><td>Spaced retrieval beats re-reading</td></tr>
+      <tr><td>«Domain، DNS و Nameserver» renders mis-ordered</td><td><code>Rich.tsx</code> wraps Latin runs in <code>&lt;bdi&gt;</code> automatically</td><td>Mixed-direction text needs explicit isolation</td></tr>
+      <tr><td>Big Bit floats endlessly on all 18 chapters</td><td>Static Bit; mood changes only</td><td>Ambient motion on a page read daily is noise</td></tr>
+    </tbody></table></div>
+  </section>
+
+  <!-- 5 ─────────────── Mobile -->
+  <section class="case" id="c5">
+    <div class="case-head"><span class="case-num">05</span><div>
+      <h2>Reading on a phone: tap any term, jump to any section</h2>
+      <p class="why">Under 980px the section rail disappears, so phone readers lose their place and their progress. And a beginner who meets "TTL" again in chapter 15 has to find chapter 3 to recall it. Add a bottom bar with section progress and a sections sheet, and make every glossary term tappable everywhere. Both sheets close with Back, a tap outside, or a downward flick.</p>
+      <div class="chips"><span class="chip h">Impact high</span><span class="chip m">Effort medium</span><span class="chip skill">tap-a-word: non-modal bottom panel</span><span class="chip skill">spa-overlay-back-navigation</span><span class="chip skill">emil: momentum dismissal, velocity &gt; 0.11</span><span class="chip skill">app-ui-ux-patterns: sheets for in-context actions</span></div>
+    </div></div>
+    <div class="ba">
+      <div class="pane"><div class="tag">Before</div><img class="shot" src="img/chapter-mobile.jpg" alt="Current chapter on a phone" loading="lazy" style="max-width:340px;margin-inline:auto"><p class="shot-note">No section navigation or progress on phones; terms are defined only in their home chapter.</p></div>
+      <div class="pane"><div class="tag after">After · tap a dotted word, or "بخش‌ها"</div>
+        <div class="stage"><div class="phone-wrap"><div class="phone fa" dir="rtl" id="phone">
+          <div class="phone-scroll">
+            <p class="muted" style="font-size:12.5px;font-weight:800">فصل ۱۶ · دامنه اختصاصی</p>
+            <h4>منتظر انتشار بمانید</h4>
+            <p>بعد از عوض کردن <button type="button" class="term" data-t="Nameserver">Nameserver</button>ها، اینترنت کمی طول می‌کشد تا خبردار شود. هر <button type="button" class="term" data-t="Resolver">Resolver</button> جواب قبلی را تا پایان <button type="button" class="term" data-t="TTL">TTL</button> نگه می‌دارد.</p>
+            <p>برای همین ممکن است شما سایت جدید را ببینید و دوستتان هنوز قدیمی را. وقتی وضعیت دامنه در Cloudflare «Active» شد، کار تمام است و می‌توانید <button type="button" class="term" data-t="Custom Domain">Custom Domain</button> را به Worker وصل کنید.</p>
+            <p class="muted">یک پاراگراف دیگر برای اسکرول…</p>
+          </div>
+          <div class="bbar">
+            <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="13" fill="none" stroke="var(--line)" stroke-width="4"/><circle cx="17" cy="17" r="13" fill="none" stroke="var(--coral)" stroke-width="4" pathLength="1" stroke-dasharray="1" stroke-dashoffset="0.5" stroke-linecap="round" transform="rotate(-90 17 17)"/></svg>
+            <span class="sec">بخش ۲ از ۴ · منتظر انتشار</span>
+            <button type="button" class="m-btn" id="secBtn">بخش‌ها</button>
+          </div>
+          <div class="scrim" id="scrim"></div>
+          <div class="sheet" id="sheet" role="dialog" aria-modal="false" aria-label="sheet">
+            <div class="grab" aria-hidden="true"></div>
+            <div id="sheetBody"></div>
+          </div>
+        </div></div></div>
+      </div>
+    </div>
+    <div class="tbl"><table class="chg"><thead><tr><th>Before</th><th>After</th><th>Why</th></tr></thead><tbody>
+      <tr><td>Rail hidden under 980px</td><td>Sticky bottom bar: ring + current section + <bdi dir="rtl">«بخش‌ها»</bdi> sheet</td><td>Phone readers keep orientation and progress</td></tr>
+      <tr><td>Terms defined only in one chapter</td><td>Dotted terms everywhere → glossary sheet with ‹ › through the paragraph's terms; built from existing <code>terms</code> blocks</td><td>Recall at the moment of need; no new content to write</td></tr>
+      <tr><td>—</td><td>Sheet: <code>translateY(100%)→0</code>, 350ms <code>cubic-bezier(0.32,0.72,0,1)</code>; flick closes if velocity &gt; 0.11 px/ms; Back closes it</td><td>Feels native; Back never leaves the chapter by surprise</td></tr>
+    </tbody></table></div>
+  </section>
+
+  <!-- 6 ─────────────── Quiz -->
+  <section class="case" id="c6">
+    <div class="case-head"><span class="case-num">06</span><div>
+      <h2>Quizzes you can't pass by picking the longest answer</h2>
+      <p class="why">Measured across all 18 quizzes: the correct option is the longest in 17 (English) and 16 (Persian), and it is never option D. Rewrite options to similar length, make every wrong option a real misconception, explain all of them after answering, and add a short review at the end of each act.</p>
+      <div class="chips"><span class="chip h">Impact high</span><span class="chip m">Effort medium</span><span class="chip skill">course-build-discipline: the discriminator is the unit</span><span class="chip skill">learn: one focused question</span></div>
+    </div></div>
+    <div class="ba">
+      <div class="pane"><div class="tag">Before</div><img class="shot" src="img/quiz.jpg" alt="Current quiz" loading="lazy">
+        <div class="lenbars" style="margin-top:10px"><b style="font-size:12.5px">Option length, GitHub quiz (characters, EN)</b>
+          <div><span>A</span><i style="width:40%"></i><span>38</span></div><div><span>B ✓</span><i class="c" style="width:100%"></i><span>96</span></div><div><span>C</span><i style="width:36%"></i><span>34</span></div></div>
+        <p class="shot-note">Illustrative of the measured pattern; exact lengths vary per quiz.</p>
+      </div>
+      <div class="pane"><div class="tag after">After · answer it</div>
+        <div class="stage" dir="rtl"><div class="quiz-m fa" id="quiz">
+          <p class="q">Agent شما یک کلید API را اشتباهی در Repository عمومی Commit کرده. اول چه کنید؟</p>
+          <button type="button" class="qopt" data-ok="0"><span class="l">الف</span><span>Commit را پاک کنید و دوباره Push کنید</span><span class="ex">کلید در تاریخچه و کپی‌های دیگران باقی می‌ماند؛ پاک کردن کافی نیست.</span></button>
+          <button type="button" class="qopt" data-ok="0"><span class="l">ب</span><span>Repository را خصوصی کنید و ادامه دهید</span><span class="ex">ربات‌ها کلیدهای عمومی را در چند دقیقه پیدا می‌کنند؛ ممکن است دیر شده باشد.</span></button>
+          <button type="button" class="qopt" data-ok="0"><span class="l">ج</span><span>به Agent بگویید کلید را در کد مخفی کند</span><span class="ex">کلیدی که لو رفته، دیگر امن نیست؛ جای نگهداری مشکل اصلی نیست.</span></button>
+          <button type="button" class="qopt" data-ok="1"><span class="l">د</span><span>کلید را باطل کنید و یک کلید تازه بسازید</span><span class="ex">درست است: اول کلید لورفته را بی‌اثر کنید، بعد سراغ تمیزکاری بروید.</span></button>
+        </div></div>
+      </div>
+    </div>
+    <div class="tbl"><table class="chg"><thead><tr><th>Before</th><th>After</th><th>Why</th></tr></thead><tbody>
+      <tr><td>Correct = longest in 17/18; answers only at A–C</td><td>Options within ±20% length; answer positions balanced A–D; validator fails otherwise</td><td>Tests understanding, not test-taking tricks</td></tr>
+      <tr><td>Only the chosen option is explained</td><td>Every option explains itself after answering</td><td>Wrong options are where the misconceptions live</td></tr>
+      <tr><td>One question per chapter</td><td>+ 5-question review at the end of each act, mixing chapters</td><td>Interleaved retrieval improves retention</td></tr>
+    </tbody></table></div>
+  </section>
+
+  <!-- 7 ─────────────── Lab standard -->
+  <section class="case" id="c7">
+    <div class="case-head"><span class="case-num">07</span><div>
+      <h2>One anatomy for all 17 labs (and labs for the 3 chapters without one)</h2>
+      <p class="why">The labs were built in three batches and drifted: switches are 28px tall, preset chips 32px, step buttons 38px, and Reset sits in different places. Give every lab the same anatomy: a goal chip, the stage, a footer with Reset at the start and the main action at the end, and a "done" stamp that tells the chapter the lab was completed.</p>
+      <div class="chips"><span class="chip m">Impact medium</span><span class="chip l">Effort small</span><span class="chip skill">accessibility-review: targets ≥ 44px</span><span class="chip skill">apple-design: respond on press</span><span class="chip skill">emil: scale(0.97) on :active</span></div>
+    </div></div>
+    <div class="ba">
+      <div class="pane"><div class="tag">Before</div><img class="shot" src="img/lab.jpg" alt="Current storage lab" loading="lazy"></div>
+      <div class="pane"><div class="tag after">After · flip the switches</div>
+        <div class="stage" dir="rtl" style="position:relative"><div class="lab-m fa">
+          <div class="lab-h"><span class="goal">هدف</span><b>یک Token با کمترین دسترسی بسازید</b></div>
+          <div class="lab-s" id="labS"></div>
+          <div class="lab-f"><button type="button" class="m-btn ghost" id="labReset">از اول</button><button type="button" class="m-btn primary" id="labRec">تنظیم پیشنهادی</button></div>
+          <div class="stamp" id="stamp">انجام شد ✓</div>
+        </div></div>
+        <ul class="anno" style="margin-top:14px">
+          <li><b class="k">1</b><span>Goal chip states the task in one line; no hint bubble that repeats the title.</span></li>
+          <li><b class="k">2</b><span>Every control ≥ 44px tall (switch 52×32 inside a 48px row).</span></li>
+          <li><b class="k">3</b><span>Footer: Reset at the start, main action at the end, in every lab.</span></li>
+          <li><b class="k">4</b><span>"Done" stamp reports completion to the chapter (feeds proposal 10).</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="extras" style="margin-top:18px">
+      <div class="ex"><b>New lab · Meet the agents</b><p><bdi dir="rtl">«کدام Agent برای من؟»</bdi> Four questions (budget, region, terminal comfort, editor) give a recommendation with availability notes.</p></div>
+      <div class="ex"><b>New lab · Design first</b><p><bdi dir="rtl">«۵ ایراد را پیدا کنید»</bdi>. A mock page with purple gradient, lorem ipsum, 2.8:1 text, a 30px button and LTR text in RTL. Tap a flaw to wipe in the fix (clip-path reveal).</p></div>
+      <div class="ex"><b>New lab · Security</b><p><bdi dir="rtl">«Secret را پیدا کنید»</bdi>. A fake commit diff hides a token; find it, then rotate it in the right order.</p></div>
+    </div>
+  </section>
+
+  <!-- 8 ─────────────── Motion -->
+  <section class="case" id="c8">
+    <div class="case-head"><span class="case-num">08</span><div>
+      <h2>Motion: fewer, better moments</h2>
+      <p class="why">Today every paragraph fades in with a 6px blur (about 17 per chapter), every small Bit wiggles its antenna forever, and route changes jump instantly. Flip it: text is simply there; headings and labs reveal once; small Bits are still; and the one moment worth animating, opening a chapter, morphs the map icon into the chapter badge. Easing lives in one token file instead of 29 copies.</p>
+      <div class="chips"><span class="chip h">Impact high</span><span class="chip l">Effort small</span><span class="chip skill">emil-design-eng</span><span class="chip skill">web-animation-design</span><span class="chip skill">improve-animations</span><span class="chip skill">animation-vocabulary: shared element</span><span class="chip skill">premium-web-design: no fade-up on everything</span></div>
+    </div></div>
+    <div class="stage">
+      <div class="mo-grid">
+        <div class="mo-col" id="moOld"><h6>Before · every block reveals</h6><div class="ln h"></div><div class="ln"></div><div class="ln" style="width:92%"></div><div class="ln" style="width:85%"></div><div class="ln"></div><div class="ln" style="width:70%"></div><div class="ln" style="width:88%"></div></div>
+        <div class="mo-col" id="moNew"><h6>After · only the heading</h6><div class="ln h"></div><div class="ln"></div><div class="ln" style="width:92%"></div><div class="ln" style="width:85%"></div><div class="ln"></div><div class="ln" style="width:70%"></div><div class="ln" style="width:88%"></div></div>
+      </div>
+      <div class="ctl"><button class="m-btn" id="moPlay" type="button">Replay both</button><span class="muted">Left: 7 blurred reveals. Right: one 300ms reveal, text already readable.</span></div>
+      <div class="flip-area" dir="rtl">
+        <p class="muted" dir="ltr" style="margin-bottom:10px;font-size:14px">Shared element: tap the map card, the icon becomes the chapter badge (300ms, <code>cubic-bezier(0.77,0,0.175,1)</code>). Tap the header to go back.</p>
+        <button type="button" class="mcard" id="mcard"><span class="ic" id="icSmall"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18.5h10.5a4 4 0 0 0 .4-8 5.5 5.5 0 0 0-10.6-1.2A4.6 4.6 0 0 0 7 18.5Z" fill="#fffdf9" stroke="#2a211b" stroke-width="1.9"/></svg></span><span><b style="display:block">فصل ۵</b>Cloudflare: خیلی بیشتر از DNS</span></button>
+        <div class="chead" id="chead" role="button" tabindex="0" aria-label="back"><span class="ic" id="icBig"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18.5h10.5a4 4 0 0 0 .4-8 5.5 5.5 0 0 0-10.6-1.2A4.6 4.6 0 0 0 7 18.5Z" fill="#fffdf9" stroke="#2a211b" stroke-width="1.9"/></svg></span><h4>Cloudflare: خیلی بیشتر از DNS</h4><p class="muted">فصل ۵ از ۱۸ · ۱۸ دقیقه</p></div>
+      </div>
+      <div class="tokens">
+        <div class="tok"><b>EASE_OUT</b> enter, exit, responses<code>cubic-bezier(0.23, 1, 0.32, 1)</code><svg class="curve" viewBox="0 0 100 46" aria-hidden="true"><path d="M2 44 C 25 0, 34 2, 98 2" fill="none" stroke="var(--coral)" stroke-width="3"/></svg></div>
+        <div class="tok"><b>EASE_INOUT</b> on-screen moves, morphs<code>cubic-bezier(0.77, 0, 0.175, 1)</code><svg class="curve" viewBox="0 0 100 46" aria-hidden="true"><path d="M2 44 C 79 44, 19 2, 98 2" fill="none" stroke="var(--coral)" stroke-width="3"/></svg></div>
+        <div class="tok"><b>SPRING</b> badge, cheer, site card<code>{ type: 'spring', bounce: 0, duration: 0.4 }</code></div>
+        <div class="tok"><b>SPRING_MOMENTUM</b> only after a drag or flick<code>{ type: 'spring', bounce: 0.2, duration: 0.45 }</code></div>
+      </div>
+    </div>
+    <div class="tbl"><table class="chg"><thead><tr><th>Before</th><th>After</th><th>Why</th></tr></thead><tbody>
+      <tr><td><code>Reveal</code> on every block: blur(6px) + translateY(10px), 550ms</td><td>Only h2, labs, quiz: <code>opacity 0→1, translateY(8px)</code>, 300ms, no blur</td><td>Reading content shouldn't wait for animation; blur is costly on Safari</td></tr>
+      <tr><td>Antenna wiggle + blink on every Bit (incl. 30px avatars)</td><td><code>ambient={false}</code> by default; on only for hero and finale Bit</td><td>Seen dozens of times a session → remove</td></tr>
+      <tr><td>Chapter Bit floats forever</td><td>Static; one mood change when the chapter is marked done</td><td>Motion should mean something happened</td></tr>
+      <tr><td>Route change swaps instantly</td><td>View Transition: map icon → chapter badge, 300ms ease-in-out; rest crossfades 200ms; skipped under reduced motion</td><td>Spatial continuity, one orchestrated moment</td></tr>
+      <tr><td>29 hard-coded <code>[0.23,1,0.32,1]</code>; bounce 0.25/0.3/0.35 ad hoc</td><td><code>src/lib/motion.ts</code> tokens; bounce only after momentum</td><td>Cohesion; bounce without a gesture reads as wobble</td></tr>
+    </tbody></table></div>
+  </section>
+
+  <!-- 9 ─────────────── Color -->
+  <section class="case" id="c9">
+    <div class="case-head"><span class="case-num">09</span><div>
+      <h2>Color: fix the contrast, consider a Persian identity</h2>
+      <p class="why">Two fixes and one option. Faint text (<code>#9a8b7c</code>) is 3.07:1 on paper; <code>#7a6b5c</code> is 4.78:1. Dark-mode stickers use a black offset shadow on a near-black page (1.11:1, invisible), so cards look flat with a harsh light outline; a warm coral-brown shadow and a softer outline fix it. Option: warm cream + terracotta is the most common AI-generated palette. A "Kashi" palette (turquoise firoozeh, saffron, pomegranate, from Persian tilework) gives the course its own identity. Ship it as a second theme to compare live before switching.</p>
+      <div class="chips"><span class="chip m">Impact medium</span><span class="chip m">Effort medium</span><span class="chip skill">frontend-design: avoid AI palette clusters</span><span class="chip skill">app-ui-ux-patterns: two theme axes</span><span class="chip skill">accessibility-review</span></div>
+    </div></div>
+    <div class="ba">
+      <div class="pane"><div class="tag">Before</div><img class="shot" src="img/dark.jpg" alt="Current dark mode" loading="lazy">
+        <div class="dk" style="margin-top:12px" dir="rtl"><div class="c old"><small>today</small>کارت در حالت تیره</div><div class="c new"><small>proposed</small>کارت در حالت تیره</div></div>
+      </div>
+      <div class="pane"><div class="tag after">After · switch palettes</div>
+        <div class="stage"><div class="col-m">
+          <div class="pal-demo" id="pal"><span class="pd-chip" id="palChip">پرده دوم</span><div class="pd-title">کارگاه را بچین</div><div class="pd-card">یک Token با کمترین دسترسی، برای Agent شما.</div><div><span class="pd-btn" id="palBtn">شروع فصل</span></div></div>
+          <div class="sw-row" id="palSw"></div>
+        </div>
+        <div class="ctl"><div class="w-toggle" role="group" aria-label="Palette" style="display:flex;gap:8px"><button class="m-btn" type="button" data-pal="candy" aria-pressed="true">Candy (today)</button><button class="m-btn ghost" type="button" data-pal="kashi" aria-pressed="false">Kashi (option)</button></div></div></div>
+      </div>
+    </div>
+    <div class="tbl"><table class="chg"><thead><tr><th>Before</th><th>After</th><th>Why</th></tr></thead><tbody>
+      <tr><td><code>--ink-3: #9a8b7c</code> used for text (3.07:1)</td><td><code>#7a6b5c</code> for text (4.78:1); keep the old value for dashed borders only</td><td>WCAG AA body text</td></tr>
+      <tr><td>Dark sticker: <code>-4px 4px 0 #0c0907</code> on <code>#1b1612</code></td><td><code>-4px 4px 0 #5a2a1e</code> + outline <code>color-mix(ink 55%)</code></td><td>The sticker signature should survive dark mode</td></tr>
+      <tr><td>One palette, cream + coral</td><td><code>data-style="candy|kashi"</code> second axis, A/B before deciding</td><td>Distinct identity without a risky big-bang change</td></tr>
+    </tbody></table></div>
+  </section>
+
+  <!-- 10 ─────────────── Finishing -->
+  <section class="case" id="c10">
+    <div class="case-head"><span class="case-num">10</span><div>
+      <h2>Finishing: earned "done", and a certificate with your live site on it</h2>
+      <p class="why">"I finished this chapter" is self-declared, so the progress ring measures button presses. Suggest "done" when the quiz was answered and the lab completed (a light bar, not mastery), and end the course with a named certificate showing the learner's own live URL, ready to share. No streaks or loss-framing; "continue at §3" is the nudge.</p>
+      <div class="chips"><span class="chip m">Impact medium</span><span class="chip m">Effort medium</span><span class="chip skill">structured-curriculum: decouple complete from mastered</span><span class="chip skill">ui-ux-pro-max: certificate reveal</span><span class="chip skill">emil: rare moments may delight</span></div>
+    </div></div>
+    <div class="ba">
+      <div class="pane"><div class="tag">Before</div><img class="shot" src="img/end.jpg" alt="Current chapter end" loading="lazy"></div>
+      <div class="pane"><div class="tag after">After · type your name</div>
+        <div class="stage"><div class="cert-m">
+          <div class="auto-done"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span>سؤال را جواب دادید و تمرین را انجام دادید. این فصل را تمام‌شده علامت بزنیم؟</span></div>
+          <label for="certName" class="muted" style="font-size:14px;font-weight:800">Name on the certificate</label>
+          <input class="in" id="certName" value="سحر احمدی" maxlength="40">
+          <div class="cert"><p class="t">این گواهی تأیید می‌کند که</p><p class="nm" id="certOut">سحر احمدی</p><p>مسیر «از صفر تا قهرمان» را تمام کرد و یک وب‌سایت واقعی را با کمک Agent ساخت و منتشر کرد.</p><span class="url">https://cafe-sahar.ir</span>
+            <div class="badges"><span style="background:#a6cdf3">۱</span><span style="background:#8fd5b5">۲</span><span style="background:#ffd36a">۳</span><span style="background:#f6bccb">۴</span></div></div>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Extras + roadmap -->
+  <section class="case" id="road">
+    <div class="case-head"><span class="case-num">→</span><div><h2>Also worth doing</h2></div></div>
+    <div class="extras">
+      <div class="ex"><b>Voice notes with timestamps</b><p>Each chapter plays your recording from the right minute (<code>voice: {src, from, to}</code>), with the original transcript in a collapsible <bdi dir="rtl">«صدای نویسنده»</bdi> panel.</p></div>
+      <div class="ex"><b>A 20-second trailer</b><p>A Remotion video of Bit building the café, for Telegram and Instagram, plus a 1200×630 share card per chapter.</p></div>
+      <div class="ex"><b>Real URLs and share previews</b><p><code>/c/cloudflare</code> instead of <code>#/c/cloudflare</code>, with Open Graph tags, so every chapter can be shared and indexed.</p></div>
+      <div class="ex"><b>Copy pass</b><p>Drop hint bubbles that restate the lab title; keep Bit's hint only where the action isn't obvious. Verb-first buttons throughout.</p></div>
+      <div class="ex"><b>Persian consistency</b><p>One spelling per term: <span class="fa">وب‌سایت</span> with half-space (13 places lack it), and one choice each for Database/<span class="fa">دیتابیس</span> and Repository/<span class="fa">مخزن</span>.</p></div>
+    </div>
+    <h3 style="margin:34px 0 12px;font-size:24px">Suggested order</h3>
+    <div class="tbl" style="margin-top:0"><table class="road"><thead><tr><th>Phase</th><th>Proposals</th><th>Why this order</th></tr></thead><tbody>
+      <tr><td class="p">1 · quick wins</td><td>08 Motion trim + tokens · 02 Hero contrast + progress line · 04 <code>&lt;bdi&gt;</code> fix · 09 contrast + dark stickers · 07 target sizes</td><td>Small edits, visible everywhere, low risk</td></tr>
+      <tr><td class="p">2 · learning</td><td>06 Quiz rewrite + act reviews · 04 Mission brief + warm-ups · 10 earned "done"</td><td>Content work; makes progress mean something</td></tr>
+      <tr><td class="p">3 · story</td><td>01 Café spine across labs and prompts · 03 Map "you are here" · 10 certificate</td><td>Touches every lab; best done in one pass</td></tr>
+      <tr><td class="p">4 · reach</td><td>05 Mobile sheets + glossary · real URLs + share cards · trailer · voice timestamps · 3 new labs · 09 Kashi palette A/B</td><td>New surfaces; each can ship on its own</td></tr>
+    </tbody></table></div>
+  </section>
+
+  <p class="foot">Before images: the live site at start.ahouei.site, captured today in headless Chromium. After panels: working mocks, not final code. Contrast numbers computed with the WCAG formula. Skill sources: emil-design-eng, web-animation-design, improve-animations, animation-vocabulary, apple-design, app-ui-ux-patterns, premium-web-design, scroll-experience, frontend-design, tap-a-word, spa-overlay-back-navigation, learn, exam-cram-planning, structured-curriculum-content, course-build-discipline, lms-course-completion, remotion, ui-ux-pro-max, accessibility-review, ux-copy.</p>
+</div>
+
+<script>
+(() => {
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const fa = (n) => String(n).replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+
+  /* 01 Story spine */
+  const CH = ['','خوش آمدید: ایده کافه روی کاغذ','وب چطور کار می‌کند','DNS کافه آماده شد','کد کافه در GitHub','Cloudflare را شناختیم','Agent در برابر چت','Codex یا Claude Code','حساب‌ها آماده شد','Agent به GitHub و Cloudflare وصل شد','AGENTS.md کافه نوشته شد','Prompt خوب برای منو','طراحی تایید شد: رنگ و هدر','منو و رزرو ساخته شد','تست‌ها سبز شدند','با هر Push منتشر می‌شود','cafe-sahar.ir با HTTPS زنده است','امنیت: Turnstile روی فرم رزرو','قهرمان! کافه کامل شد'];
+  const sp = document.getElementById('spRange'), pieces = document.querySelectorAll('#spSite .piece');
+  const addr = document.getElementById('spAddr'), hero = document.getElementById('spHero');
+  function spUpdate() {
+    const v = +sp.value;
+    pieces.forEach((p) => p.classList.toggle('on', v >= +p.dataset.from));
+    addr.textContent = v >= 16 ? 'https://cafe-sahar.ir' : v >= 15 ? 'cafe-sahar.workers.dev' : v >= 3 ? 'cafe-sahar.ir (DNS)' : 'localhost:5173';
+    addr.classList.toggle('live', v >= 15);
+    hero.classList.toggle('styled', v >= 12);
+    document.getElementById('spCh').textContent = 'ch ' + String(v).padStart(2, '0');
+    document.getElementById('spText').textContent = CH[v];
+  }
+  sp.addEventListener('input', spUpdate); spUpdate();
+  let spTimer = null;
+  document.getElementById('spPlay').addEventListener('click', (e) => {
+    if (spTimer) { clearInterval(spTimer); spTimer = null; e.target.textContent = 'Play'; return; }
+    if (+sp.value >= 18) sp.value = 1;
+    e.target.textContent = 'Pause';
+    spTimer = setInterval(() => { sp.value = Math.min(18, +sp.value + 1); spUpdate(); if (+sp.value >= 18) { clearInterval(spTimer); spTimer = null; e.target.textContent = 'Play'; } }, reduce ? 400 : 700);
+  });
+
+  /* 02 Hero progress line */
+  const hr = document.getElementById('heroRange'), fill = document.getElementById('heroFill'), ring = document.getElementById('heroRing');
+  function heroUpdate() {
+    const v = +hr.value, f = v / 18;
+    fill.style.transition = reduce ? 'none' : 'stroke-dashoffset 900ms cubic-bezier(0.23,1,0.32,1)';
+    ring.style.transition = fill.style.transition;
+    fill.setAttribute('stroke-dashoffset', String(1 - f));
+    ring.setAttribute('stroke-dashoffset', String(1 - f));
+    document.getElementById('heroVal').textContent = v + '/18';
+  }
+  hr.addEventListener('input', heroUpdate); requestAnimationFrame(heroUpdate);
+
+  /* 03 Map */
+  const TITLES = ['خوش آمدید','وب چطور کار می‌کند','Domain و DNS','GitHub','Cloudflare','Generative تا Agentic','Codex و Claude Code','جعبه‌ابزار','وصل کردن Agent','تعریف پروژه','Prompt و Skills','اول طراحی','حلقه Vibe Coding','تست و Debug','CI/CD','دامنه اختصاصی','امنیت و نگهداری','قهرمان'];
+  const mapM = document.getElementById('mapM'), mr = document.getElementById('mapRange');
+  function mapUpdate() {
+    const cur = +mr.value;
+    const done = TITLES.slice(0, cur).map((t) => `<span>✓ ${t}</span>`).join('');
+    const next = TITLES.slice(cur + 1, cur + 4).map((t, i) => `<li><span class="n">${fa(cur + 2 + i)}</span>${t}</li>`).join('');
+    const rest = Math.max(0, 18 - (cur + 4));
+    mapM.innerHTML = `
+      ${cur ? `<div><p class="muted" style="font-size:13px;font-weight:800;margin-bottom:6px">${fa(cur)} فصل تمام شده</p><div class="done-row">${done}</div></div>` : ''}
+      <div class="now-card"><span class="here">شما اینجایید</span><span class="muted" style="font-size:13px;font-weight:800">فصل ${fa(cur + 1)}</span><b>${TITLES[cur]}</b><span class="muted" style="font-size:14px">بخش ۲ از ۴ · کافه سحر در این فصل: ${CH[cur + 1]}</span><div class="bar"><i></i></div></div>
+      ${next ? `<ul class="next-list">${next}</ul>` : ''}
+      ${rest ? `<p class="more">+ ${fa(rest)} فصل دیگر تا قهرمان</p>` : ''}`;
+  }
+  mr.addEventListener('input', mapUpdate); mapUpdate();
+
+  /* 04 Warm-up */
+  document.querySelectorAll('#warm button').forEach((b) => b.addEventListener('click', () => {
+    document.querySelectorAll('#warm button').forEach((x) => x.classList.remove('right', 'wrong'));
+    const ok = b.dataset.ok === '1';
+    b.classList.add(ok ? 'right' : 'wrong');
+    document.getElementById('warmFb').textContent = ok ? 'درست! Frontend در مرورگر اجرا می‌شود. حالا برویم سراغ DNS.' : 'نه دقیقاً؛ این بخش روی سرور است. دوباره امتحان کنید.';
+  }));
+
+  /* 05 Phone: glossary + sections sheet, flick to dismiss */
+  const DEF = {
+    'Nameserver': 'سروری که جواب می‌دهد «این دامنه کجاست». با عوض کردنش، مدیریت DNS را به Cloudflare می‌سپارید. (فصل ۳)',
+    'Resolver': 'واسطه‌ای (معمولاً از اینترنت شما) که به‌جای مرورگر دنبال جواب DNS می‌گردد و آن را نگه می‌دارد. (فصل ۳)',
+    'TTL': 'مدت زمانی که یک جواب DNS می‌تواند در حافظه بماند، به ثانیه. برای همین تغییرات فوری همه‌جا دیده نمی‌شوند. (فصل ۳)',
+    'Custom Domain': 'وصل کردن دامنه خودتان به یک Worker؛ Cloudflare رکورد DNS و گواهی HTTPS را خودش می‌سازد. (فصل ۱۶)',
+  };
+  const TERMS = Object.keys(DEF);
+  const sheet = document.getElementById('sheet'), scrim = document.getElementById('scrim'), body = document.getElementById('sheetBody');
+  let ti = 0;
+  function showTerm(i) {
+    ti = (i + TERMS.length) % TERMS.length;
+    document.querySelectorAll('.term').forEach((t) => t.classList.toggle('active', t.dataset.t === TERMS[ti]));
+    body.innerHTML = `<h5>${TERMS[ti]}</h5><p>${DEF[TERMS[ti]]}</p><div class="nav"><button class="m-btn ghost" type="button" data-step="-1">‹ قبلی</button><button class="m-btn ghost" type="button" data-step="1">بعدی ›</button></div>`;
+    body.querySelectorAll('[data-step]').forEach((b) => b.addEventListener('click', () => showTerm(ti + +b.dataset.step)));
+    open(false);
+  }
+  function showSections() {
+    const S = ['انتقال دامنه به Cloudflare', 'منتظر انتشار بمانید', 'وصل کردن به Worker', 'www و ایمیل'];
+    body.innerHTML = `<h5 style="font-family:var(--f-fa)">بخش‌های این فصل</h5><ol>${S.map((s, i) => `<li><button type="button" class="${i === 1 ? 'cur' : ''}">${fa(i + 1)}. ${s}</button></li>`).join('')}</ol>`;
+    document.querySelectorAll('.term').forEach((t) => t.classList.remove('active'));
+    open(true);
+  }
+  function open(modal) { sheet.classList.add('on'); scrim.classList.toggle('on', modal); sheet.style.transform = ''; }
+  function close() { sheet.classList.remove('on'); scrim.classList.remove('on'); sheet.style.transform = ''; document.querySelectorAll('.term').forEach((t) => t.classList.remove('active')); }
+  document.querySelectorAll('.term').forEach((t) => t.addEventListener('click', () => showTerm(TERMS.indexOf(t.dataset.t))));
+  document.getElementById('secBtn').addEventListener('click', showSections);
+  scrim.addEventListener('click', close);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  let sy = 0, st = 0, dy = 0, drag = false;
+  sheet.addEventListener('pointerdown', (e) => { if (e.target.closest('button')) return; drag = true; sy = e.clientY; st = performance.now(); dy = 0; sheet.classList.add('dragging'); sheet.setPointerCapture(e.pointerId); });
+  sheet.addEventListener('pointermove', (e) => { if (!drag) return; dy = e.clientY - sy; const d = dy < 0 ? dy * 0.2 : dy; sheet.style.transform = `translateY(${d}px)`; });
+  sheet.addEventListener('pointerup', () => { if (!drag) return; drag = false; sheet.classList.remove('dragging'); const v = Math.abs(dy) / Math.max(1, performance.now() - st); if (dy > 80 || (dy > 0 && v > 0.11)) close(); else sheet.style.transform = ''; });
+
+  /* 06 Quiz */
+  const quiz = document.getElementById('quiz');
+  quiz.querySelectorAll('.qopt').forEach((b) => b.addEventListener('click', () => {
+    quiz.classList.add('answered');
+    quiz.querySelectorAll('.qopt').forEach((x) => x.classList.remove('right', 'wrong'));
+    quiz.querySelectorAll('.qopt').forEach((x) => { if (x.dataset.ok === '1') x.classList.add('right'); });
+    if (b.dataset.ok !== '1') b.classList.add('wrong');
+  }));
+
+  /* 07 Lab */
+  const PERMS = [['Workers Scripts: Edit', 1], ['D1: Edit', 1], ['DNS: Edit (one zone)', 1], ['Workers Tail: Read', 1], ['All permissions: Edit', 0]];
+  const labS = document.getElementById('labS'), stamp = document.getElementById('stamp');
+  labS.innerHTML = PERMS.map(([n, rec], i) => `<button type="button" class="sw" role="switch" aria-checked="false" data-rec="${rec}"><span class="t"></span><span class="lab">${n}</span>${rec ? '' : '<span class="chip h" style="margin-inline-start:auto">خطرناک</span>'}</button>`).join('');
+  function labCheck() {
+    const ok = [...labS.querySelectorAll('.sw')].every((s) => (s.getAttribute('aria-checked') === 'true') === (s.dataset.rec === '1'));
+    stamp.classList.toggle('on', ok);
+  }
+  labS.querySelectorAll('.sw').forEach((s) => s.addEventListener('click', () => { s.setAttribute('aria-checked', s.getAttribute('aria-checked') === 'true' ? 'false' : 'true'); labCheck(); }));
+  document.getElementById('labReset').addEventListener('click', () => { labS.querySelectorAll('.sw').forEach((s) => s.setAttribute('aria-checked', 'false')); labCheck(); });
+  document.getElementById('labRec').addEventListener('click', () => { labS.querySelectorAll('.sw').forEach((s) => s.setAttribute('aria-checked', s.dataset.rec === '1' ? 'true' : 'false')); labCheck(); });
+
+  /* 08 Motion demos */
+  function play() {
+    if (reduce) return;
+    document.querySelectorAll('#moOld .ln').forEach((el, i) => el.animate(
+      [{ opacity: 0, filter: 'blur(6px)', transform: 'translateY(10px)' }, { opacity: el.classList.contains('h') ? 1 : 0.55, filter: 'blur(0px)', transform: 'translateY(0)' }],
+      { duration: 550, delay: 120 + i * 140, easing: 'cubic-bezier(0.23,1,0.32,1)', fill: 'backwards' }));
+    const h = document.querySelector('#moNew .ln.h');
+    h.animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 300, delay: 120, easing: 'cubic-bezier(0.23,1,0.32,1)', fill: 'backwards' });
+  }
+  document.getElementById('moPlay').addEventListener('click', play);
+  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { play(); io.disconnect(); } }), { threshold: 0.5 });
+  io.observe(document.getElementById('moOld'));
+
+  const mcard = document.getElementById('mcard'), chead = document.getElementById('chead'), icS = document.getElementById('icSmall'), icB = document.getElementById('icBig');
+  function morph(from, to) {
+    if (reduce) return;
+    const a = from.getBoundingClientRect(), b = to.getBoundingClientRect();
+    const dx = a.left - b.left, dy = a.top - b.top, s = a.width / b.width;
+    to.animate([{ transformOrigin: 'top left', transform: `translate(${dx}px, ${dy}px) scale(${s})` }, { transformOrigin: 'top left', transform: 'none' }], { duration: 300, easing: 'cubic-bezier(0.77,0,0.175,1)' });
+  }
+  mcard.addEventListener('click', () => {
+    chead.classList.add('on');
+    morph(icS, icB);
+    if (!reduce) [...chead.children].slice(1).forEach((el) => el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, delay: 120, fill: 'backwards', easing: 'ease-out' }));
+    chead.focus();
+  });
+  function back() { const r = icB.getBoundingClientRect(); chead.classList.remove('on'); if (!reduce) { const a = icS.getBoundingClientRect(); icS.animate([{ transformOrigin: 'top left', transform: `translate(${r.left - a.left}px, ${r.top - a.top}px) scale(${r.width / a.width})` }, { transformOrigin: 'top left', transform: 'none' }], { duration: 300, easing: 'cubic-bezier(0.77,0,0.175,1)' }); } mcard.focus(); }
+  chead.addEventListener('click', back);
+  chead.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); back(); } });
+
+  /* 09 Palettes */
+  const PAL = {
+    candy: { bg: '#fbf6ee', chip: '#a6cdf3', btn: '#ef6a4c', card: '#fffdf9', sw: [['#fbf6ee','paper'],['#ef6a4c','coral'],['#ffd36a','butter'],['#8fd5b5','mint'],['#a6cdf3','sky']] },
+    kashi: { bg: '#eef3f1', chip: '#f2a516', btn: '#1f8a8a', card: '#ffffff', sw: [['#eef3f1','paper'],['#1f8a8a','firoozeh'],['#f2a516','saffron'],['#b8324b','anar'],['#203a5c','lapis']] },
+  };
+  function setPal(k) {
+    const p = PAL[k];
+    const el = document.getElementById('pal');
+    el.style.background = p.bg;
+    document.getElementById('palChip').style.background = p.chip;
+    const btn = document.getElementById('palBtn'); btn.style.background = p.btn; btn.style.color = k === 'kashi' ? '#ffffff' : '#2a211b'; btn.style.borderColor = '#2a211b';
+    el.querySelector('.pd-card').style.background = p.card;
+    document.getElementById('palSw').innerHTML = p.sw.map(([c, n]) => `<span class="swatch"><i style="background:${c}"></i><b>${n}</b><span style="font-family:var(--f-mono)">${c}</span></span>`).join('');
+    document.querySelectorAll('[data-pal]').forEach((b) => { const on = b.dataset.pal === k; b.setAttribute('aria-pressed', String(on)); b.classList.toggle('ghost', !on); });
+  }
+  document.querySelectorAll('[data-pal]').forEach((b) => b.addEventListener('click', () => setPal(b.dataset.pal)));
+  setPal('candy');
+
+  /* 10 Certificate */
+  const cn = document.getElementById('certName'), co = document.getElementById('certOut');
+  cn.addEventListener('input', () => { co.textContent = cn.value.trim() || '…'; });
+})();
+</script>
+
+</body>
+</html>
