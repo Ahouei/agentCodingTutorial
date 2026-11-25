@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>از صفر تا قهرمان: ساخت وب‌سایت با Agentic AI</title>
+    <meta
+      name="description"
+      content="یک مسیر آموزشی تعاملی و قدم‌به‌قدم برای ساختن و منتشر کردن هر نوع وب‌سایت با Agentic AI و Vibe Coding، با GitHub و Cloudflare."
+    />
+    <meta name="theme-color" content="#fbf6ee" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1b1612" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script>
+      // Apply saved language and theme before first paint to avoid a flash.
+      try {
+        var l = JSON.parse(localStorage.getItem('act:lang') || 'null');
+        if (l === 'en') { document.documentElement.lang = 'en'; document.documentElement.dir = 'ltr'; }
+        var t = JSON.parse(localStorage.getItem('act:theme') || 'null');
+        if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,185 @@
+.w-frame {
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--card);
+}
+.w-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 14px 18px;
+  background: var(--w-tint);
+  border-bottom: var(--stroke) solid var(--ink);
+}
+.w-try {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 11px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 12.5px;
+  font-weight: 800;
+}
+:root[dir='rtl'] .w-try svg {
+  transform: scaleX(-1);
+}
+.w-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 900;
+  line-height: 1.4;
+}
+.w-hint {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 14px 18px 0;
+}
+.w-hint > svg {
+  flex: none;
+}
+.w-hint-bubble {
+  position: relative;
+  padding: 9px 14px;
+  border-radius: 16px;
+  border-end-start-radius: 4px;
+  background: var(--paper-2);
+  font-size: 0.94rem;
+  line-height: 1.7;
+}
+.w-stage {
+  padding: 18px;
+}
+.w-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px 16px;
+  border-top: 1.5px dashed var(--line);
+}
+
+/* Shared widget helpers */
+.w-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.w-grid {
+  display: grid;
+  gap: 12px;
+}
+.w-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+  border: 1.5px solid var(--ink);
+  background: var(--card);
+}
+.w-card {
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  border: 1.5px solid var(--line);
+  background: var(--paper);
+}
+.w-mono {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+.w-muted {
+  color: var(--ink-2);
+  font-size: 0.93rem;
+}
+.w-toggle {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 999px;
+  border: var(--stroke) solid var(--ink);
+  background: var(--paper-2);
+  gap: 4px;
+}
+.w-toggle button {
+  min-height: 40px;
+  padding: 6px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+.w-toggle button[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--paper);
+}
+.w-terminal {
+  border-radius: var(--r-md);
+  background: var(--code-bg);
+  color: var(--code-ink);
+  padding: 14px 16px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.8;
+  direction: ltr;
+  text-align: left;
+  min-height: 120px;
+  overflow-x: auto;
+}
+.w-terminal .ok {
+  color: #9ff0cf;
+}
+.w-terminal .dim {
+  opacity: 0.55;
+}
+.w-terminal .warn {
+  color: #ffd36a;
+}
+.w-input {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1.5px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  transition: border-color 150ms ease;
+}
+.w-input:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+textarea.w-input {
+  resize: vertical;
+  min-height: 84px;
+  line-height: 1.7;
+}
+.w-label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 800;
+  font-size: 0.93rem;
+}
+
+/* Toggle that wraps gracefully on narrow screens. */
+.w-toggle--grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  border-radius: 22px;
+  width: 100%;
+}
+.w-toggle--grid button {
+  border-radius: 16px;
+  line-height: 1.4;
+}

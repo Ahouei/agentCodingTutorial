@@ -1,0 +1,276 @@
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { useEffect, useRef, useState } from 'react';
+import { num, useApp, useTx } from '../../lib/app';
+import { Mascot } from '../Mascot';
+import { Frame } from './Frame';
+import './set2.css';
+
+const EASE = [0.23, 1, 0.32, 1] as const;
+const MOVE = [0.77, 0, 0.175, 1] as const;
+
+type PhaseId = 'plan' | 'act' | 'observe' | 'adjust';
+const PHASES: PhaseId[] = ['plan', 'act', 'observe', 'adjust'];
+const TINT: Record<PhaseId, string> = {
+  plan: 'var(--sky)',
+  act: 'var(--butter)',
+  observe: 'var(--mint)',
+  adjust: 'var(--blush)',
+};
+
+type LogLine = { lap: number; phase: PhaseId; text: string; bad?: boolean; good?: boolean };
+
+export default function AgentLoop() {
+  const { lang } = useApp();
+  const tx = useTx();
+  const reduce = useReducedMotion();
+  const rtl = lang === 'fa';
+
+  const [lap, setLap] = useState(0); // laps completed
+  const [ticks, setTicks] = useState(0); // phases elapsed overall (drives Bit's angle)
+  const [running, setRunning] = useState(false);
+  const [log, setLog] = useState<LogLine[]>([]);
+  const [finished, setFinished] = useState(false);
+  const timers = useRef<number[]>([]);
+
+  useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), []);
+
+  const label: Record<PhaseId, [string, string]> = {
+    plan: [tx('برنامه', 'Plan'), tx('قدم بعدی چیست؟', "what's next?")],
+    act: [tx('اقدام', 'Act'), tx('با ابزارها', 'use tools')],
+    observe: [tx('مشاهده', 'Observe'), tx('تست و نتیجه', 'check results')],
+    adjust: [tx('اصلاح', 'Adjust'), tx('تصمیم بعدی', 'decide')],
+  };
+
+  const LAPS: Record<PhaseId, { text: string; bad?: boolean; good?: boolean }>[] = [
+    {
+      plan: {
+        text: tx(
+          'کد و درخواست را می‌خواند. برنامه: فرم با نام، ایمیل و پیام؛ یک Endpoint در Worker که پیام را در D1 ذخیره کند. برنامه را به شما نشان می‌دهد.',
+          'Reads the request and the code. Plan: a form with name, email and message; a Worker endpoint that saves it to D1. Shows you the plan.',
+        ),
+      },
+      act: {
+        text: tx(
+          'فایل فرم را می‌سازد، مسیر POST /api/contact را اضافه می‌کند و جدول D1 را می‌سازد.',
+          'Writes the form, adds POST /api/contact and creates the D1 table.',
+        ),
+      },
+      observe: {
+        text: tx('تست‌ها را اجرا می‌کند: یک تست رد شد! فرم «abc» را به‌عنوان ایمیل قبول می‌کند.', 'Runs the tests: one fails! The form accepts "abc" as an email.'),
+        bad: true,
+      },
+      adjust: {
+        text: tx('خطا را می‌خواند و تصمیم می‌گیرد ایمیل را در سمت سرور هم بررسی کند.', 'Reads the error and decides to validate the email on the server too.'),
+      },
+    },
+    {
+      plan: { text: tx('برنامه اصلاح: اعتبارسنجی ایمیل در Worker و یک تست برای همین مورد.', 'Plans the fix: email validation in the Worker, plus a test for it.') },
+      act: { text: tx('Worker را ویرایش می‌کند و تست جدید را می‌نویسد.', 'Edits the Worker and writes the new test.') },
+      observe: {
+        text: tx('دوباره تست می‌گیرد: همه تست‌ها سبز. صفحه را در مرورگر موبایل هم باز می‌کند: فرم کار می‌کند.', 'Runs the tests again: all green. Opens the page in a mobile browser too: the form works.'),
+        good: true,
+      },
+      adjust: { text: tx('چیزی برای اصلاح نمانده. هدف محقق شد.', 'Nothing left to fix. The goal is met.') },
+    },
+  ];
+
+  const runLap = () => {
+    if (running || lap >= LAPS.length) return;
+    const data = LAPS[lap];
+    const thisLap = lap;
+    setRunning(true);
+    PHASES.forEach((p, i) => {
+      const t = window.setTimeout(
+        () => {
+          setTicks((n) => n + (i === 0 && thisLap === 0 ? 0 : 1));
+          setLog((l) => [...l, { lap: thisLap + 1, phase: p, ...data[p] }]);
+          if (i === PHASES.length - 1) {
+            setLap(thisLap + 1);
+            setRunning(false);
+          }
+        },
+        reduce ? 0 : i * 1100,
+      );
+      timers.current.push(t);
+    });
+  };
+
+  const finish = () => {
+    setTicks((n) => n + 1);
+    setFinished(true);
+  };
+
+  const reset = () => {
+    timers.current.forEach((t) => window.clearTimeout(t));
+    timers.current = [];
+    setLap(0);
+    setTicks(0);
+    setRunning(false);
+    setLog([]);
+    setFinished(false);
+  };
+
+  const current: PhaseId = PHASES[ticks % 4];
+  const angle = ticks * 90 * (rtl ? -1 : 1);
+  const lastBad = log.length > 0 && log[log.length - 1].bad;
+
+  // Node positions on the ring. RTL mirrors the direction of travel.
+  const pos: Record<PhaseId, { x: string; y: string }> = {
+    plan: { x: '50%', y: '13%' },
+    act: { x: rtl ? '13%' : '87%', y: '50%' },
+    observe: { x: '50%', y: '87%' },
+    adjust: { x: rtl ? '87%' : '13%', y: '50%' },
+  };
+
+  const checkpoint =
+    log.length === 0
+      ? -1
+      : finished
+        ? 2
+        : log.length === 1
+          ? 0
+          : -1;
+
+  const checkpoints = [
+    tx('برنامه را قبل از کار بزرگ تأیید کنید.', 'Approve the plan before big work starts.'),
+    tx('وقتی چیزی مبهم است، Agent می‌پرسد و شما تصمیم می‌گیرید.', 'When something is unclear, the agent asks and you decide.'),
+    tx('نتیجه (Preview یا Pull Request) را قبل از انتشار بازبینی کنید.', 'Review the result (preview or pull request) before it goes live.'),
+  ];
+
+  const button = finished ? (
+    <button type="button" className="btn btn--small" onClick={reset}>
+      {tx('از اول', 'Start over')}
+    </button>
+  ) : lap < LAPS.length ? (
+    <button type="button" className="btn btn--primary" onClick={runLap} disabled={running}>
+      {running ? tx('در حال اجرا…', 'Running…') : lap === 0 ? tx('اجرای دور اول', 'Run lap 1') : tx('اجرای دور دوم', 'Run lap 2')}
+    </button>
+  ) : (
+    <button type="button" className="btn btn--mint" onClick={finish}>
+      {tx('پایان: تحویل به شما', 'Finish: hand it to you')}
+    </button>
+  );
+
+  return (
+    <Frame
+      title={tx('حلقه Agent: «یک فرم تماس اضافه کن»', 'The agent loop: "add a contact form"')}
+      hint={tx(
+        'هر دور را اجرا کنید. ببینید وقتی تست رد می‌شود، Agent چطور خودش برمی‌گردد و درستش می‌کند.',
+        'Run each lap. Watch how the agent loops back on its own when a test fails.',
+      )}
+      mood={finished ? 'happy' : lastBad ? 'wow' : running ? 'think' : 'calm'}
+      tint="var(--mint-soft)"
+      footer={
+        <>
+          {button}
+          <span className="w-muted">
+            {tx('دور', 'Lap')} {num(Math.min(lap + (running ? 1 : 0), 2), lang)} {tx('از', 'of')} {num(2, lang)}
+          </span>
+        </>
+      }
+    >
+      <div className="al-wrap">
+        <div className="al-ring" role="img" aria-label={tx('حلقه برنامه، اقدام، مشاهده، اصلاح', 'Loop of plan, act, observe, adjust')}>
+          <div className="al-track" aria-hidden />
+          {/* direction arrows */}
+          <svg className="al-spinner" viewBox="0 0 100 100" aria-hidden style={{ inset: '13%', overflow: 'visible' }}>
+            {[45, 135, 225, 315].map((a) => (
+              <g key={a} transform={`rotate(${rtl ? -a : a} 50 50)`}>
+                <path d="M54 0 l-4 -3 v6 Z" transform={rtl ? 'translate(100 0) scale(-1 1)' : undefined} fill="var(--ink-3)" />
+              </g>
+            ))}
+          </svg>
+          {PHASES.map((p) => {
+            const on = (log.length > 0 || running) && current === p && !finished;
+            return (
+              <div
+                key={p}
+                className={`al-node ${on ? 'is-on' : ''}`}
+                style={{ left: pos[p].x, top: pos[p].y, background: on ? TINT[p] : 'var(--card)', color: on ? '#2a211b' : undefined }}
+              >
+                <span>{label[p][0]}</span>
+                <small style={on ? { color: '#4a3d33' } : undefined}>{label[p][1]}</small>
+              </div>
+            );
+          })}
+          {/* Bit orbits the inner circle; the wrapper rotates, Bit counter-rotates to stay upright. */}
+          <motion.div
+            className="al-spinner"
+            style={{ inset: '28%' }}
+            animate={{ rotate: angle }}
+            transition={{ duration: reduce ? 0 : 0.8, ease: MOVE }}
+            aria-hidden
+          >
+            <motion.div className="al-bit" animate={{ rotate: -angle }} transition={{ duration: reduce ? 0 : 0.8, ease: MOVE }}>
+              <Mascot size={40} mood={finished ? 'happy' : lastBad ? 'wow' : 'think'} follow={false} />
+            </motion.div>
+          </motion.div>
+        </div>
+
+        <div style={{ display: 'grid', gap: 12, minWidth: 0 }}>
+          {log.length === 0 && !running ? (
+            <p className="w-card" style={{ margin: 0 }}>
+              {tx(
+                'هدف: «یک فرم تماس اضافه کن که پیام‌ها را ذخیره کند.» Agent این هدف را در چند دور از حلقه پیش می‌برد، نه در یک حرکت.',
+                'Goal: "Add a contact form that saves messages." The agent gets there in several laps of the loop, not in one move.',
+              )}
+            </p>
+          ) : (
+            <ul className="al-log" aria-live="polite">
+              <AnimatePresence initial={false}>
+                {log.map((l, i) => (
+                  <motion.li
+                    key={i}
+                    initial={{ opacity: 0, transform: 'translateY(6px)' }}
+                    animate={{ opacity: 1, transform: 'translateY(0px)' }}
+                    transition={{ duration: 0.25, ease: EASE }}
+                  >
+                    <span className="al-tag" style={{ background: TINT[l.phase] }}>
+                      {label[l.phase][0]}
+                    </span>
+                    <span style={l.bad ? { color: 'var(--coral-ink)', fontWeight: 800 } : l.good ? { color: 'var(--mint-ink)', fontWeight: 800 } : undefined}>
+                      {l.text}
+                    </span>
+                  </motion.li>
+                ))}
+              </AnimatePresence>
+            </ul>
+          )}
+
+          <AnimatePresence>
+            {finished && (
+              <motion.div
+                className="al-check"
+                initial={{ opacity: 0, transform: 'translateY(6px)' }}
+                animate={{ opacity: 1, transform: 'translateY(0px)' }}
+                transition={{ duration: 0.3, ease: EASE }}
+              >
+                <span aria-hidden>✋</span>
+                <span>
+                  {tx(
+                    'از حلقه خارج می‌شود: یک Pull Request با خلاصه تغییرات و لینک Preview می‌سازد و از شما می‌خواهد بازبینی کنید. تا شما تأیید نکنید، چیزی روی سایت اصلی نمی‌رود.',
+                    'It exits the loop: opens a pull request with a summary and a preview link, and asks you to review. Nothing reaches the live site until you approve.',
+                  )}
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      <div style={{ marginTop: 18 }}>
+        <p style={{ margin: '0 0 8px', fontWeight: 900 }}>{tx('جاهایی که شما در حلقه هستید (Human-in-the-loop)', 'Where you stay in the loop (human-in-the-loop)')}</p>
+        <ol className="al-log" style={{ listStyle: 'none' }}>
+          {checkpoints.map((c, i) => (
+            <li key={i}>
+              <span className="al-tag" style={{ background: checkpoint === i ? 'var(--coral)' : 'var(--paper-2)' }}>
+                {tx(['۱', '۲', '۳'][i], String(i + 1))}
+              </span>
+              <span style={checkpoint === i ? { fontWeight: 800 } : undefined}>{c}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </Frame>
+  );
+}

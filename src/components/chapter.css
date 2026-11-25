@@ -1,0 +1,391 @@
+.ch-missing {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  padding-block: 80px;
+  text-align: center;
+}
+
+/* ───────── Opening scene ───────── */
+.ch-hero {
+  position: relative;
+  padding-block: 26px clamp(30px, 5vw, 60px);
+  background:
+    radial-gradient(circle at 88% 30%, color-mix(in oklab, var(--act) 45%, transparent) 0 120px, transparent 121px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--act) 28%, var(--paper)), var(--paper));
+  border-bottom: 1.5px solid var(--line);
+  overflow: hidden;
+}
+:root[dir='rtl'] .ch-hero {
+  background:
+    radial-gradient(circle at 12% 30%, color-mix(in oklab, var(--act) 45%, transparent) 0 120px, transparent 121px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--act) 28%, var(--paper)), var(--paper));
+}
+.ch-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+.ch-crumbs a {
+  font-weight: 800;
+  text-underline-offset: 3px;
+}
+.ch-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: end;
+  margin-top: 22px;
+}
+.ch-badge {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  border-radius: 20px;
+  background: var(--act);
+  color: #2a211b;
+  border: var(--stroke) solid var(--ink);
+  box-shadow: var(--sticker);
+}
+.ch-title {
+  margin: 8px 0 0;
+  font-size: clamp(38px, 6vw, 76px);
+  max-width: 18ch;
+}
+.ch-tagline {
+  margin: 14px 0 0;
+  max-width: 56ch;
+  font-size: clamp(17px, 1.6vw, 20px);
+  color: var(--ink-2);
+}
+.ch-bit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  max-width: 280px;
+}
+.ch-say {
+  position: relative;
+  padding: 12px 16px;
+  border-radius: 20px;
+  background: var(--card);
+  border: var(--stroke) solid var(--ink);
+  box-shadow: var(--sticker-sm);
+  font-weight: 700;
+  line-height: 1.7;
+  font-size: 15px;
+  transform-origin: 50% 100%;
+}
+.ch-say::after {
+  content: '';
+  position: absolute;
+  bottom: -9px;
+  inset-inline-start: 50%;
+  width: 16px;
+  height: 16px;
+  background: var(--card);
+  border-inline-end: var(--stroke) solid var(--ink);
+  border-bottom: var(--stroke) solid var(--ink);
+  transform: translateX(-50%) rotate(45deg);
+}
+:root[dir='rtl'] .ch-say::after {
+  transform: translateX(50%) rotate(-45deg);
+}
+@media (max-width: 760px) {
+  .ch-hero-grid {
+    grid-template-columns: 1fr;
+  }
+  .ch-bit {
+    flex-direction: row-reverse;
+    align-items: center;
+    max-width: none;
+    justify-content: flex-end;
+  }
+  .ch-bit > svg {
+    width: 84px;
+    height: auto;
+    flex: none;
+  }
+  .ch-say::after {
+    display: none;
+  }
+}
+.ch-voice {
+  display: grid;
+  gap: 6px;
+  margin-top: 20px;
+  max-width: 420px;
+}
+.ch-voice audio {
+  width: 100%;
+}
+
+/* ───────── Layout ───────── */
+.ch-layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: clamp(24px, 4vw, 64px);
+  padding-block: clamp(30px, 5vw, 60px) 80px;
+}
+.ch-rail-inner {
+  position: sticky;
+  top: 92px;
+}
+.ch-rail ol {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+.ch-rail a {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  padding: 8px 10px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+.ch-rail a.is-active {
+  background: var(--card);
+  color: var(--ink);
+  font-weight: 800;
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+}
+@media (hover: hover) and (pointer: fine) {
+  .ch-rail a:hover {
+    color: var(--ink);
+  }
+}
+.ch-rail-num {
+  flex: none;
+  font-weight: 900;
+  font-size: 12.5px;
+  min-width: 16px;
+}
+.ch-rail-progress {
+  height: 6px;
+  margin-top: 16px;
+  border-radius: 6px;
+  background: var(--line);
+  overflow: hidden;
+}
+.ch-rail-progress span {
+  display: block;
+  height: 100%;
+  background: var(--coral);
+  transform-origin: 0 50%;
+}
+:root[dir='rtl'] .ch-rail-progress span {
+  transform-origin: 100% 50%;
+}
+@media (max-width: 980px) {
+  .ch-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ch-rail {
+    display: none;
+  }
+}
+
+.ch-article {
+  min-width: 0;
+  max-width: 780px;
+}
+.ch-section {
+  padding-bottom: clamp(24px, 4vw, 44px);
+  scroll-margin-top: 90px;
+}
+.ch-h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 18px;
+  font-size: clamp(24px, 2.6vw, 32px);
+  font-weight: 900;
+  line-height: 1.35;
+}
+.ch-h2-num {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  background: var(--act);
+  color: #2a211b;
+  border: var(--stroke) solid var(--ink);
+  font-size: 18px;
+  transform: rotate(-4deg);
+}
+
+/* ───────── Connects + takeaways ───────── */
+.ch-connects {
+  margin: 20px 0 40px;
+  padding: 22px 24px;
+  border-radius: var(--r-lg);
+  background: var(--sky-soft);
+}
+.ch-connects-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.ch-connects-head svg {
+  flex: none;
+  color: var(--ink);
+}
+.ch-connects h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 900;
+}
+.ch-connects p {
+  margin: 0;
+  max-width: 68ch;
+}
+.ch-takeaways ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ch-takeaways li {
+  padding: 14px 16px;
+  border-radius: 6px 6px 18px 6px;
+  background: var(--butter-soft);
+  border: 1.5px solid var(--ink);
+  box-shadow: var(--sticker-sm);
+  line-height: 1.7;
+  font-weight: 650;
+  transform: rotate(var(--r));
+}
+.ch-takeaways li:nth-child(3n + 2) {
+  background: var(--mint-soft);
+}
+.ch-takeaways li:nth-child(3n + 3) {
+  background: var(--blush-soft);
+}
+
+/* ───────── Done + gates ───────── */
+.ch-done {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin: 44px 0 30px;
+}
+.ch-cheer {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 16px 6px 8px;
+  border-radius: 999px;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  font-weight: 800;
+}
+.ch-sparks {
+  position: absolute;
+  inset-inline-start: 30px;
+  top: 50%;
+  pointer-events: none;
+}
+.ch-sparks i {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 3px;
+  border: 1px solid var(--ink);
+}
+.ch-gates {
+  display: grid;
+  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
+  gap: 16px;
+  align-items: stretch;
+}
+.ch-gate {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 18px 20px;
+  border-radius: var(--r-lg);
+  text-decoration: none;
+  line-height: 1.5;
+}
+.ch-gate--prev {
+  border: 1.5px dashed var(--line);
+  justify-content: center;
+  transition: border-color 150ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .ch-gate--prev:hover {
+    border-color: var(--ink);
+  }
+}
+.ch-gate--next {
+  position: relative;
+  padding-inline-end: 70px;
+  background: var(--tint, var(--butter));
+  color: #2a211b;
+  transition:
+    transform 200ms var(--ease-out),
+    box-shadow 200ms var(--ease-out);
+}
+.ch-gate--next .eyebrow {
+  color: #4a3f36;
+}
+.ch-gate--next strong {
+  font-size: clamp(22px, 2.6vw, 30px);
+}
+.ch-gate-tag {
+  font-size: 0.95rem;
+  opacity: 0.85;
+}
+.ch-gate-arrow {
+  position: absolute;
+  inset-inline-end: 18px;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-top: -22px;
+  border-radius: 50%;
+  background: #fffdf9;
+  border: var(--stroke) solid #2a211b;
+}
+.ch-gate--next:active {
+  transform: translate(var(--sx), 4px) scale(0.99);
+  box-shadow: 0 0 0 var(--ink);
+}
+@media (hover: hover) and (pointer: fine) {
+  .ch-gate--next:hover {
+    transform: translate(calc(var(--sx) / -2), -2px);
+    box-shadow: calc(var(--sx) * 1.5) 6px 0 var(--ink);
+  }
+}
+@media (max-width: 640px) {
+  .ch-gates {
+    grid-template-columns: 1fr;
+  }
+  .ch-gate--prev {
+    order: 2;
+  }
+}
