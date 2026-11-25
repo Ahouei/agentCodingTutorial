@@ -38,7 +38,7 @@ writeFileSync(
     .map((u) => `  <url><loc>${SITE}${u}</loc><lastmod>${today}</lastmod></url>`)
     .join('\n')}\n</urlset>\n`,
 );
-writeFileSync('public/robots.txt', `User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: ${SITE}/sitemap.xml\n`);
+writeFileSync('public/robots.txt', `User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /admin\n\nSitemap: ${SITE}/sitemap.xml\n`);
 console.log(`meta: ${all.length} chapters, sitemap: ${urls.length} urls`);
 
 // Which voice notes exist, so the player never probes for missing files (no 404 noise).

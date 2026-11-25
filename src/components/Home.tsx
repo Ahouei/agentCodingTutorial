@@ -178,20 +178,6 @@ export function Home() {
         </div>
       </section>
 
-      <footer className="ft wrap">
-        <p>
-          {tx('ساخته‌شده با React و Motion، منتشرشده روی Cloudflare Workers؛ همان مسیری که در دوره یاد می‌گیرید.', 'Built with React and Motion, deployed on Cloudflare Workers: the same path you learn in the course.')}
-        </p>
-        <p>
-          <a href="/media/trailer.mp4" target="_blank" rel="noreferrer">
-            {tx('تریلر ۲۰ ثانیه‌ای دوره', 'The 20-second trailer')}
-          </a>
-          {' · '}
-          <a href="https://github.com/Ahouei/Ahouei-GetheredInOne-AIAgentSkills" target="_blank" rel="noreferrer">
-            {tx('مجموعه Agent Skills دوره', "The course's agent skills collection")}
-          </a>
-        </p>
-      </footer>
     </main>
   );
 }

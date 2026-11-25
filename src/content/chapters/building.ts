@@ -513,8 +513,8 @@ Goal: show today's menu and opening hours, and let people book a table.
               {
                 type: 'p',
                 text: {
-                  fa: "طبق مستندات Lovable، کنار Instructions که همیشه حاضرند، **Skills** هم وجود دارند که فقط وقتی لازم است بارگذاری می‌شوند؛ همان ایده Progressive Disclosure.",
-                  en: "According to Lovable's docs, next to Instructions, which are always present, there are also **Skills**, which load only when needed: the same progressive-disclosure idea.",
+                  fa: "طبق مستندات Lovable، کنار Instructions که همیشه حاضرند، **Skills** هم وجود دارند که فقط وقتی لازم است بارگذاری می‌شوند؛ همان ایده Progressive Disclosure. با زدن `/` در چت هم می‌توانید یک Skill را مستقیم صدا بزنید (بخش «یک ایده، سه خانه» پایین‌تر).",
+                  en: "According to Lovable's docs, next to Instructions, which are always present, there are also **Skills**, which load only when needed: the same progressive-disclosure idea. You can also call a skill directly by typing `/` in the chat (see “One idea, three homes” below).",
                 },
               },
             ],
@@ -546,7 +546,7 @@ Goal: show today's menu and opening hours, and let people book a table.
               { fa: "هر Skill یک پوشه است که حداقل یک فایل **SKILL.md** دارد: بالای آن `name` و `description`، و پایینش دستورالعمل‌ها.", en: "Each skill is a folder with at least a **SKILL.md** file: `name` and `description` at the top, instructions below." },
               { fa: "می‌تواند پوشه‌های اختیاری هم داشته باشد: `scripts/` برای کد اجرایی، `references/` برای مستندات، `assets/` برای قالب‌ها.", en: "It can include optional folders: `scripts/` for executable code, `references/` for documentation, `assets/` for templates." },
               { fa: "Agent در شروع فقط نام و توضیح Skillها را می‌بیند. وقتی کار شما با توضیح یک Skill جور شد، متن کامل آن را می‌خواند. به این روش **Progressive Disclosure** می‌گویند و باعث می‌شود Skillهای زیاد ذهن Agent را شلوغ نکنند.", en: "At startup the agent only sees each skill's name and description. When your task matches a description, it reads the full instructions. This is called **progressive disclosure**, and it keeps many skills from cluttering the agent's context." },
-              { fa: "Agent Skills یک **استاندارد باز** است (agentskills.io). Claude Code و Codex هر دو طبق مستندات رسمی‌شان از آن پشتیبانی می‌کنند، پس یک Skill را می‌توانید در هر دو استفاده کنید.", en: "Agent Skills is an **open standard** (agentskills.io). Both Claude Code and Codex support it according to their official docs, so one skill can work in both." },
+              { fa: "Agent Skills یک **استاندارد باز** است (agentskills.io). طبق مستندات رسمی، Claude (هم Claude Code و هم اپ Claude)، Codex و Lovable همه همین شکل SKILL.md را می‌فهمند؛ پس یک Skill را یک بار می‌نویسید و هر جا خواستید استفاده می‌کنید.", en: "Agent Skills is an **open standard** (agentskills.io). Per their official docs, Claude (both Claude Code and the Claude app), Codex and Lovable all understand the same SKILL.md shape, so you write a skill once and use it anywhere." },
             ],
           },
           {
@@ -565,6 +565,89 @@ description: Reviews a web page for Persian and RTL quality. Use when the user a
           },
           {
             type: 'h',
+            text: { fa: 'یک ایده، سه خانه: Skill در Claude، Codex و Lovable', en: 'One idea, three homes: skills in Claude, Codex and Lovable' },
+          },
+          {
+            type: 'p',
+            text: {
+              fa: "هر سه ابزار دو جور «حافظه» برای دانش شما دارند. **قانون‌های همیشگی** که در هر پیام حاضرند: در Claude فایل `CLAUDE.md`، در Codex فایل `AGENTS.md` و در Lovable بخش **Instructions** (نام قبلی Knowledge). و **Skillها** که فقط وقتی کار با توضیحشان جور شد باز می‌شوند. قانون کوتاه و همیشگی را در اولی بگذارید؛ روش بلند و گاه‌به‌گاه را در Skill.",
+              en: "All three tools have two kinds of “memory” for your know-how. **Always-on rules**, present in every message: `CLAUDE.md` in Claude, `AGENTS.md` in Codex, and **Instructions** (formerly Knowledge) in Lovable. And **skills**, which open only when a task matches their description. Put short, always-true rules in the first; put long, occasional procedures in a skill.",
+            },
+          },
+          { type: 'widget', id: 'skill-homes' },
+          {
+            type: 'compare',
+            headers: [
+              { fa: '', en: '' },
+              { fa: 'Claude', en: 'Claude' },
+              { fa: 'Codex', en: 'Codex' },
+              { fa: 'Lovable', en: 'Lovable' },
+            ],
+            rows: [
+              [
+                { fa: 'Skill کجا زندگی می‌کند', en: 'Where skills live' },
+                { fa: 'Claude Code: `.claude/skills/` یا `~/.claude/skills/`. اپ Claude: ‏Customize ← Skills (بارگذاری ZIP).', en: 'Claude Code: `.claude/skills/` or `~/.claude/skills/`. Claude app: Customize → Skills (upload a ZIP).' },
+                { fa: '`.agents/skills/` در Repository یا `~/.agents/skills/`.', en: '`.agents/skills/` in the repository, or `~/.agents/skills/`.' },
+                { fa: 'Workspace settings ← Skills برای تیم؛ Account settings ← Personal skills برای خودتان.', en: 'Workspace settings → Skills for the team; Account settings → Personal skills for yourself.' },
+              ],
+              [
+                { fa: 'صدا زدن دستی', en: 'Calling one yourself' },
+                { fa: '`/name`', en: '`/name`' },
+                { fa: '`$name` یا `/skills`', en: '`$name` or `/skills`' },
+                { fa: '`/` در چت و انتخاب از فهرست', en: '`/` in the chat, then pick from the list' },
+              ],
+              [
+                { fa: 'استفاده خودکار', en: 'Automatic use' },
+                { fa: 'بله، وقتی کار با description جور باشد.', en: 'Yes, when the task matches the description.' },
+                { fa: 'بله؛ قابل خاموش‌کردن برای هر Skill.', en: 'Yes; can be turned off per skill.' },
+                { fa: 'بله؛ مدیر Workspace می‌تواند برای هر Skill خاموشش کند.', en: 'Yes; a workspace admin can turn it off per skill.' },
+              ],
+              [
+                { fa: 'آوردن Skill آماده', en: 'Bringing in a ready skill' },
+                { fa: 'کپی پوشه (Claude Code) یا ZIP (اپ).', en: 'Copy the folder (Claude Code) or a ZIP (app).' },
+                { fa: 'کپی پوشه یا `$skill-installer`.', en: 'Copy the folder, or `$skill-installer`.' },
+                { fa: 'Import from GitHub (Repository عمومی) یا Upload ZIP.', en: 'Import from GitHub (public repository) or Upload ZIP.' },
+              ],
+              [
+                { fa: 'قانون‌های همیشگی', en: 'Always-on rules' },
+                { fa: '`CLAUDE.md`', en: '`CLAUDE.md`' },
+                { fa: '`AGENTS.md`', en: '`AGENTS.md`' },
+                { fa: 'Instructions', en: 'Instructions' },
+              ],
+            ],
+          },
+          {
+            type: 'callout',
+            tone: 'fix',
+            title: { fa: 'Skill، MCP و Prompt سه چیز متفاوت‌اند', en: 'Skills, MCP and prompts are three different things' },
+            text: {
+              fa: "**Prompt** کار همین لحظه را می‌گوید. **Skill** یاد می‌دهد یک نوع کار را *چطور* انجام دهد (دستورالعمل، و گاهی اسکریپت). **MCP** و Connectorها به Agent *دسترسی* به یک ابزار یا سرویس بیرونی می‌دهند (مثلاً GitHub یا یک Database). یک Skill خوب می‌تواند بگوید «از فلان ابزار این‌طور استفاده کن»، ولی خودش آن دسترسی را نمی‌سازد.",
+              en: "A **prompt** says what to do right now. A **skill** teaches *how* to do a kind of task (instructions, and sometimes scripts). **MCP** and connectors give the agent *access* to an outside tool or service (GitHub, a database). A good skill can say “use that tool like this”, but it doesn't create the access itself.",
+            },
+          },
+          {
+            type: 'path',
+            codex: [
+              {
+                type: 'p',
+                text: {
+                  fa: "در Codex ساده‌ترین شروع: `$skill-creator` را صدا بزنید و بگویید «یک Skill برای بررسی فارسی و RTL صفحه‌های کافه سحر بساز». سؤال می‌پرسد، SKILL.md را در `.agents/skills/` می‌سازد و دفعه بعد با `$persian-rtl-review` صدایش می‌کنید.",
+                  en: "The easiest start in Codex: call `$skill-creator` and say “make a skill that reviews Café Sahar's pages for Persian and RTL quality.” It asks questions, writes SKILL.md in `.agents/skills/`, and next time you call it with `$persian-rtl-review`.",
+                },
+              },
+            ],
+            lovable: [
+              {
+                type: 'p',
+                text: {
+                  fa: "در Lovable، بعد از کاری که دوست داشتید تکرار شود، از Workspace settings ← Skills ← Add گزینه **Build with Lovable** را بزنید؛ Lovable با `/skill-creator` سؤال می‌پرسد و Skill را برای همه پروژه‌های Workspace منتشر می‌کند. اگر Skill را قبلاً در Claude ساخته‌اید، خروجی `.skill` یا ZIP آن را با **Upload ZIP** بیاورید؛ همان شکل SKILL.md است.",
+                  en: "In Lovable, after a task you'd like repeated, go to Workspace settings → Skills → Add and choose **Build with Lovable**; it asks questions with `/skill-creator` and publishes the skill to every project in the workspace. If you already built the skill in Claude, export it as `.skill` or ZIP and bring it in with **Upload ZIP**: it's the same SKILL.md shape.",
+                },
+              },
+            ],
+          },
+          {
+            type: 'h',
             text: { fa: 'نصب یک Skill', en: 'Installing a skill' },
           },
           {
@@ -580,15 +663,15 @@ description: Reviews a web page for Persian and RTL quality. Use when the user a
               {
                 title: { fa: 'پوشه را در جای درست کپی کنید', en: 'Copy the folder to the right place' },
                 text: {
-                  fa: "برای Claude Code: داخل پروژه در `.claude/skills/` یا برای همه پروژه‌ها در `~/.claude/skills/`. برای Codex: داخل پروژه در `.agents/skills/` یا برای همه پروژه‌ها در `~/.agents/skills/`. مسیرها ممکن است در نسخه‌های جدید تغییر کنند؛ مستندات رسمی را چک کنید.",
-                  en: "For Claude Code: inside the project in `.claude/skills/`, or for every project in `~/.claude/skills/`. For Codex: inside the project in `.agents/skills/`, or for every project in `~/.agents/skills/`. Paths can change in new versions; check the official docs.",
+                  fa: "برای Claude Code: داخل پروژه در `.claude/skills/` یا برای همه پروژه‌ها در `~/.claude/skills/`. برای Codex: داخل پروژه در `.agents/skills/` یا برای همه پروژه‌ها در `~/.agents/skills/`. برای Lovable: پوشه‌ای کپی نمی‌شود؛ در Workspace settings ← Skills ← Add گزینه Import from GitHub را بزنید و نشانی پوشه همان Skill در GitHub را بدهید. مسیرها و نام منوها ممکن است تغییر کنند؛ مستندات رسمی را چک کنید.",
+                  en: "For Claude Code: inside the project in `.claude/skills/`, or for every project in `~/.claude/skills/`. For Codex: inside the project in `.agents/skills/`, or for every project in `~/.agents/skills/`. For Lovable: nothing to copy; in Workspace settings → Skills → Add, choose Import from GitHub and paste the address of that skill's folder on GitHub. Paths and menu names can change; check the official docs.",
                 },
               },
               {
                 title: { fa: 'جلسه تازه باز کنید و امتحان کنید', en: 'Start a fresh session and try it' },
                 text: {
-                  fa: "کاری بخواهید که با توضیح Skill جور باشد، یا مستقیم صدایش کنید: در Claude Code با `/skill-name` و در Codex با `$skill-name`؛ به جای `skill-name` نام همان Skill را بنویسید (مثلاً `/frontend-design`).",
-                  en: "Ask for something that matches the skill's description, or call it directly: `/skill-name` in Claude Code and `$skill-name` in Codex, replacing `skill-name` with the skill's own name (for example `/frontend-design`).",
+                  fa: "کاری بخواهید که با توضیح Skill جور باشد، یا مستقیم صدایش کنید: در Claude Code با `/skill-name`، در Codex با `$skill-name` و در Lovable با زدن `/` در چت؛ به جای `skill-name` نام همان Skill را بنویسید (مثلاً `/frontend-design`).",
+                  en: "Ask for something that matches the skill's description, or call it directly: `/skill-name` in Claude Code, `$skill-name` in Codex, and `/` in the Lovable chat, replacing `skill-name` with the skill's own name (for example `/frontend-design`).",
                 },
               },
             ],
@@ -624,6 +707,7 @@ cp -R Ahouei-GetheredInOne-AIAgentSkills/skills/frontend-design .claude/skills/`
               { term: 'Context', def: { fa: 'همه اطلاعاتی که Agent در لحظه کار در اختیار دارد: پیام‌ها، فایل‌ها و خروجی ابزارها.', en: 'Everything the agent has at hand while working: messages, files and tool output.' } },
               { term: 'Agent Skill', def: { fa: 'پوشه‌ای با فایل SKILL.md که دانش و روش یک کار را برای Agent بسته‌بندی می‌کند.', en: 'A folder with a SKILL.md that packages know-how for one kind of task.' } },
               { term: 'SKILL.md', def: { fa: 'فایل اصلی Skill: نام، توضیح و دستورالعمل‌ها.', en: 'The main skill file: name, description and instructions.' } },
+              { term: 'CLAUDE.md', def: { fa: 'فایل قانون‌های همیشگی پروژه برای Claude Code؛ مثل AGENTS.md برای Codex و Instructions در Lovable.', en: "Claude Code's file of always-on project rules; like AGENTS.md for Codex and Instructions in Lovable." } },
               { term: 'Progressive Disclosure', def: { fa: 'بارگذاری تدریجی: اول فقط نام و توضیح، متن کامل فقط وقتی لازم است.', en: 'Loading in stages: names and descriptions first, full text only when needed.' } },
             ],
           },
@@ -651,6 +735,8 @@ cp -R Ahouei-GetheredInOne-AIAgentSkills/skills/frontend-design .claude/skills/`
               { label: 'Agent Skills specification (agentskills.io)', url: 'https://agentskills.io/specification' },
               { label: 'Claude Code: Extend Claude with skills', url: 'https://code.claude.com/docs/en/skills' },
               { label: 'OpenAI Codex: Build skills', url: 'https://developers.openai.com/codex/skills' },
+              { label: 'Lovable: Define reusable instructions with skills', url: 'https://docs.lovable.dev/features/skills' },
+              { label: 'Claude Help Center: Use skills in Claude', url: 'https://support.claude.com/en/articles/12512180' },
               { label: 'Lovable docs: Plan mode', url: 'https://docs.lovable.dev/features/plan-mode' },
               { label: 'Anthropic: Skill authoring best practices', url: 'https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices' },
               { label: 'Course skills collection on GitHub', url: 'https://github.com/Ahouei/Ahouei-GetheredInOne-AIAgentSkills' },

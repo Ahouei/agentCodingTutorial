@@ -10,11 +10,13 @@ type Status = 'unknown' | 'unavailable' | 'signed-out' | 'signed-in';
 type AccountState = {
   status: Status;
   email: string | null;
+  /** 'admin' or 'owner' can open the admin panel (the server checks again on every request). */
+  role: 'learner' | 'admin' | 'owner' | null;
   turnstileSiteKey: string | null;
   syncing: boolean;
   lastSync: number | null;
   justSignedIn: boolean;
-  startSignIn: (email: string, turnstile: string) => Promise<'ok' | 'rate_limited' | 'turnstile_failed' | 'error'>;
+  startSignIn: (email: string, turnstile: string) => Promise<'ok' | 'rate_limited' | 'turnstile_failed' | 'paused' | 'busy' | 'error'>;
   signOut: () => Promise<void>;
   deleteAccount: () => Promise<boolean>;
   dismissWelcome: () => void;
@@ -27,6 +29,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const app = useApp();
   const [status, setStatus] = useState<Status>('unknown');
   const [email, setEmail] = useState<string | null>(null);
+  const [role, setRole] = useState<AccountState['role']>(null);
   const [siteKey, setSiteKey] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [lastSync, setLastSync] = useState<number | null>(null);
@@ -49,6 +52,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         if (!alive) return;
         if (me?.user?.email) {
           setEmail(me.user.email);
+          setRole(me.user.role === 'admin' || me.user.role === 'owner' ? me.user.role : 'learner');
           setStatus('signed-in');
         } else setStatus('signed-out');
       } catch {
@@ -126,6 +130,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         const j = await r.json().catch(() => ({}));
         if (j.error === 'rate_limited') return 'rate_limited' as const;
         if (j.error === 'turnstile_failed') return 'turnstile_failed' as const;
+        if (j.error === 'signin_paused') return 'paused' as const;
+        if (j.error === 'busy') return 'busy' as const;
         return 'error' as const;
       } catch {
         return 'error' as const;
@@ -159,6 +165,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       value={{
         status,
         email,
+        role: status === 'signed-in' ? role : null,
         turnstileSiteKey: siteKey,
         syncing,
         lastSync,

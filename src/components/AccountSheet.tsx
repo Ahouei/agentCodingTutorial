@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { useAccount } from '../lib/account';
-import { num, useApp, useTx } from '../lib/app';
+import { href, num, useApp, useTx } from '../lib/app';
 import { BottomSheet } from './BottomSheet';
 import { Mascot } from './Mascot';
 import './account.css';
@@ -40,7 +40,7 @@ export function AccountSheet({ open, onClose }: { open: boolean; onClose: () => 
   const tx = useTx();
   const [email, setEmail] = useState('');
   const [token, setToken] = useState<string | null>(null);
-  const [state, setState] = useState<'form' | 'sending' | 'sent' | 'error' | 'rate' | 'bot'>('form');
+  const [state, setState] = useState<'form' | 'sending' | 'sent' | 'error' | 'rate' | 'bot' | 'paused' | 'busy'>('form');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const box = useRef<HTMLDivElement>(null);
   const widget = useRef<string | null>(null);
@@ -75,7 +75,7 @@ export function AccountSheet({ open, onClose }: { open: boolean; onClose: () => 
     if (!token || !email.trim()) return;
     setState('sending');
     const r = await acc.startSignIn(email.trim(), token);
-    setState(r === 'ok' ? 'sent' : r === 'rate_limited' ? 'rate' : r === 'turnstile_failed' ? 'bot' : 'error');
+    setState(r === 'ok' ? 'sent' : r === 'rate_limited' ? 'rate' : r === 'turnstile_failed' ? 'bot' : r === 'paused' ? 'paused' : r === 'busy' ? 'busy' : 'error');
     if (r !== 'ok' && widget.current && window.turnstile) window.turnstile.reset(widget.current);
   };
 
@@ -93,6 +93,12 @@ export function AccountSheet({ open, onClose }: { open: boolean; onClose: () => 
               ? tx('در حال همگام‌سازی پیشرفت…', 'Syncing your progress…')
               : tx(`پیشرفت شما (${num(doneCount, lang)} فصل) روی همه دستگاه‌ها یکی است.`, `Your progress (${doneCount} chapters) is the same on all your devices.`)}
           </p>
+          {(acc.role === 'admin' || acc.role === 'owner') && (
+            <a className="acc-admin" href={href.admin()} onClick={onClose}>
+              <span>{tx('پنل مدیریت', 'Admin panel')}</span>
+              <b>{acc.role === 'owner' ? tx('مالک', 'Owner') : tx('مدیر', 'Admin')}</b>
+            </a>
+          )}
           <div className="acc-row">
             <button type="button" className="btn btn--small" onClick={() => acc.signOut()}>
               {tx('خروج', 'Sign out')}
@@ -156,6 +162,10 @@ export function AccountSheet({ open, onClose }: { open: boolean; onClose: () => 
           <div ref={box} className="acc-turnstile" />
           {state === 'error' && <p className="acc-err">{tx('چیزی درست کار نکرد. کمی بعد دوباره امتحان کنید.', 'Something went wrong. Try again in a moment.')}</p>}
           {state === 'rate' && <p className="acc-err">{tx('درخواست‌ها زیاد شد. یک دقیقه صبر کنید.', 'Too many requests. Wait a minute.')}</p>}
+          {state === 'paused' && (
+            <p className="acc-err">{tx('ورود فعلاً متوقف است. بدون ورود هم همه دوره در دسترس است و پیشرفتتان روی همین دستگاه می‌ماند.', 'Sign-in is paused for now. The whole course works without it, and your progress stays on this device.')}</p>
+          )}
+          {state === 'busy' && <p className="acc-err">{tx('امروز ایمیل‌های ورود زیاد بوده. فردا دوباره امتحان کنید.', 'Too many sign-in emails today. Try again tomorrow.')}</p>}
           {state === 'bot' && <p className="acc-err">{tx('بررسی امنیتی کامل نشد. صفحه را تازه کنید و دوباره امتحان کنید.', "The security check didn't complete. Reload and try again.")}</p>}
           <button type="submit" className="btn btn--primary" disabled={!token || !email.trim() || state === 'sending'}>
             {state === 'sending' ? tx('در حال ارسال…', 'Sending…') : tx('پیوند ورود را بفرست', 'Email me a sign-in link')}

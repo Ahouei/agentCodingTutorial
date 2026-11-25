@@ -1,0 +1,89 @@
+/* Learner-facing announcement (published from the admin panel). Sticker style, compact. */
+.ann-wrap {
+  padding-block-start: 12px;
+}
+.ann {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  padding-inline-start: 14px;
+  border: var(--stroke) solid var(--outline);
+  border-radius: var(--r-md);
+  box-shadow: var(--sticker-sm);
+  background: var(--sky-soft);
+  color: var(--ink);
+  line-height: 1.6;
+}
+.ann--celebrate {
+  background: var(--butter-soft);
+}
+.ann--warn {
+  background: var(--coral-soft);
+}
+.ann-icon {
+  font-size: 20px;
+  flex: none;
+}
+.ann-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 10px;
+  font-size: 15px;
+}
+.ann-text strong {
+  font-weight: 800;
+}
+.ann-text span {
+  color: var(--ink-2);
+}
+.ann-link {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: var(--stroke) solid var(--outline);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  font-weight: 800;
+  font-size: 14px;
+  text-decoration: none;
+}
+.ann-close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+.ann-close:focus-visible,
+.ann-link:focus-visible {
+  outline: 3px solid var(--coral);
+  outline-offset: 2px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .ann-close:hover {
+    background: color-mix(in oklab, var(--ink) 8%, transparent);
+  }
+}
+@media (max-width: 560px) {
+  .ann {
+    flex-wrap: wrap;
+  }
+  .ann-text {
+    flex-basis: calc(100% - 90px);
+  }
+  .ann-link {
+    order: 3;
+  }
+}

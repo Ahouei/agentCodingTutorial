@@ -9,10 +9,11 @@ Instructions for AI coding agents (Codex, Claude Code and others) working on thi
 ## Stack
 
 - Vite + React 19 + TypeScript, animation with `motion` (Motion for React); tokens in `src/lib/motion.ts`.
-- No router library: `src/lib/router.ts` uses real URLs (`/`, `/c/<slug>[/<section>]`, `/glossary`), restores scroll on Back, and lets Back close overlays (`useOverlay`). Old `#/c/…` links redirect.
+- No router library: `src/lib/router.ts` uses real URLs (`/`, `/c/<slug>[/<section>]`, `/glossary`, `/admin[/<section>]`), restores scroll on Back, and lets Back close overlays (`useOverlay`). Old `#/c/…` links redirect.
 - Fonts are self-hosted through Fontsource (no Google Fonts requests).
 - A Cloudflare Worker (`worker/index.ts`) sits in front of the built files: per-page title/description/Open Graph, real 404s, security headers (strict CSP: no inline scripts), immutable caching for hashed assets.
 - Optional accounts (`worker/api.ts`): passwordless email sign-in (Resend + Turnstile), D1 (`migrations/`), progress sync with a shared merge (`src/lib/progressMerge.ts`). Everything works signed-out.
+- Admin panel (`/admin`, code-split in `src/admin/`, API in `worker/admin.ts`): overview + chapter funnel, learners table, question/lab insights, announcements (draft → preview → publish), live settings (`worker/settings.ts`), audit log. The owner is the `OWNER_EMAIL` Worker secret; admins are `users.role = 'admin'`.
 
 ## Commands
 
@@ -41,7 +42,8 @@ Instructions for AI coding agents (Codex, Claude Code and others) working on thi
 - Correct a common misconception with a `callout` of tone `fix`.
 - Café Sahar (`cafe-sahar.ir`) is the single running example in every chapter and lab.
 - Where steps differ by tool, use a `path` block (Codex / Lovable). Quizzes: 4 options of similar length, answer position varied, a `why` per option (the validator enforces this).
-- Do not redesign: keep the sticker style and Bit. Small Bits stay still (`ambient` only on hero/finale).
+- Do not redesign: keep the sticker style and Bit. Bit is alive everywhere (owner request): blinking, antenna, a hop on every mood change; `talking` while he speaks (`<BitSays>` / `useTypewriter`), `wave` for greetings; he rides the reading-progress line on chapter pages. Pass `ambient={false}` only for a still icon. All of it stops under reduced motion.
+- Admin routes: every `/api/admin/*` request re-reads the caller's role from D1 (never from the request); every state change writes an `audit_log` row; settings are sanitized in `worker/settings.ts`.
 - Never edit an applied D1 migration; add a new file.
 - Browser storage is only for per-viewer conveniences (language, theme, progress, drafts) and every access is wrapped in try/catch.
 - Run `npm run build` before you say a change is done.

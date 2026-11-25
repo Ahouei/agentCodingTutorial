@@ -1,5 +1,7 @@
 import { MotionConfig } from 'motion/react';
-import { useLayoutEffect } from 'react';
+import { lazy, Suspense, useLayoutEffect } from 'react';
+import { SiteAnnouncement } from './components/Announcement';
+import { SiteFooter } from './components/SiteFooter';
 import { ChapterPage } from './components/ChapterPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Glossary } from './components/Glossary';
@@ -9,6 +11,9 @@ import { NotFound } from './components/NotFound';
 import { AppProvider, useApp, useRoute, useTx } from './lib/app';
 import { AccountProvider } from './lib/account';
 import { lastNavigation, restoreScrollWhenReady } from './lib/router';
+
+// The admin panel is its own chunk: learners never download it.
+const AdminPage = lazy(() => import('./admin/AdminPage'));
 
 /** One place decides where the page lands after a route change. */
 function useLanding(routeKey: string, section?: string) {
@@ -47,7 +52,7 @@ function Routes() {
   const route = useRoute();
   const { lang } = useApp();
   const tx = useTx();
-  const key = route.name === 'chapter' ? `c/${route.slug}` : route.name;
+  const key = route.name === 'chapter' ? `c/${route.slug}` : route.name === 'admin' ? `admin/${route.section}` : route.name;
   useLanding(key, route.name === 'chapter' ? route.section : undefined);
 
   return (
@@ -56,8 +61,13 @@ function Routes() {
         {tx('رفتن به محتوا', 'Skip to content')}
       </a>
       <Header />
+      {route.name !== 'admin' && <SiteAnnouncement />}
       <ErrorBoundary scope="page" lang={lang} resetKey={key}>
-        {route.name === 'chapter' ? (
+        {route.name === 'admin' ? (
+          <Suspense fallback={<main id="main" className="wrap" style={{ minHeight: '60vh' }} />}>
+            <AdminPage section={route.section} />
+          </Suspense>
+        ) : route.name === 'chapter' ? (
           <ChapterPage slug={route.slug} section={route.section} />
         ) : route.name === 'glossary' ? (
           <Glossary />
@@ -67,6 +77,7 @@ function Routes() {
           <Home />
         )}
       </ErrorBoundary>
+      {route.name !== 'admin' && <SiteFooter />}
     </>
   );
 }

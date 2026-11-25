@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /admin
 
 Sitemap: https://start.ahouei.site/sitemap.xml

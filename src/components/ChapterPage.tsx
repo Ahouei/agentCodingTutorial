@@ -12,6 +12,7 @@ import { Rich } from './blocks/Rich';
 import { BottomSheet } from './BottomSheet';
 import { ACT_TINT, Icon } from './Icon';
 import { Mascot } from './Mascot';
+import { plain, useTypewriter } from './BitSays';
 import { NotFound } from './NotFound';
 import './chapter.css';
 
@@ -50,6 +51,17 @@ function ChapterBody({ chapter: c, index, section }: { chapter: Chapter; index: 
   const { scrollYProgress } = useScroll({ target: articleRef, offset: ['start start', 'end end'] });
   const readProgress = useSpring(scrollYProgress, { stiffness: 200, damping: 40 });
   const [celebrate, setCelebrate] = useState(false);
+  const [sayStart, setSayStart] = useState(false);
+  const [hello, setHello] = useState(true);
+  const say = useTypewriter(plain(t(c.mascotLine)), sayStart);
+  useEffect(() => {
+    const a = window.setTimeout(() => setSayStart(true), 450);
+    const b = window.setTimeout(() => setHello(false), 2600);
+    return () => {
+      window.clearTimeout(a);
+      window.clearTimeout(b);
+    };
+  }, []);
   usePageTitle(t(c.title), lang);
 
   const req = useMemo(() => chapterRequirements(c), [c]);
@@ -132,7 +144,9 @@ function ChapterBody({ chapter: c, index, section }: { chapter: Chapter; index: 
                   <Icon id={c.icon} size={34} tint="var(--card)" />
                 </motion.div>
                 <p className="eyebrow">
-                  {tx('فصل', 'Chapter')} {num(index + 1, lang)} {tx('از', 'of')} {num(CHAPTERS.length, lang)} · {num(c.minutes, lang)}{' '}
+                  {tx('فصل', 'Chapter')} {num(index + 1, lang)} {tx('از', 'of')} {num(CHAPTERS.length, lang)}
+                  {tx('، ', ' · ')}
+                  {num(c.minutes, lang)}{' '}
                   {tx('دقیقه', 'min')}
                 </p>
                 <motion.h1
@@ -155,10 +169,23 @@ function ChapterBody({ chapter: c, index, section }: { chapter: Chapter; index: 
                   animate={{ opacity: 1, transform: 'translateY(0px) scale(1)' }}
                   transition={{ duration: 0.4, ease: EASE_OUT, delay: 0.25 }}
                 >
-                  <Rich text={t(c.mascotLine)} />
+                  {/* Bit says the chapter's line: typed out while his mouth moves, then shown with formatting. */}
+                  <span className="sr-only">
+                    <Rich text={t(c.mascotLine)} />
+                  </span>
+                  <span aria-hidden>
+                    {say.done ? (
+                      <Rich text={t(c.mascotLine)} />
+                    ) : (
+                      <>
+                        {say.typed}
+                        <span className="bitsays-ghost">{say.rest}</span>
+                      </>
+                    )}
+                  </span>
                 </motion.div>
-                {/* Still Bit: mood is the only change (RD-08). */}
-                <Mascot size={128} mood={isDone ? 'happy' : 'calm'} />
+                {/* Bit greets you: waves while talking, then floats; hops when the chapter is done. */}
+                <Mascot size={128} mood={isDone ? 'happy' : 'calm'} talking={say.typing} wave={hello} float={!say.typing} />
               </div>
             </div>
 
@@ -175,7 +202,7 @@ function ChapterBody({ chapter: c, index, section }: { chapter: Chapter; index: 
                   <dt>{tx('زمان', 'Time')}</dt>
                   <dd>
                     {tx(`حدود ${num(c.minutes, lang)} دقیقه`, `About ${c.minutes} minutes`)}
-                    {req.labs.length > 0 && tx(` · ${num(req.labs.length, lang)} تمرین`, ` · ${req.labs.length} lab${req.labs.length > 1 ? 's' : ''}`)}
+                    {req.labs.length > 0 && tx(`، ${num(req.labs.length, lang)} تمرین`, ` · ${req.labs.length} lab${req.labs.length > 1 ? 's' : ''}`)}
                   </dd>
                 </div>
                 <div className="ch-mission-cafe">

@@ -1,0 +1,27 @@
+import { useCallback, useEffect, useState } from 'react';
+
+/** Load once (and on demand) with loading/error state. Stale responses are ignored. */
+export function useLoad<T>(fn: () => Promise<T>, deps: unknown[] = []) {
+  const [data, setData] = useState<T | null>(null);
+  const [error, setError] = useState<unknown>(null);
+  const [loading, setLoading] = useState(true);
+  const [tick, setTick] = useState(0);
+  const reload = useCallback(() => setTick((t) => t + 1), []);
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    fn()
+      .then((d) => {
+        if (!alive) return;
+        setData(d);
+        setError(null);
+      })
+      .catch((e) => alive && setError(e))
+      .finally(() => alive && setLoading(false));
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [...deps, tick]);
+  return { data, error, loading, reload, setData };
+}
