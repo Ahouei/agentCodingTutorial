@@ -8,5 +8,8 @@
   "assets": {
     "directory": "./dist",
     "not_found_handling": "single-page-application"
-  }
+  },
+  // Custom Domain: Cloudflare creates the DNS record and HTTPS certificate for it.
+  "routes": [{ "pattern": "start.ahouei.site", "custom_domain": true }],
+  "observability": { "enabled": true }
 }

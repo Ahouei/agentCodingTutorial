@@ -3,6 +3,8 @@
 **ساخت هر نوع وب‌سایت و وب‌اپلیکیشن با Agentic AI و Vibe Coding**
 An interactive, story-like course for building and publishing any kind of website with agentic AI, from the first idea to a live site on your own domain.
 
+**Live:** https://start.ahouei.site
+
 - ۱۸ فصل در ۴ پرده: دنیا را بشناس، کارگاه را بچین، بساز، منتشر کن
 - ۱۷ تمرین تعاملی (مسیر یک درخواست در اینترنت، جست‌وجوی DNS، بازی Git، انتخاب D1/KV/R2، ساخت API Token امن، سازنده AGENTS.md، آزمایشگاه Prompt، حلقه Vibe Coding، Pipeline استقرار و…)
 - فارسی (راست‌به‌چپ) با نسخه انگلیسی، حالت روشن و تیره، ذخیره پیشرفت در مرورگر
@@ -47,7 +49,7 @@ npx wrangler login
 npm run deploy
 ```
 
-`wrangler.jsonc` serves `dist/` as static assets with single-page-app fallback.
+`wrangler.jsonc` serves `dist/` as static assets with single-page-app fallback, on the Custom Domain `start.ahouei.site` (Cloudflare creates its DNS record and certificate).
 
 ## Voice notes
 
